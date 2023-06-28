@@ -5,3 +5,4 @@ dataset = wds.WebDataset(url)
 for sample in dataset:
     break
 print(type(sample))
+print(sample.keys())
