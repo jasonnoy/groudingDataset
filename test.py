@@ -4,8 +4,8 @@ dataset = wds.WebDataset(url)
 
 for sample in dataset:
     break
-print(type(sample))
-for k,v in sample.items():
-    if k == "image":
-        print(v.nbytes)
-    print(k, v)
+print(sample.keys())
+# for k,v in sample.items():
+#     if k == "image":
+#         print(v.nbytes)
+#     print(k, v)
