@@ -7,5 +7,5 @@ for sample in dataset:
 
 for k,v in sample.items():
     if k == "jpg":
-        print(v.nbytes)
+        continue
     print("k = {}, v = {}".format(k,v))
