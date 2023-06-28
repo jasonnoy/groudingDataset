@@ -4,4 +4,4 @@ dataset = wds.WebDataset(url)
 
 for sample in dataset:
     break
-print(sample)
+print(type(sample))
