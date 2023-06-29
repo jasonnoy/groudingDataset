@@ -7,7 +7,7 @@ from GLIP.maskrcnn_benchmark.engine.predictor_glip import GLIPDemo
 import sys
 
 sys.path.append(os.path.join(os.getcwd(), "GLIP"))
-sys.path.append("/home/jijunhui/projects/groudingDataset/GLIP")
+sys.path.append("/home/jijunhui/projects/groudingDataset/GLIP/maskrcnn_benchmark")
 
 
 
