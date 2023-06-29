@@ -1,0 +1,3 @@
+[submodule "GLIP"]
+    path = "groundingDataset/GLIP"
+    url = "git@github.com:microsoft/GLIP.git"
