@@ -1,10 +1,13 @@
+import os
+
 from PIL import Image
 import numpy as np
 from GLIP.maskrcnn_benchmark.config import cfg
 from GLIP.maskrcnn_benchmark.engine.predictor_glip import GLIPDemo
 import sys
 
-sys.path.append("GLIP")
+sys.path.append(os.path.join(os.getcwd(), "GLIP"))
+print(os.path.join(os.getcwd(), "GLIP"))
 
 
 config_file = "GLIP/configs/pretrain/glip_Swin_L.yaml"
