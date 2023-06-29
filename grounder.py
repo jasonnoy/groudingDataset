@@ -7,7 +7,8 @@ from GLIP.maskrcnn_benchmark.engine.predictor_glip import GLIPDemo
 import sys
 
 sys.path.append(os.path.join(os.getcwd(), "GLIP"))
-print(os.path.join(os.getcwd(), "GLIP"))
+sys.path.append("/home/jijunhui/projects/groudingDataset/GLIP")
+
 
 
 config_file = "GLIP/configs/pretrain/glip_Swin_L.yaml"
