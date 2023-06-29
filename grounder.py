@@ -4,11 +4,7 @@ from PIL import Image
 import numpy as np
 from GLIP.maskrcnn_benchmark.config import cfg
 from GLIP.maskrcnn_benchmark.engine.predictor_glip import GLIPDemo
-import sys
-
-sys.path.append(os.path.join(os.getcwd(), "GLIP"))
-sys.path.append("/home/jijunhui/projects/groudingDataset/GLIP/maskrcnn_benchmark")
-
+from GLIP import maskrcnn_benchmark
 
 
 config_file = "GLIP/configs/pretrain/glip_Swin_L.yaml"
