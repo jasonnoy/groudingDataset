@@ -108,6 +108,8 @@ if __name__ == "__main__":
     #     print("groundings:", groundings)
     # res = output_decorator(0, caption, groundings, nouns, ids, texts, image_size)
     for idx, filename in enumerate(tqdm(os.listdir(input_path))):
+        if not filename.endswith(".png"):
+            continue
         output_path = os.path.join("output", str(idx))
         if not os.path.exists(output_path):
             os.mkdir(output_path)
