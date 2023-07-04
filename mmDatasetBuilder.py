@@ -69,7 +69,7 @@ if __name__ == "__main__":
         result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.75)
         labels = get_label_names(pred, glip_demo)
         groundings = get_grounding_and_label(pred, labels)
-        break
+        print("groundings:", groundings)
     res = output_decorator(0, caption, groundings, nouns, ids, texts, image_size)
     with open("test.json", "w", encoding='utf-8') as f:
         f.write(json.dumps(res))
