@@ -2,6 +2,8 @@ from GLIP import *
 import numpy as np
 from PIL import Image
 import spacy
+import json
+import os
 
 
 def get_label_names(predictions, model):
@@ -24,37 +26,49 @@ def get_label_names(predictions, model):
     return new_labels
 
 
-def output_decorator(bboxes, labels):
+def get_grounding_and_label(pred, labels):
     res = []
-    for idx, box in enumerate(bboxes):
+    for idx, box in enumerate(pred.bboxes):
+        record = []
         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
-        res.append(top_left+bottom_right+[labels[idx]])
+        record.append(top_left+bottom_right)
+        record.append(labels[idx])
+        res.append(record)
+    return res
+
+
+def output_decorator(id, caption, groundings, nouns, positions, subtexts, image_size):
+    res = {"id": id, "caption": caption, "groundings": groundings, "nouns": nouns, "positions": positions,
+           "subtexts": subtexts, "image_size": image_size}
     return res
 
 
 def load(path):
     pil_image = Image.open(path).convert("RGB")
+    img_size = pil_image.size
     # convert to BGR format
     image = np.array(pil_image)[:, :, [2, 1, 0]]
-    return image
+    return image, img_size
 
 
 if __name__ == "__main__":
     nlp = spacy.load("en_core_web_trf")
-    image = load('test.jpg')
+    image, image_size = load('test.jpg')
     caption = 'bobble heads on top of the shelf'
-    result, pred = glip_demo.run_on_web_image(image, caption, 0.5)
-    bboxes = pred.bbox
-    labels = get_label_names(pred, glip_demo)
     doc = nlp(caption)
     nouns = []
     ids = []
     texts = []
     for noun_chunk in doc.noun_chunks:
-        nouns.append(noun_chunk.text)
+        chunk_text = noun_chunk.text
+        nouns.append(chunk_text)
         ids.append([t.idx for t in noun_chunk])
-        texts.append("".join(t.text for t in noun_chunk.subtree))
-    print(output_decorator(bboxes, labels))
-    print("nouns:", nouns)
-    print("ids:", ids)
-    print("texts:", texts)
+        texts.append(" ".join(t.text for t in noun_chunk.subtree))
+
+        result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.75)
+        labels = get_label_names(pred, glip_demo)
+        groundings = get_grounding_and_label(pred, labels)
+    res = output_decorator(0, caption, groundings, nouns, ids, texts, image_size)
+    with open("test.json", "w", encoding='utf-8') as f:
+        f.write(json.dumps(res))
+    f.close()
