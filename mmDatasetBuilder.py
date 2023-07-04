@@ -28,7 +28,7 @@ def get_label_names(predictions, model):
 
 def get_grounding_and_label(pred, labels):
     res = []
-    for idx, box in enumerate(pred.bboxes):
+    for idx, box in enumerate(pred.bbox):
         record = []
         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
         record.append(top_left+bottom_right)
@@ -60,8 +60,8 @@ if __name__ == "__main__":
     ids = []
     texts = []
     for noun_chunk in doc.noun_chunks:
-        # chunk_text = noun_chunk.text
-        chunk_text = 'bobble heads on top of the shelf'
+        chunk_text = noun_chunk.text
+        # chunk_text = 'bobble heads on top of the shelf'
         nouns.append(chunk_text)
         ids.append([t.idx for t in noun_chunk])
         texts.append(" ".join(t.text for t in noun_chunk.subtree))
