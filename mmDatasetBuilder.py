@@ -74,7 +74,7 @@ def parse_and_grounding_single_class(img, caption, id, nlp):
         texts.append(text)
         result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.55)
         print("chunk_text:", chunk_text)
-        print("pred:", pred)
+        print("pred boxes:", pred.num_boxes)
         labels = get_label_names(pred, glip_demo)
         groundings = get_grounding_and_label(pred, labels)
         total_groundings.extend(groundings)
