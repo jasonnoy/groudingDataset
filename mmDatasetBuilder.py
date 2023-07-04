@@ -80,7 +80,7 @@ def parse_and_grounding_single_class(img, caption, idx, nlp):
         groundings = get_grounding_and_label(pred, labels)
         total_groundings.update(groundings)
         output_path = os.path.join("output", str(idx))
-        imsave(result, text, os.path.join(output_path, "{}.png".format(text)))
+        imsave(result, text, output_path)
     res = output_decorator(idx, caption, total_groundings, nouns, ids, texts, image_size)
     return res
 
