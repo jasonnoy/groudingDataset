@@ -5,6 +5,7 @@ import spacy
 import json
 import os
 import matplotlib.pyplot as plt
+from collections import defaultdict
 
 
 def get_label_names(predictions, model):
@@ -28,13 +29,10 @@ def get_label_names(predictions, model):
 
 
 def get_grounding_and_label(pred, labels):
-    res = []
+    res = defaultdict(list)
     for idx, box in enumerate(pred.bbox):
-        record = []
         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
-        record.append(top_left+bottom_right)
-        record.append(labels[idx])
-        res.append(record)
+        res[labels[idx]].append(top_left+bottom_right)
     return res
 
 
