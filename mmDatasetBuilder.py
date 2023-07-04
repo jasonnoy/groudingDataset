@@ -111,6 +111,7 @@ if __name__ == "__main__":
         if not filename.endswith(".png"):
             continue
         idx = meta[filename.split(".")[0]]
+        print("idx:", idx)
         output_path = os.path.join("output", str(idx))
         if not os.path.exists(output_path):
             os.mkdir(output_path)
