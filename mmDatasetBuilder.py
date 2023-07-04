@@ -86,7 +86,7 @@ def parse_and_grounding_single_class(img, caption, id, nlp):
 
 if __name__ == "__main__":
     nlp = spacy.load("en_core_web_trf")
-    input_path = "home/jijunhui/download/test_images"
+    input_path = "/home/jijunhui/download/test_images"
     res = []
     with open(os.path.join(input_path, "meta.json"), 'r', encoding='utf-8') as f:
         meta = json.loads(f)
