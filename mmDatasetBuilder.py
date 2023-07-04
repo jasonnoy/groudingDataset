@@ -60,7 +60,7 @@ def imsave(img, caption, save_dir):
     plt.close()
 
 
-def parse_and_grounding_single_class(img, caption, idx, nlp):
+def parse_and_grounding_single_class(img, caption, idx, nlp, output_path):
     image, image_size = load(img)
     doc = nlp(caption)
     nouns = []
@@ -86,7 +86,6 @@ def parse_and_grounding_single_class(img, caption, idx, nlp):
         result = glip_demo.overlay_entity_names(result, pred, custom_labels=labels)
         groundings = get_grounding_and_label(pred, labels)
         total_groundings.update(groundings)
-        output_path = os.path.join("output", str(idx))
         imsave(result, text, output_path)
     res = output_decorator(idx, caption, total_groundings, nouns, ids, texts, image_size)
     return res
@@ -123,7 +122,7 @@ if __name__ == "__main__":
         if not os.path.exists(output_path):
             os.mkdir(output_path)
         caption = meta[str(idx)]['caption']
-        ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, str(idx), nlp)
+        ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path)
         res.append(ret)
     with open("output_1/test.json", "w", encoding='utf-8') as f2:
         f2.write(json.dumps(res))
