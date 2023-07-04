@@ -1,6 +1,7 @@
 from GLIP import *
 import numpy as np
 from PIL import Image
+import spacy
 
 
 def get_label_names(predictions, model):
@@ -39,9 +40,21 @@ def load(path):
 
 
 if __name__ == "__main__":
+    nlp = spacy.load("en_core_web_trf")
     image = load('test.jpg')
     caption = 'bobble heads on top of the shelf'
     result, pred = glip_demo.run_on_web_image(image, caption, 0.5)
     bboxes = pred.bbox
     labels = get_label_names(pred, glip_demo)
+    doc = nlp(caption)
+    nouns = []
+    ids = []
+    texts = []
+    for noun_chunk in doc.noun_chunks:
+        nouns.append(noun_chunk.text)
+        ids.append([t.idx for t in noun_chunk])
+        texts.append("".join(t.text for t in noun_chunk.subtree))
     print(output_decorator(bboxes, labels))
+    print("nouns:", nouns)
+    print("ids:", ids)
+    print("texts:", texts)
