@@ -65,6 +65,7 @@ def parse_and_grounding_single_class(img, caption, id, nlp):
     nouns = []
     ids = []
     texts = []
+    total_groundings = []
     for noun_chunk in doc.noun_chunks:
         chunk_text = noun_chunk.text
         nouns.append(chunk_text)
@@ -74,8 +75,9 @@ def parse_and_grounding_single_class(img, caption, id, nlp):
         result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.55)
         labels = get_label_names(pred, glip_demo)
         groundings = get_grounding_and_label(pred, labels)
+        total_groundings.extend(groundings)
         imsave(result, text)
-    res = output_decorator(id, caption, groundings, nouns, ids, texts, image_size)
+    res = output_decorator(id, caption, total_groundings, nouns, ids, texts, image_size)
     return res
 
 
