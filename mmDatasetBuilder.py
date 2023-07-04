@@ -110,8 +110,7 @@ if __name__ == "__main__":
     for filename in tqdm(os.listdir(input_path)):
         if not filename.endswith(".png"):
             continue
-        idx = meta[filename.split(".")[0]]
-        print("idx:", idx)
+        idx = filename.split(".")[0]
         output_path = os.path.join("output", str(idx))
         if not os.path.exists(output_path):
             os.mkdir(output_path)
