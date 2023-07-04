@@ -60,7 +60,8 @@ if __name__ == "__main__":
     ids = []
     texts = []
     for noun_chunk in doc.noun_chunks:
-        chunk_text = noun_chunk.text
+        # chunk_text = noun_chunk.text
+        chunk_text = 'bobble heads on top of the shelf'
         nouns.append(chunk_text)
         ids.append([t.idx for t in noun_chunk])
         texts.append(" ".join(t.text for t in noun_chunk.subtree))
@@ -68,6 +69,7 @@ if __name__ == "__main__":
         result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.75)
         labels = get_label_names(pred, glip_demo)
         groundings = get_grounding_and_label(pred, labels)
+        break
     res = output_decorator(0, caption, groundings, nouns, ids, texts, image_size)
     with open("test.json", "w", encoding='utf-8') as f:
         f.write(json.dumps(res))
