@@ -6,6 +6,7 @@ import json
 import os
 import matplotlib.pyplot as plt
 from collections import defaultdict
+from tqdm import tqdm
 
 
 def get_label_names(predictions, model):
@@ -50,11 +51,11 @@ def load(path):
     return image, img_size
 
 
-def imsave(img, caption):
+def imsave(img, caption, save_dir):
     plt.imshow(img[:, :, [2, 1, 0]])
     plt.axis("off")
     plt.figtext(0.5, 0.09, caption, wrap=True, horizontalalignment='center', fontsize=20)
-    plt.savefig("{}.png".format(caption))
+    plt.savefig(os.path.join(save_dir, "{}.png".format(caption)))
 
 
 def parse_and_grounding_single_class(img, caption, id, nlp):
@@ -78,15 +79,18 @@ def parse_and_grounding_single_class(img, caption, id, nlp):
         labels = get_label_names(pred, glip_demo)
         groundings = get_grounding_and_label(pred, labels)
         total_groundings.update(groundings)
-        imsave(result, text)
+        imsave(result, text, os.path.join("output", id))
     res = output_decorator(id, caption, total_groundings, nouns, ids, texts, image_size)
     return res
 
 
 if __name__ == "__main__":
     nlp = spacy.load("en_core_web_trf")
-    img_path = 'test.jpg'
-    caption = 'bobble heads on top of the shelf'
+    input_path = "home/jijunhui/download/test_images"
+    res = []
+    with open(os.path.join(input_path, "meta.json"), 'r', encoding='utf-8') as f:
+        meta = json.loads(f)
+    f.close()
     # doc = nlp(caption)
     # nouns = []
     # ids = []
@@ -102,7 +106,10 @@ if __name__ == "__main__":
     #     groundings = get_grounding_and_label(pred, labels)
     #     print("groundings:", groundings)
     # res = output_decorator(0, caption, groundings, nouns, ids, texts, image_size)
-    res = parse_and_grounding_single_class(img_path, caption, 0, nlp)
+    for idx, filename in enumerate(tqdm(os.listdir(input_path))):
+        caption = meta[idx]['caption']
+        ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, 0, nlp)
+        res.append(ret)
     with open("test.json", "w", encoding='utf-8') as f:
-        f.write(json.dumps(res))
+        f.write(json.dumps(ret))
     f.close()
