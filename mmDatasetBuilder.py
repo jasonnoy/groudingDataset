@@ -7,6 +7,7 @@ import os
 import matplotlib.pyplot as plt
 from collections import defaultdict
 from tqdm import tqdm
+import matplotlib.pylab as pylab
 
 
 def get_label_names(predictions, model):
@@ -56,6 +57,7 @@ def imsave(img, caption, save_dir):
     plt.axis("off")
     plt.figtext(0.5, 0.09, caption, wrap=True, horizontalalignment='center', fontsize=20)
     plt.savefig(os.path.join(save_dir, "{}.png".format(caption)))
+    plt.close()
 
 
 def parse_and_grounding_single_class(img, caption, idx, nlp):
@@ -77,6 +79,11 @@ def parse_and_grounding_single_class(img, caption, idx, nlp):
         texts.append(text)
         image_size = pred.size
         labels = get_label_names(pred, glip_demo)
+        if len(list(set(labels))) > 1:
+            pass
+        else:
+            labels = text * len(labels)
+        result = glip_demo.overlay_entity_names(result, pred, custom_labels=labels)
         groundings = get_grounding_and_label(pred, labels)
         total_groundings.update(groundings)
         output_path = os.path.join("output", str(idx))
@@ -86,6 +93,7 @@ def parse_and_grounding_single_class(img, caption, idx, nlp):
 
 
 if __name__ == "__main__":
+    pylab.rcParams['figure.figsize'] = 20, 12
     nlp = spacy.load("en_core_web_trf")
     input_path = "/home/jijunhui/download/test_images"
     res = []
@@ -111,12 +119,12 @@ if __name__ == "__main__":
         if not filename.endswith(".png"):
             continue
         idx = filename.split(".")[0]
-        output_path = os.path.join("output", str(idx))
+        output_path = os.path.join("output_1", str(idx))
         if not os.path.exists(output_path):
             os.mkdir(output_path)
         caption = meta[str(idx)]['caption']
-        ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, 0, nlp)
+        ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, str(idx), nlp)
         res.append(ret)
-    with open("test.json", "w", encoding='utf-8') as f2:
+    with open("output_1/test.json", "w", encoding='utf-8') as f2:
         f2.write(json.dumps(res))
     f2.close()
