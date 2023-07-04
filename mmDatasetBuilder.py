@@ -81,7 +81,7 @@ def parse_and_grounding_single_class(img, caption, id, nlp):
 
 if __name__ == "__main__":
     nlp = spacy.load("en_core_web_trf")
-    image, image_size = load('test.jpg')
+    img_path = 'test.jpg'
     caption = 'bobble heads on top of the shelf'
     # doc = nlp(caption)
     # nouns = []
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     #     groundings = get_grounding_and_label(pred, labels)
     #     print("groundings:", groundings)
     # res = output_decorator(0, caption, groundings, nouns, ids, texts, image_size)
-    res = parse_and_grounding_single_class(image, caption, 0, nlp)
+    res = parse_and_grounding_single_class(img_path, caption, 0, nlp)
     with open("test.json", "w", encoding='utf-8') as f:
         f.write(json.dumps(res))
     f.close()
