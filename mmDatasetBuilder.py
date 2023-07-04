@@ -47,6 +47,8 @@ def output_decorator(id, caption, groundings, nouns, positions, subtexts, image_
 def load(path):
     pil_image = Image.open(path).convert("RGB")
     img_size = pil_image.size
+    if img_size != (640, 480):
+        pil_image = pil_image.resize((640, 480))
     # convert to BGR format
     image = np.array(pil_image)[:, :, [2, 1, 0]]
     return image, img_size
@@ -83,7 +85,7 @@ def parse_and_grounding_single_class(img, caption, idx, nlp, output_path):
             pass
         else:
             labels = [text] * len(labels)
-        result = glip_demo.overlay_entity_names(result, pred, custom_labels=labels, text_size=0.8, text_offset=-20, text_offset_original=-10)
+        result = glip_demo.overlay_entity_names(result, pred, custom_labels=labels, text_size=0.8, text_offset=-25, text_offset_original=-15, text_pixel=1)
         groundings = get_grounding_and_label(pred, labels)
         total_groundings.update(groundings)
         imsave(result, text, output_path)
