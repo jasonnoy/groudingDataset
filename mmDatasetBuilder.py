@@ -79,7 +79,8 @@ def parse_and_grounding_single_class(img, caption, id, nlp):
         labels = get_label_names(pred, glip_demo)
         groundings = get_grounding_and_label(pred, labels)
         total_groundings.update(groundings)
-        imsave(result, text, os.path.join("output", id))
+        output_path = os.path.join("output", id)
+        imsave(result, text, os.path.join(output_path, "{}.png".format(text)))
     res = output_decorator(id, caption, total_groundings, nouns, ids, texts, image_size)
     return res
 
@@ -107,6 +108,9 @@ if __name__ == "__main__":
     #     print("groundings:", groundings)
     # res = output_decorator(0, caption, groundings, nouns, ids, texts, image_size)
     for idx, filename in enumerate(tqdm(os.listdir(input_path))):
+        output_path = os.path.join("output", idx)
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
         caption = meta[str(idx)]['caption']
         ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, 0, nlp)
         res.append(ret)
