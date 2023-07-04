@@ -83,7 +83,7 @@ def parse_and_grounding_single_class(img, caption, idx, nlp, output_path):
             pass
         else:
             labels = [text] * len(labels)
-        result = glip_demo.overlay_entity_names(result, pred, custom_labels=labels, text_size=0.2, text_offset=1, text_offset_original=1)
+        result = glip_demo.overlay_entity_names(result, pred, custom_labels=labels, text_size=0.7, text_offset=-3, text_offset_original=-1)
         groundings = get_grounding_and_label(pred, labels)
         total_groundings.update(groundings)
         imsave(result, text, output_path)
