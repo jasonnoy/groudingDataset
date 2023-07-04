@@ -69,7 +69,7 @@ def parse_and_grounding_single_class(img, caption, idx, nlp, output_path):
     total_groundings = {}
     for noun_chunk in doc.noun_chunks:
         chunk_text = noun_chunk.text
-        result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.55)
+        result, pred = glip_demo.run_on_image(image, chunk_text, 0.55)
         # if no detection
         if len(pred.bbox) == 0:
             continue
