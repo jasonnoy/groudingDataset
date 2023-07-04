@@ -88,9 +88,9 @@ if __name__ == "__main__":
     nlp = spacy.load("en_core_web_trf")
     input_path = "/home/jijunhui/download/test_images"
     res = []
-    with open(os.path.join(input_path, "meta.json"), 'r', encoding='utf-8') as f:
-        meta = json.loads(f.read())
-    f.close()
+    with open(os.path.join(input_path, "meta.json"), 'r', encoding='utf-8') as f1:
+        meta = json.loads(f1.read())
+    f1.close()
     # doc = nlp(caption)
     # nouns = []
     # ids = []
@@ -107,9 +107,9 @@ if __name__ == "__main__":
     #     print("groundings:", groundings)
     # res = output_decorator(0, caption, groundings, nouns, ids, texts, image_size)
     for idx, filename in enumerate(tqdm(os.listdir(input_path))):
-        caption = meta[idx]['caption']
+        caption = meta[str(idx)]['caption']
         ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, 0, nlp)
         res.append(ret)
-    with open("test.json", "w", encoding='utf-8') as f:
-        f.write(json.dumps(res))
-    f.close()
+    with open("test.json", "w", encoding='utf-8') as f2:
+        f2.write(json.dumps(res))
+    f2.close()
