@@ -65,8 +65,8 @@ if __name__ == "__main__":
         nouns.append(chunk_text)
         ids.append([t.idx for t in noun_chunk])
         texts.append(" ".join(t.text for t in noun_chunk.subtree))
-
-        result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.6)
+        print("chunk_text:", chunk_text)
+        result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.5)
         labels = get_label_names(pred, glip_demo)
         groundings = get_grounding_and_label(pred, labels)
         print("groundings:", groundings)
