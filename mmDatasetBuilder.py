@@ -68,14 +68,15 @@ def parse_and_grounding_single_class(img, caption, id, nlp):
     total_groundings = []
     for noun_chunk in doc.noun_chunks:
         chunk_text = noun_chunk.text
+        result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.55)
+        # if no detection
+        if len(pred.bbox) == 0:
+            continue
         nouns.append(chunk_text)
         ids.append([t.idx for t in noun_chunk])
         text = " ".join(t.text for t in noun_chunk.subtree)
         texts.append(text)
-        result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.55)
-        print("chunk_text:", chunk_text)
-        print("pred dict:", pred.__dict__)
-        print("bbox size:", len(pred.bbox))
+        image_size = pred.size
         labels = get_label_names(pred, glip_demo)
         groundings = get_grounding_and_label(pred, labels)
         total_groundings.extend(groundings)
