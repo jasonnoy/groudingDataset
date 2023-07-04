@@ -89,7 +89,7 @@ if __name__ == "__main__":
     input_path = "/home/jijunhui/download/test_images"
     res = []
     with open(os.path.join(input_path, "meta.json"), 'r', encoding='utf-8') as f:
-        meta = json.loads(f)
+        meta = json.loads(f.read())
     f.close()
     # doc = nlp(caption)
     # nouns = []
@@ -111,5 +111,5 @@ if __name__ == "__main__":
         ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, 0, nlp)
         res.append(ret)
     with open("test.json", "w", encoding='utf-8') as f:
-        f.write(json.dumps(ret))
+        f.write(json.dumps(res))
     f.close()
