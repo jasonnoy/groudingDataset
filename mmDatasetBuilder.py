@@ -4,6 +4,7 @@ from PIL import Image
 import spacy
 import json
 import os
+import matplotlib.pyplot as plt
 
 
 def get_label_names(predictions, model):
@@ -51,26 +52,53 @@ def load(path):
     return image, img_size
 
 
-if __name__ == "__main__":
-    nlp = spacy.load("en_core_web_trf")
-    image, image_size = load('test.jpg')
-    caption = 'bobble heads on top of the shelf'
+def imsave(img, caption):
+    plt.imshow(img[:, :, [2, 1, 0]])
+    plt.axis("off")
+    plt.figtext(0.5, 0.09, caption, wrap=True, horizontalalignment='center', fontsize=20)
+    plt.savefig("{}.png".format(caption))
+
+
+def parse_and_grounding_single_class(img, caption, id, nlp):
+    image, image_size = load(img)
     doc = nlp(caption)
     nouns = []
     ids = []
     texts = []
     for noun_chunk in doc.noun_chunks:
         chunk_text = noun_chunk.text
-        # chunk_text = 'bobble heads on top of the shelf'
         nouns.append(chunk_text)
         ids.append([t.idx for t in noun_chunk])
-        texts.append(" ".join(t.text for t in noun_chunk.subtree))
-        print("chunk_text:", chunk_text)
-        result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.5)
+        text = " ".join(t.text for t in noun_chunk.subtree)
+        texts.append(text)
+        result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.55)
         labels = get_label_names(pred, glip_demo)
         groundings = get_grounding_and_label(pred, labels)
-        print("groundings:", groundings)
-    res = output_decorator(0, caption, groundings, nouns, ids, texts, image_size)
+        imsave(result, text)
+    res = output_decorator(id, caption, groundings, nouns, ids, texts, image_size)
+    return res
+
+
+if __name__ == "__main__":
+    nlp = spacy.load("en_core_web_trf")
+    image, image_size = load('test.jpg')
+    caption = 'bobble heads on top of the shelf'
+    # doc = nlp(caption)
+    # nouns = []
+    # ids = []
+    # texts = []
+    # for noun_chunk in doc.noun_chunks:
+    #     chunk_text = noun_chunk.text
+    #     # chunk_text = 'bobble heads on top of the shelf'
+    #     nouns.append(chunk_text)
+    #     ids.append([t.idx for t in noun_chunk])
+    #     texts.append(" ".join(t.text for t in noun_chunk.subtree))
+    #     result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.5)
+    #     labels = get_label_names(pred, glip_demo)
+    #     groundings = get_grounding_and_label(pred, labels)
+    #     print("groundings:", groundings)
+    # res = output_decorator(0, caption, groundings, nouns, ids, texts, image_size)
+    res = parse_and_grounding_single_class(image, caption, 0, nlp)
     with open("test.json", "w", encoding='utf-8') as f:
         f.write(json.dumps(res))
     f.close()
