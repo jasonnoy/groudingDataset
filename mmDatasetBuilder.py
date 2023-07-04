@@ -58,7 +58,7 @@ def imsave(img, caption, save_dir):
     plt.savefig(os.path.join(save_dir, "{}.png".format(caption)))
 
 
-def parse_and_grounding_single_class(img, caption, id, nlp):
+def parse_and_grounding_single_class(img, caption, idx, nlp):
     image, image_size = load(img)
     doc = nlp(caption)
     nouns = []
@@ -79,9 +79,9 @@ def parse_and_grounding_single_class(img, caption, id, nlp):
         labels = get_label_names(pred, glip_demo)
         groundings = get_grounding_and_label(pred, labels)
         total_groundings.update(groundings)
-        output_path = os.path.join("output", id)
+        output_path = os.path.join("output", str(idx))
         imsave(result, text, os.path.join(output_path, "{}.png".format(text)))
-    res = output_decorator(id, caption, total_groundings, nouns, ids, texts, image_size)
+    res = output_decorator(idx, caption, total_groundings, nouns, ids, texts, image_size)
     return res
 
 
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     #     print("groundings:", groundings)
     # res = output_decorator(0, caption, groundings, nouns, ids, texts, image_size)
     for idx, filename in enumerate(tqdm(os.listdir(input_path))):
-        output_path = os.path.join("output", idx)
+        output_path = os.path.join("output", str(idx))
         if not os.path.exists(output_path):
             os.mkdir(output_path)
         caption = meta[str(idx)]['caption']
