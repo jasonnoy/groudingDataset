@@ -266,26 +266,23 @@ class GLIPDemo(object):
         _, idx = scores.sort(0, descending=True)
         return predictions[idx]
 
-    def _post_process(self, predictions, threshold=0.5):
-        res = []
-        for prediction in predictions:
-            scores = prediction.get_field("scores")
-            labels = prediction.get_field("labels").tolist()
-            thresh = scores.clone()
-            for i, lb in enumerate(labels):
-                if isinstance(self.confidence_threshold, float):
-                    thresh[i] = threshold
-                elif len(self.confidence_threshold) == 1:
-                    thresh[i] = threshold
-                else:
-                    thresh[i] = self.confidence_threshold[lb - 1]
-            keep = torch.nonzero(scores > thresh).squeeze(1)
-            prediction = prediction[keep]
+    def _post_process(self, prediction, threshold=0.5):
+        scores = prediction.get_field("scores")
+        labels = prediction.get_field("labels").tolist()
+        thresh = scores.clone()
+        for i, lb in enumerate(labels):
+            if isinstance(self.confidence_threshold, float):
+                thresh[i] = threshold
+            elif len(self.confidence_threshold) == 1:
+                thresh[i] = threshold
+            else:
+                thresh[i] = self.confidence_threshold[lb - 1]
+        keep = torch.nonzero(scores > thresh).squeeze(1)
+        prediction = prediction[keep]
 
-            scores = prediction.get_field("scores")
-            _, idx = scores.sort(0, descending=True)
-            res.append(prediction[idx])
-        return res
+        scores = prediction.get_field("scores")
+        _, idx = scores.sort(0, descending=True)
+        return prediction[idx]
 
     def compute_colors_for_labels(self, labels):
         """
