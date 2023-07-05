@@ -714,16 +714,14 @@ class ATSSPostProcessor(torch.nn.Module):
                 box_cls=None,
                 token_logits=None,
                 dot_product_logits=None,
-                positive_maps=None,
+                positive_map=None,
                 ):
         sampled_boxes = []
         anchors = list(zip(*anchors))
-        print("len box_regression: {}, len positive_maps: {}".format(len(box_regression), len(positive_maps)))
         for idx, (b, c, a) in enumerate(zip(box_regression, centerness, anchors)):
             o = None
             t = None
             d = None
-            positive_map = positive_maps[idx]
             if box_cls is not None:
                 o = box_cls[idx]
             if token_logits is not None:
