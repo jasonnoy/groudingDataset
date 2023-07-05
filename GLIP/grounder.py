@@ -7,7 +7,7 @@ from GLIP.maskrcnn_benchmark.engine.predictor_glip import GLIPDemo
 
 
 config_file = "./GLIP/configs/pretrain/glip_Swin_L.yaml"
-weight_file = "/zphz/jjh/models/glip/MODEL/glip_large_model.pth"
+weight_file = "/gpfs/gpfs1/zphz/jjh/models/glip/MODEL/glip_large_model.pth"
 cfg.local_rank = 0
 cfg.num_gpus = 2
 cfg.merge_from_file(config_file)
