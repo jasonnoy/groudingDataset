@@ -104,7 +104,6 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path):
     image_size = pred.size
     labels = get_label_names(pred, glip_demo)
     print("labels:", labels)
-    # labels = [text] * len(labels)
     result = glip_demo.overlay_entity_names(result, pred, custom_labels=labels, text_size=0.8, text_offset=-25,
                                             text_offset_original=-40, text_pixel=2)
     groundings = get_grounding_and_label(pred, labels)
