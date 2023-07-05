@@ -198,6 +198,7 @@ class GLIPDemo(object):
         if isinstance(original_caption, list):
             # we directly provided a list of category names
             self.entities = original_caption
+            print("entities:", self.entities)
             caption_string = ""
             tokens_positive = []
             seperation_tokens = " . "
