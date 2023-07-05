@@ -191,7 +191,7 @@ class GLIPDemo(object):
         # image
         if not isinstance(original_images, list):
             original_images = [original_images]
-        images = self.transforms(original_images)
+        images = [self.transforms(img) for img in original_images]
         image_list = to_image_list(images, self.cfg.DATALOADER.SIZE_DIVISIBILITY)
         image_list = image_list.to(self.device)
         positive_maps = []
