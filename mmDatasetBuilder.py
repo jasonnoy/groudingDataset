@@ -72,8 +72,8 @@ def parse_and_grounding_single_class(img, caption, idx, nlp, output_path):
     for noun_chunk in doc.noun_chunks:
         chunk_text = noun_chunk.text
         result, pred = glip_demo.run_on_image(image, chunk_text, 0.55)
-        print("result:", result)
-        print("pred:", pred)
+        # print("result:", result)
+        # print("pred:", pred)
         # if no detection
         if len(pred.bbox) == 0:
             continue
@@ -95,13 +95,23 @@ def parse_and_grounding_single_class(img, caption, idx, nlp, output_path):
 def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path):
     image, image_size = load(img)
     doc = nlp(caption)
-    nouns = []
+    nouns = [t.text for t in doc.noun_chunks]
+    print("nouns:", nouns)
     ids = []
     texts = []
     total_groundings = {}
+    result, pred = glip_demo.run_on_image(image, nouns, 0.55)
+    image_size = pred.size
+    labels = get_label_names(pred, glip_demo)
+    print("labels:", labels)
+    # labels = [text] * len(labels)
+    result = glip_demo.overlay_entity_names(result, pred, custom_labels=labels, text_size=0.8, text_offset=-25,
+                                            text_offset_original=-40, text_pixel=2)
+    groundings = get_grounding_and_label(pred, labels)
+    total_groundings.update(groundings)
+    imsave(result, caption, output_path)
     for noun_chunk in doc.noun_chunks:
         chunk_text = noun_chunk.text
-        result, pred = glip_demo.run_on_image(image, chunk_text, 0.55)
         # if no detection
         if len(pred.bbox) == 0:
             continue
@@ -109,13 +119,7 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path):
         ids.append([t.idx for t in noun_chunk])
         text = " ".join(t.text for t in noun_chunk.subtree)
         texts.append(text)
-        image_size = pred.size
-        labels = get_label_names(pred, glip_demo)
-        labels = [text] * len(labels)
-        result = glip_demo.overlay_entity_names(result, pred, custom_labels=labels, text_size=0.8, text_offset=-25, text_offset_original=-40, text_pixel=2)
-        groundings = get_grounding_and_label(pred, labels)
-        total_groundings.update(groundings)
-        imsave(result, text, output_path)
+
     res = output_decorator(idx, caption, total_groundings, nouns, ids, texts, image_size)
     return res
 
@@ -151,7 +155,9 @@ if __name__ == "__main__":
         if not os.path.exists(output_path):
             os.mkdir(output_path)
         caption = meta[str(idx)]['caption']
-        ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path)
+        # ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path)
+        ret = parse_and_grounding_multi_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path)
+
         res.append(ret)
     with open("output_1/test.json", "w", encoding='utf-8') as f2:
         f2.write(json.dumps(res))
