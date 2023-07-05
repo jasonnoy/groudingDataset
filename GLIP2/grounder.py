@@ -2,9 +2,8 @@ import os
 
 from PIL import Image
 import numpy as np
-from GLIP.maskrcnn_benchmark.config import cfg
-from GLIP.maskrcnn_benchmark.engine.predictor_glip import GLIPDemo
-from GLIP import maskrcnn_benchmark
+from GLIP2.maskrcnn_benchmark.config import cfg
+from GLIP2.maskrcnn_benchmark.engine.predictor_glip import GLIPDemo
 
 
 config_file = "./configs/pretrain/glip_Swin_L.yaml"
