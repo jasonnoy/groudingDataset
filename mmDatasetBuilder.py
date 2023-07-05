@@ -100,7 +100,7 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path):
     ids = []
     texts = []
     total_groundings = {}
-    result, pred = glip_demo.run_on_image(image, nouns, 0.55)
+    result, pred = glip_demo.run_on_image(image, caption, 0.55, custom_entity=nouns)
     image_size = pred.size
     labels = get_label_names(pred, glip_demo)
     print("labels:", labels)

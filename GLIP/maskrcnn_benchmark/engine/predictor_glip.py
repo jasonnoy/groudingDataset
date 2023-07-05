@@ -188,32 +188,47 @@ class GLIPDemo(object):
             result = self.overlay_mask(result, top_predictions)
         return result, top_predictions
 
-    def compute_prediction(self, original_image, original_caption, custom_entity=None):
+    def compute_prediction(self, original_image, original_caption, custom_entities=None):
         # image
         image = self.transforms(original_image)
         image_list = to_image_list(image, self.cfg.DATALOADER.SIZE_DIVISIBILITY)
         image_list = image_list.to(self.device)
-        original_caption = ". ".join(original_caption)
-        # caption
-        if isinstance(original_caption, list):
-            # we directly provided a list of category names
-            self.entities = original_caption
-            print("entities:", self.entities)
-            caption_string = ""
+        if custom_entities:
+            self.entities = custom_entities
             tokens_positive = []
-            seperation_tokens = " . "
-            for word in original_caption:
-
-                tokens_positive.append([len(caption_string), len(caption_string) + len(word)])
-                caption_string += word
-                caption_string += seperation_tokens
-            original_caption = caption_string
-            tokenized = self.tokenizer([caption_string], return_tensors="pt")
-            tokens_positive = [tokens_positive]
+            for entity in custom_entities:
+                try:
+                    # want no overlays
+                    found = {(0,0)}
+                    for m in re.finditer(entity, original_caption.lower()):
+                        if (m.start(), m.end()) not in found:
+                            tokens_positive.append([[m.start(), m.end()]])
+                            found.add((m.start(), m.end()))
+                except:
+                    print("noun entities:", custom_entities)
+                    print("entity:", entity)
+                    print("caption:", original_caption.lower())
         else:
-            tokenized = self.tokenizer([original_caption], return_tensors="pt")
-            if custom_entity is None:
-                tokens_positive = self.run_ner(original_caption)
+            # caption
+            if isinstance(original_caption, list):
+                # we directly provided a list of category names
+                self.entities = original_caption
+                print("entities:", self.entities)
+                caption_string = ""
+                tokens_positive = []
+                seperation_tokens = " . "
+                for word in original_caption:
+
+                    tokens_positive.append([len(caption_string), len(caption_string) + len(word)])
+                    caption_string += word
+                    caption_string += seperation_tokens
+                original_caption = caption_string
+                tokenized = self.tokenizer([caption_string], return_tensors="pt")
+                tokens_positive = [tokens_positive]
+            else:
+                tokenized = self.tokenizer([original_caption], return_tensors="pt")
+                if custom_entities is None:
+                    tokens_positive = self.run_ner(original_caption)
         print("entities:", self.entities)
         # process positive map
         positive_map = create_positive_map(tokenized, tokens_positive)
