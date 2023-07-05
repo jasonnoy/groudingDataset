@@ -204,7 +204,7 @@ class GLIPDemo(object):
                 tokens_positive.append([len(caption_string), len(caption_string) + len(word)])
                 caption_string += word
                 caption_string += seperation_tokens
-
+            original_caption = caption_string
             tokenized = self.tokenizer([caption_string], return_tensors="pt")
             tokens_positive = [tokens_positive]
         else:
@@ -227,7 +227,6 @@ class GLIPDemo(object):
 
         # compute predictions
         with torch.no_grad():
-            print("original caption:", original_caption)
             predictions = self.model(image_list, captions=[original_caption], positive_map=positive_map_label_to_token)
             predictions = [o.to(self.cpu_device) for o in predictions]
         print("inference time per image: {}".format(timeit.time.perf_counter() - tic))
