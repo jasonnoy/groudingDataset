@@ -1,4 +1,4 @@
-from GLIP import *
+from GLIP2 import *
 import numpy as np
 from PIL import Image
 import spacy
