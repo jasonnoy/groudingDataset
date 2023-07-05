@@ -111,6 +111,7 @@ class GLIPDemo(object):
         relevant_phrases = noun_phrases
         labels = noun_phrases
         self.entities = labels
+        print("entities:", self.entities)
 
         tokens_positive = []
 
@@ -210,6 +211,7 @@ class GLIPDemo(object):
         else:
             tokenized = self.tokenizer([original_caption], return_tensors="pt")
             if custom_entity is None:
+                print("No custom_entity provided")
                 tokens_positive = self.run_ner(original_caption)
         # process positive map
         positive_map = create_positive_map(tokenized, tokens_positive)
