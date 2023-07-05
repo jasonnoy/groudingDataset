@@ -101,7 +101,7 @@ class GLIPDemo(object):
                 tokenizer = CLIPTokenizerFast.from_pretrained("openai/clip-vit-base-patch32",
                                                               from_slow=True)
         else:
-            tokenizer = AutoTokenizer.from_pretrained("/zphz/official_pretrains/hugging_face/bert-base-uncased")
+            tokenizer = AutoTokenizer.from_pretrained(cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH)
         return tokenizer
 
     def run_ner(self, caption):
