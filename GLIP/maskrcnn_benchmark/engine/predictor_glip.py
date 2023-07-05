@@ -227,6 +227,7 @@ class GLIPDemo(object):
 
         # compute predictions
         with torch.no_grad():
+            print("original caption:", original_caption)
             predictions = self.model(image_list, captions=[original_caption], positive_map=positive_map_label_to_token)
             predictions = [o.to(self.cpu_device) for o in predictions]
         print("inference time per image: {}".format(timeit.time.perf_counter() - tic))
