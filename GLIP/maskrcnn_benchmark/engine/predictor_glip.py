@@ -193,7 +193,7 @@ class GLIPDemo(object):
         image = self.transforms(original_image)
         image_list = to_image_list(image, self.cfg.DATALOADER.SIZE_DIVISIBILITY)
         image_list = image_list.to(self.device)
-        positive_maps = []
+        original_caption = ". ".join(original_caption)
         # caption
         if isinstance(original_caption, list):
             # we directly provided a list of category names
@@ -214,6 +214,7 @@ class GLIPDemo(object):
             tokenized = self.tokenizer([original_caption], return_tensors="pt")
             if custom_entity is None:
                 tokens_positive = self.run_ner(original_caption)
+        print("entities:", self.entities)
         # process positive map
         positive_map = create_positive_map(tokenized, tokens_positive)
 
