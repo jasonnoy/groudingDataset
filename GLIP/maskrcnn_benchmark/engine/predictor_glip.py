@@ -195,6 +195,7 @@ class GLIPDemo(object):
         image_list = image_list.to(self.device)
         if custom_entities:
             self.entities = custom_entities
+            tokenized = self.tokenizer([original_caption], return_tensors="pt")
             tokens_positive = []
             for entity in custom_entities:
                 try:

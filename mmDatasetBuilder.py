@@ -95,7 +95,7 @@ def parse_and_grounding_single_class(img, caption, idx, nlp, output_path):
 def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path):
     image, image_size = load(img)
     doc = nlp(caption)
-    nouns = [t.text for t in doc.noun_chunks]
+    nouns = [t.text.lower() for t in doc.noun_chunks]
     print("nouns:", nouns)
     ids = []
     texts = []
