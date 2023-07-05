@@ -187,70 +187,66 @@ class GLIPDemo(object):
             result = self.overlay_mask(result, top_predictions)
         return result, top_predictions
 
-    def compute_prediction(self, original_images, original_captions, custom_entity=None):
+    def compute_prediction(self, original_image, original_caption, custom_entity=None):
         # image
-        if not isinstance(original_images, list):
-            original_images = [original_images]
-        images = [self.transforms(img) for img in original_images]
-        image_list = to_image_list(images, self.cfg.DATALOADER.SIZE_DIVISIBILITY)
+        image = self.transforms(original_image)
+        image_list = to_image_list(image, self.cfg.DATALOADER.SIZE_DIVISIBILITY)
         image_list = image_list.to(self.device)
         positive_maps = []
         # caption
-        for original_caption in original_captions:
-            if isinstance(original_caption, list):
-                # we directly provided a list of category names
-                caption_string = ""
-                tokens_positive = []
-                seperation_tokens = " . "
-                for word in original_caption:
+        if isinstance(original_caption, list):
+            # we directly provided a list of category names
+            caption_string = ""
+            tokens_positive = []
+            seperation_tokens = " . "
+            for word in original_caption:
 
-                    tokens_positive.append([len(caption_string), len(caption_string) + len(word)])
-                    caption_string += word
-                    caption_string += seperation_tokens
+                tokens_positive.append([len(caption_string), len(caption_string) + len(word)])
+                caption_string += word
+                caption_string += seperation_tokens
 
-                tokenized = self.tokenizer([caption_string], return_tensors="pt")
-                tokens_positive = [tokens_positive]
-            else:
-                tokenized = self.tokenizer([original_caption], return_tensors="pt")
-                if custom_entity is None:
-                    tokens_positive = self.run_ner(original_caption)
-            # process positive map
-            positive_map = create_positive_map(tokenized, tokens_positive)
+            tokenized = self.tokenizer([caption_string], return_tensors="pt")
+            tokens_positive = [tokens_positive]
+        else:
+            tokenized = self.tokenizer([original_caption], return_tensors="pt")
+            if custom_entity is None:
+                tokens_positive = self.run_ner(original_caption)
+        # process positive map
+        positive_map = create_positive_map(tokenized, tokens_positive)
 
-            if self.cfg.MODEL.RPN_ARCHITECTURE == "VLDYHEAD":
-                plus = 1
-            else:
-                plus = 0
+        if self.cfg.MODEL.RPN_ARCHITECTURE == "VLDYHEAD":
+            plus = 1
+        else:
+            plus = 0
 
-            positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
-            self.plus = plus
-            # self.positive_map_label_to_token = positive_map_label_to_token
-            positive_maps.append(positive_map_label_to_token)
+        positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
+        self.plus = plus
+        # self.positive_map_label_to_token = positive_map_label_to_token
+        positive_maps.append(positive_map_label_to_token)
         tic = timeit.time.perf_counter()
 
         # compute predictions
         with torch.no_grad():
-            predictions = self.model(image_list, captions=original_captions, positive_map=positive_maps)
+            predictions = self.model(image_list, captions=[original_caption], positive_map=positive_maps)
             predictions = [o.to(self.cpu_device) for o in predictions]
         print("inference time per image: {}".format(timeit.time.perf_counter() - tic))
 
         # # always single image is passed at a time
-        # prediction = predictions[0]
+        prediction = predictions[0]
 
         # reshape prediction (a BoxList) into the original image size
-        for i in range(len(predictions)):
-            height, width = original_images[i].shape[:-1]
-            predictions[i] = predictions[i].resize((width, height))
+        height, width = original_image.shape[:-1]
+        prediction = prediction.resize((width, height))
 
-            # if predictions[i].has_field("mask"):
-            #     # if we have masks, paste the masks in the right position
-            #     # in the image, as defined by the bounding boxes
-            #     masks = predictions[i].get_field("mask")
-            #     # always single image is passed at a time
-            #     masks = self.masker([masks], [predictions[i]])[0]
-            #     predictions[i].add_field("mask", masks)
+        # if predictions[i].has_field("mask"):
+        #     # if we have masks, paste the masks in the right position
+        #     # in the image, as defined by the bounding boxes
+        #     masks = predictions[i].get_field("mask")
+        #     # always single image is passed at a time
+        #     masks = self.masker([masks], [predictions[i]])[0]
+        #     predictions[i].add_field("mask", masks)
 
-        return predictions
+        return prediction
 
     def _post_process_fixed_thresh(self, predictions):
         scores = predictions.get_field("scores")
