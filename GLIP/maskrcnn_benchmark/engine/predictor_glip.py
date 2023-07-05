@@ -221,13 +221,13 @@ class GLIPDemo(object):
 
         positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
         self.plus = plus
-        # self.positive_map_label_to_token = positive_map_label_to_token
-        positive_maps.append(positive_map_label_to_token)
+        self.positive_map_label_to_token = positive_map_label_to_token
+        # positive_maps.append(positive_map_label_to_token)
         tic = timeit.time.perf_counter()
 
         # compute predictions
         with torch.no_grad():
-            predictions = self.model(image_list, captions=[original_caption], positive_map=positive_maps)
+            predictions = self.model(image_list, captions=[original_caption], positive_map=positive_map_label_to_token)
             predictions = [o.to(self.cpu_device) for o in predictions]
         print("inference time per image: {}".format(timeit.time.perf_counter() - tic))
 
