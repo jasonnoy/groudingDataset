@@ -197,6 +197,7 @@ class GLIPDemo(object):
         # caption
         if isinstance(original_caption, list):
             # we directly provided a list of category names
+            self.entities = original_caption
             caption_string = ""
             tokens_positive = []
             seperation_tokens = " . "
@@ -211,7 +212,6 @@ class GLIPDemo(object):
         else:
             tokenized = self.tokenizer([original_caption], return_tensors="pt")
             if custom_entity is None:
-                print("No custom_entity provided")
                 tokens_positive = self.run_ner(original_caption)
         # process positive map
         positive_map = create_positive_map(tokenized, tokens_positive)
