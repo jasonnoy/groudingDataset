@@ -35,8 +35,12 @@ def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entit
     res = defaultdict(list)
     for idx, box in enumerate(pred.bbox):
         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
-        entity = new_to_old_entity[new_labels[idx]]
-        pos = new_entity_to_id[new_labels[idx]]
+        if new_labels[idx] in new_to_old_entity:
+            entity = new_to_old_entity[new_labels[idx]]
+            pos = new_entity_to_id[new_labels[idx]]
+        else:
+            entity = new_labels[idx]
+            pos = -1
         res[entity].append([top_left+bottom_right, pos])
     return res
 
@@ -185,7 +189,7 @@ if __name__ == "__main__":
                     caption = data['txt'].decode()
                     print("id:{}, caption:{}".format(index, caption))
 
-                    ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, count < 5)  # save first 5 grounding images for each tar
+                    ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, count < 10)  # save first 5 grounding images for each tar
                     print(ret)
                     meta_data.update(ret)
                     print(meta_data)
