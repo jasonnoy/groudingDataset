@@ -320,6 +320,7 @@ class GLIPDemo(object):
         ids = []
         labels = prediction.get_field("labels").tolist()
         for l in labels:
+            print("l:", l)
             if l > len(self.entities):
                 continue
             else:
