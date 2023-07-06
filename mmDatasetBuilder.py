@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 from tqdm import tqdm
 import matplotlib.pylab as pylab
+import webdataset as wds
 
 
 def get_label_names(predictions, model):
@@ -40,8 +41,13 @@ def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entit
     return res
 
 
-def output_decorator(id, caption, groundings, image_size):
-    res = {"id": id, "caption": caption, "groundings": groundings, "image_size": image_size}
+# def output_decorator(id, caption, groundings, image_size):
+#     res = {"id": id, "caption": caption, "groundings": groundings, "image_size": image_size}
+#     return res
+
+
+def output_decorator(groundings):
+    res = {"groundings": groundings}
     return res
 
 
@@ -89,12 +95,13 @@ def parse_and_grounding_single_class(img, caption, idx, nlp, output_path):
         groundings = get_grounding_and_label(pred, labels)
         total_groundings.update(groundings)
         imsave(result, text, output_path)
-    res = output_decorator(idx, caption, total_groundings, image_size)
+    res = output_decorator(total_groundings)
     return res
 
 
 def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_img=False):
-    image, image_size = load(img)
+    # image, image_size = load(img)
+    image = np.array(img)[:, :, [2, 1, 0]]
     doc = nlp(caption)
     nouns = [t.text.lower() for t in doc.noun_chunks]
     entity_dict = {}
@@ -116,10 +123,10 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
     total_groundings = {}
     result, pred = glip_demo.run_on_image(image, caption, 0.55, custom_entity=nouns, save_img=save_img)
 
-    image_size = pred.size
     new_labels = get_label_names(pred, glip_demo)
     # print("labels:", labels)
     if save_img:
+        image_size = pred.size
         result = glip_demo.overlay_entity_names(result, pred, custom_labels=new_labels, text_size=0.8, text_offset=-25,
                                                 text_offset_original=-40, text_pixel=2)
         imsave(result, caption, output_path)
@@ -136,45 +143,54 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
     #     text = " ".join(t.text for t in noun_chunk.subtree)
     #     texts.append(text)
 
-    res = output_decorator(idx, caption, total_groundings, image_size)
+    res = output_decorator(idx)
     return res
 
 
-if __name__ == "__main__":
-    pylab.rcParams['figure.figsize'] = 20, 12
-    nlp = spacy.load("en_core_web_trf")
-    input_path = "/home/jijunhui/download/test_images"
-    res = []
-    with open(os.path.join(input_path, "meta.json"), 'r', encoding='utf-8') as f1:
-        meta = json.loads(f1.read())
-    f1.close()
-    # doc = nlp(caption)
-    # nouns = []
-    # ids = []
-    # texts = []
-    # for noun_chunk in doc.noun_chunks:
-    #     chunk_text = noun_chunk.text
-    #     # chunk_text = 'bobble heads on top of the shelf'
-    #     nouns.append(chunk_text)
-    #     ids.append([t.idx for t in noun_chunk])
-    #     texts.append(" ".join(t.text for t in noun_chunk.subtree))
-    #     result, pred = glip_demo.run_on_web_image(image, chunk_text, 0.5)
-    #     labels = get_label_names(pred, glip_demo)
-    #     groundings = get_grounding_and_label(pred, labels)
-    #     print("groundings:", groundings)
-    # res = output_decorator(0, caption, groundings, nouns, ids, texts, image_size)
-    for filename in tqdm(os.listdir(input_path)):
-        if not filename.endswith(".png"):
-            continue
-        idx = filename.split(".")[0]
-        output_path = os.path.join("output_1", str(idx))
-        if not os.path.exists(output_path):
-            os.mkdir(output_path)
-        caption = meta[str(idx)]['caption']
-        # ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path)
-        ret = parse_and_grounding_multi_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path, True)
+def read_tar(tar_path):
+    return wds.WebDataset(tar_path)
 
-        res.append(ret)
-    with open("output_1/test.json", "w", encoding='utf-8') as f2:
-        f2.write(json.dumps(res))
-    f2.close()
+
+if __name__ == "__main__":
+    nlp = spacy.load("en_core_web_trf")
+    input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00032"
+    output_path = "/gpfs/gpfs1/zphz/jjh/test_dataset/part-00032"
+    ids = [0, 1, 2, 3, 4, 5]
+    for idx in ids:
+        res = {}
+        tar_filename = "{}.tar".format(3200000+idx)
+        tar_dataset = read_tar(os.path.join(input_path, tar_filename))
+        meta_filename = "{}.meta.jsonl".format(3200000+idx)
+        with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(os.path.join(output_path, meta_filename), 'a', encoding='utf-8') as f2:
+            for data, line in zip(tar_dataset, f1):
+                meta_data = json.loads(line)
+                image = data.get("image")
+                caption = data.get("caption")
+                index = data.get("id")
+                ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, True)
+                meta_data.update(ret)
+                f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
+                break
+        f1.close()
+        f2.close()
+        break
+    print("done")
+
+    # with open(os.path.join(input_path, "meta.json"), 'r', encoding='utf-8') as f1:
+    #     meta = json.loads(f1.read())
+    # f1.close()
+    # for filename in tqdm(os.listdir(input_path)):
+    #     if not filename.endswith(".png"):
+    #         continue
+    #     idx = filename.split(".")[0]
+    #     output_path = os.path.join("output_1", str(idx))
+    #     if not os.path.exists(output_path):
+    #         os.mkdir(output_path)
+    #     caption = meta[str(idx)]['caption']
+    #     # ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path)
+    #     ret = parse_and_grounding_multi_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path, True)
+    #
+    #     res.append(ret)
+    # with open("output_1/test.json", "w", encoding='utf-8') as f2:
+    #     f2.write(json.dumps(res))
+    # f2.close()
