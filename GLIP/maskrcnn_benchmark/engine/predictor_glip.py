@@ -291,10 +291,9 @@ class GLIPDemo(object):
         qualified = {}
         for idx, bbox in enumerate(prediction.bbox):
             top_left, bottom_right = bbox[:2].tolist(), bbox[2:].tolist()
-            print("top_left:", top_left, "bottom_right:", bottom_right)
+            # print("top_left:", top_left, "bottom_right:", bottom_right)
             top_left = (top_left[0], top_left[1])
             bottom_right = (bottom_right[0], bottom_right[1])
-            print("top_left:", top_left, "bottom_right:", bottom_right)
             if len(qualified) == 0:
                 qualified[(top_left, bottom_right)] = idx
                 continue
