@@ -215,7 +215,6 @@ class GLIPDemo(object):
             if isinstance(original_caption, list):
                 # we directly provided a list of category names
                 self.entities = original_caption
-                print("entities:", self.entities)
                 caption_string = ""
                 tokens_positive = []
                 seperation_tokens = " . "
@@ -230,7 +229,6 @@ class GLIPDemo(object):
                 tokenized = self.tokenizer([original_caption], return_tensors="pt")
                 if custom_entities is None:
                     tokens_positive = self.run_ner(original_caption)
-        print("entities:", self.entities)
         # process positive map
         positive_map = create_positive_map(tokenized, tokens_positive)
 
@@ -243,13 +241,13 @@ class GLIPDemo(object):
         self.plus = plus
         self.positive_map_label_to_token = positive_map_label_to_token
         # positive_maps.append(positive_map_label_to_token)
-        tic = timeit.time.perf_counter()
+        # tic = timeit.time.perf_counter()
 
         # compute predictions
         with torch.no_grad():
             predictions = self.model(image_list, captions=[original_caption], positive_map=positive_map_label_to_token)
             predictions = [o.to(self.cpu_device) for o in predictions]
-        print("inference time per image: {}".format(timeit.time.perf_counter() - tic))
+        # print("inference time per image: {}".format(timeit.time.perf_counter() - tic))
 
         # # always single image is passed at a time
         prediction = predictions[0]
@@ -289,13 +287,13 @@ class GLIPDemo(object):
     def filter_iou(self, prediction, threshold=0.9):
         # predictions in descending order
         qualified = {}
-        labels = prediction.get_field("labels").tolist()
-        scores = prediction.get_field("scores").tolist()
+        # labels = prediction.get_field("labels").tolist()
+        # scores = prediction.get_field("scores").tolist()
         for idx, bbox in enumerate(prediction.bbox):
             top_left, bottom_right = bbox[:2].tolist(), bbox[2:].tolist()
-            print("idx:", idx)
-            print("cur label:", labels[idx])
-            print("cur score:", scores[idx])
+            # print("idx:", idx)
+            # print("cur label:", labels[idx])
+            # print("cur score:", scores[idx])
             # print("top_left:", top_left, "bottom_right:", bottom_right)
             top_left = (top_left[0], top_left[1])
             bottom_right = (bottom_right[0], bottom_right[1])
@@ -305,21 +303,19 @@ class GLIPDemo(object):
             add = True
             for tl, rb in *qualified.keys(), :
                 iou = get_iou(top_left, bottom_right, tl, rb)
-                print("iou to idx={}:{}".format(idx, iou))
+                # print("iou to idx={}:{}".format(idx, iou))
                 if get_iou(top_left, bottom_right, tl, rb) > threshold:
                     add = False
                     break
             if add:
                 qualified[(top_left, bottom_right)] = idx
         ids = list(qualified.values())
-        print("keys:", ids)
+        # print("keys:", ids)
         return prediction[ids]
 
     def _post_process(self, prediction, threshold=0.5):
         scores = prediction.get_field("scores")
         labels = prediction.get_field("labels").tolist()
-        print("scores:", scores)
-        print("labels:", labels)
         thresh = scores.clone()
         for i, lb in enumerate(labels):
             if isinstance(self.confidence_threshold, float):

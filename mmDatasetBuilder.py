@@ -30,17 +30,17 @@ def get_label_names(predictions, model):
     return new_labels
 
 
-def get_grounding_and_label(pred, labels):
+def get_grounding_and_label(pred, labels, ids):
     res = defaultdict(list)
     for idx, box in enumerate(pred.bbox):
         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
         res[labels[idx]].append(top_left+bottom_right)
+        res[labels[idx]].append(ids[idx])
     return res
 
 
-def output_decorator(id, caption, groundings, nouns, positions, subtexts, image_size):
-    res = {"id": id, "caption": caption, "groundings": groundings, "nouns": nouns, "positions": positions,
-           "subtexts": subtexts, "image_size": image_size}
+def output_decorator(id, caption, groundings, image_size):
+    res = {"id": id, "caption": caption, "groundings": groundings, "image_size": image_size}
     return res
 
 
@@ -88,39 +88,42 @@ def parse_and_grounding_single_class(img, caption, idx, nlp, output_path):
         groundings = get_grounding_and_label(pred, labels)
         total_groundings.update(groundings)
         imsave(result, text, output_path)
-    res = output_decorator(idx, caption, total_groundings, nouns, ids, texts, image_size)
+    res = output_decorator(idx, caption, total_groundings, image_size)
     return res
 
 
-def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path):
+def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_img=False):
     image, image_size = load(img)
     doc = nlp(caption)
     nouns = [t.text.lower() for t in doc.noun_chunks]
-    print("nouns:", nouns)
-    ids = []
-    texts = []
+    ids = [noun_chunk[0].idx for noun_chunk in doc.noun_chunks]  # starting position of the first token
+    # print("nouns:", nouns)
+    # ids = []
+    # texts = []
     total_groundings = {}
     result, pred = glip_demo.run_on_image(image, caption, 0.55, custom_entity=nouns)
 
     image_size = pred.size
     labels = get_label_names(pred, glip_demo)
-    print("labels:", labels)
-    result = glip_demo.overlay_entity_names(result, pred, custom_labels=labels, text_size=0.8, text_offset=-25,
-                                            text_offset_original=-40, text_pixel=2)
-    groundings = get_grounding_and_label(pred, labels)
-    total_groundings.update(groundings)
-    imsave(result, caption, output_path)
-    for noun_chunk in doc.noun_chunks:
-        chunk_text = noun_chunk.text
-        # if no detection
-        if len(pred.bbox) == 0:
-            continue
-        nouns.append(chunk_text)
-        ids.append([t.idx for t in noun_chunk])
-        text = " ".join(t.text for t in noun_chunk.subtree)
-        texts.append(text)
+    # print("labels:", labels)
+    if save_img:
+        result = glip_demo.overlay_entity_names(result, pred, custom_labels=labels, text_size=0.8, text_offset=-25,
+                                                text_offset_original=-40, text_pixel=2)
+        imsave(result, caption, output_path)
 
-    res = output_decorator(idx, caption, total_groundings, nouns, ids, texts, image_size)
+    groundings = get_grounding_and_label(pred, labels, ids)
+    total_groundings.update(groundings)
+    # for noun_chunk in doc.noun_chunks:
+    #     chunk_text = noun_chunk.text
+    #     # if no detection
+    #     if len(pred.bbox) == 0:
+    #         continue
+    #     nouns.append(chunk_text)
+    #     ids.append([t.idx for t in noun_chunk])
+    #     text = " ".join(t.text for t in noun_chunk.subtree)
+    #     texts.append(text)
+
+    res = output_decorator(idx, caption, total_groundings, image_size)
     return res
 
 
