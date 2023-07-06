@@ -152,7 +152,7 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
     #     text = " ".join(t.text for t in noun_chunk.subtree)
     #     texts.append(text)
 
-    res = output_decorator(idx)
+    res = output_decorator(total_groundings)
     return res
 
 
