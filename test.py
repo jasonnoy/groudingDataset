@@ -22,17 +22,17 @@ if __name__ == "__main__":
             for data, line in zip(tar_dataset, f1):
                 meta_data = json.loads(line)
                 if meta_data['status'] == "success":
-                    print("origin size: {}, {}".format(meta_data['width'], meta_data['height']))
                     size = (int(meta_data['width']), int(meta_data['height']))
-                    print("size:", size)
+                    index = data['id']
+                    sample_id = meta_data['SAMPLE_ID']
+                    print("id:", id)
+                    print("sample id:", sample_id)
                     # print("data:", data)
                     image_b = data['jpg']
-                    image_d = image_b.decode('utf-8')
-                    print(image_d)
-                    image = Image.frombytes(mode="RGBA", data=image_b, size=size, decoder_name="raw")
+                    image = Image.frombytes(mode="RGB", data=image_b, size=size, decoder_name="raw")
                     image.save("test.png", format="png")
                     caption = data['txt']
-                    index = data['id']
+
                     # ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, True)
                     # meta_data.update(ret)
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
