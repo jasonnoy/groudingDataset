@@ -409,7 +409,6 @@ class GLIPDemo(object):
             for x_prev, y_prev in previous_locations:
                 if abs(x - x_prev) < abs(text_offset) and abs(y - y_prev) < abs(text_offset):
                     y -= text_offset
-            print("color:", color)
             cv2.putText(
                 image, s, (int(x), int(y) - text_offset_original), cv2.FONT_HERSHEY_SIMPLEX, text_size, color,
                 text_pixel, cv2.LINE_AA
