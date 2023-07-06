@@ -304,7 +304,9 @@ class GLIPDemo(object):
                     break
             if add:
                 qualified[(top_left, bottom_right)] = idx
-        return prediction[qualified.keys()]
+        keys = list(qualified.keys())
+        print("keys:", keys)
+        return prediction[keys]
 
     def _post_process(self, prediction, threshold=0.5):
         scores = prediction.get_field("scores")
