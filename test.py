@@ -21,7 +21,7 @@ if __name__ == "__main__":
             for data, line in zip(tar_dataset, f1):
                 meta_data = json.loads(line)
                 # print("data:", data)
-                image = data['image']
+                image = data['jpg']
                 print("image:", image)
                 caption = data['txt']
                 index = data['id']
