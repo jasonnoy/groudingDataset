@@ -21,7 +21,7 @@ if __name__ == "__main__":
         with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(os.path.join(output_path, meta_filename), 'a', encoding='utf-8') as f2:
             for data, line in zip(tar_dataset, f1):
                 meta_data = json.loads(line)
-                if meta_data['status'] is "success":
+                if meta_data['status'] == "success":
                     size = (int(meta_data['width']), int(meta_data['height']))
                     # print("data:", data)
                     image_b = data['jpg']
