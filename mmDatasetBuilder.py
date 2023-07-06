@@ -7,7 +7,7 @@ import os
 import matplotlib.pyplot as plt
 from collections import defaultdict
 from tqdm import tqdm
-import matplotlib.pylab as pylab
+import io
 import webdataset as wds
 
 
@@ -100,8 +100,8 @@ def parse_and_grounding_single_class(img, caption, idx, nlp, output_path):
 
 
 def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_img=False):
-    # image, image_size = load(img)
-    image = np.array(img)[:, :, [2, 1, 0]]
+    image, image_size = load(img)
+    # image = np.array(img)[:, :, [2, 1, 0]]
     doc = nlp(caption)
     nouns = [t.text.lower() for t in doc.noun_chunks]
     entity_dict = {}
@@ -164,12 +164,18 @@ if __name__ == "__main__":
         with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(os.path.join(output_path, meta_filename), 'a', encoding='utf-8') as f2:
             for data, line in zip(tar_dataset, f1):
                 meta_data = json.loads(line)
-                image = data.get("image")
-                print("image")
-                caption = data.get("caption")
-                index = data.get("id")
-                ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, True)
-                meta_data.update(ret)
+                if meta_data['status'] == "success":
+                    size = (int(meta_data['width']), int(meta_data['height']))
+                    index = data['id'].decode()
+                    sample_id = meta_data['SAMPLE_ID']
+                    assert (str(index) == str(sample_id))
+                    image_b = data['jpg']
+                    image = Image.open(io.BytesIO(image_b)).convert('RGB')
+                    image.save("test.png", format="png")
+                    caption = data['txt']
+
+                    ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, True)
+                    meta_data.update(ret)
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
                 break
         f1.close()

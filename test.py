@@ -26,20 +26,14 @@ if __name__ == "__main__":
                     size = (int(meta_data['width']), int(meta_data['height']))
                     index = data['id'].decode()
                     sample_id = meta_data['SAMPLE_ID']
-                    print(index)
-                    print(sample_id)
                     assert (str(index) == str(sample_id))
-                    print("id:", index)
-                    print("sample id:", sample_id)
-                    # print("data:", data)
                     image_b = data['jpg']
                     image = Image.open(io.BytesIO(image_b)).convert('RGB')
-                    # image = Image.frombytes(mode="RGB", data=image_b, size=size, decoder_name="raw")
                     image.save("test.png", format="png")
                     caption = data['txt']
 
-                    # ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, True)
-                    # meta_data.update(ret)
+                    ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, True)
+                    meta_data.update(ret)
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
                 break
         f1.close()
