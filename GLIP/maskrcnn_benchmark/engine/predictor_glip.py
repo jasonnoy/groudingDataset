@@ -322,20 +322,17 @@ class GLIPDemo(object):
         for idx, l in enumerate(labels):
             print("l:", l)
             if l > len(self.entities):
-                print("filtered")
                 continue
             else:
-                print("added")
                 ids.append(idx)
-            print("ids:", ids)
         return prediction[ids]
 
 
     def _post_process(self, prediction, threshold=0.5):
         scores = prediction.get_field("scores")
         labels = prediction.get_field("labels").tolist()
-        print("labels:", labels)
-        print("scores:", scores)
+        # print("labels:", labels)
+        # print("scores:", scores)
         thresh = scores.clone()
         for i, lb in enumerate(labels):
             if isinstance(self.confidence_threshold, float):
@@ -350,8 +347,6 @@ class GLIPDemo(object):
         _, idx = scores.sort(0, descending=True)
         prediction = prediction[idx]
         prediction = self.filter_object(prediction)
-        print("new labels")
-        print(prediction.get_field("labels").tolist())
         prediction = self.filter_iou(prediction)
         return prediction
 
