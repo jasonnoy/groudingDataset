@@ -184,7 +184,9 @@ if __name__ == "__main__":
                     print("id:{}, caption:{}".format(index, caption))
 
                     ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, True)
+                    print(ret)
                     meta_data.update(ret)
+                    print(meta_data)
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
                 break
         f1.close()
