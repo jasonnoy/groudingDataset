@@ -18,10 +18,10 @@ def get_label_names(predictions, model):
     else:
         plus = 0
     model.plus = plus
-    if model.entities and model.plus:
+    if model.new_entities and model.plus:
         for i in labels:
-            if i <= len(model.entities):
-                new_labels.append(model.entities[i - model.plus])
+            if i <= len(model.new_entities):
+                new_labels.append(model.new_entities[i - model.plus])
             else:
                 new_labels.append('object')
         # labels = [self.entities[i - self.plus] for i in labels ]
@@ -30,12 +30,14 @@ def get_label_names(predictions, model):
     return new_labels
 
 
-def get_grounding_and_label(pred, labels, ids):
+def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity):
     res = defaultdict(list)
     for idx, box in enumerate(pred.bbox):
         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
-        res[labels[idx]].append(top_left+bottom_right)
-        res[labels[idx]].append(ids[idx])
+        entity = new_to_old_entity[new_labels[idx]]
+        pos = new_entity_to_id[new_labels[idx]]
+        res[entity].append(top_left+bottom_right)
+        res[entity].append(pos)
     return res
 
 
@@ -96,22 +98,34 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
     image, image_size = load(img)
     doc = nlp(caption)
     nouns = [t.text.lower() for t in doc.noun_chunks]
-    ids = [noun_chunk[0].idx for noun_chunk in doc.noun_chunks]  # starting position of the first token
+    entity_dict = {}
+    new_entities = []
+    # to handle duplicates in entities
+    for chunk in nouns:
+        if chunk not in entity_dict:
+            new_entities.append(chunk)
+            entity_dict[chunk] = 0
+        else:
+            entity_dict[chunk] += 1
+            new_entities.append("{}-{}".format(chunk, entity_dict[chunk]))
+    glip_demo.new_entities = new_entities
+    new_to_old_entity = dict(zip(new_entities, nouns))
+    new_entity_to_id = dict(zip(new_entities, [noun_chunk[0].idx for noun_chunk in doc.noun_chunks]))  # starting position of the first token
     # print("nouns:", nouns)
     # ids = []
     # texts = []
     total_groundings = {}
-    result, pred = glip_demo.run_on_image(image, caption, 0.55, custom_entity=nouns)
+    result, pred = glip_demo.run_on_image(image, caption, 0.55, custom_entity=nouns, save_img=save_img)
 
     image_size = pred.size
-    labels = get_label_names(pred, glip_demo)
+    new_labels = get_label_names(pred, glip_demo)
     # print("labels:", labels)
     if save_img:
-        result = glip_demo.overlay_entity_names(result, pred, custom_labels=labels, text_size=0.8, text_offset=-25,
+        result = glip_demo.overlay_entity_names(result, pred, custom_labels=new_labels, text_size=0.8, text_offset=-25,
                                                 text_offset_original=-40, text_pixel=2)
         imsave(result, caption, output_path)
 
-    groundings = get_grounding_and_label(pred, labels, ids)
+    groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
     total_groundings.update(groundings)
     # for noun_chunk in doc.noun_chunks:
     #     chunk_text = noun_chunk.text
@@ -159,7 +173,7 @@ if __name__ == "__main__":
             os.mkdir(output_path)
         caption = meta[str(idx)]['caption']
         # ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path)
-        ret = parse_and_grounding_multi_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path)
+        ret = parse_and_grounding_multi_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path, True)
 
         res.append(ret)
     with open("output_1/test.json", "w", encoding='utf-8') as f2:
