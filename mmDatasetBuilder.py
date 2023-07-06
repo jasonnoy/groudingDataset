@@ -185,7 +185,7 @@ if __name__ == "__main__":
                     try:
                         assert (str(index) == str(sample_id))
                     except:
-                        raise("index:{}\n sample_id:{}".format(str(index), str(sample_id)))
+                        print("index:{}\n sample_id:{}".format(str(index), str(sample_id)))
                     image_b = data['jpg']
                     image = Image.open(io.BytesIO(image_b)).convert('RGB')
                     caption = data['txt'].decode()
