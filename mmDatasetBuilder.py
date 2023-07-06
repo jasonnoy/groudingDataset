@@ -182,7 +182,10 @@ if __name__ == "__main__":
                     size = (int(meta_data['width']), int(meta_data['height']))
                     index = data['id'].decode()
                     sample_id = meta_data['SAMPLE_ID']
-                    assert (str(index) == str(sample_id))
+                    try:
+                        assert (str(index) == str(sample_id))
+                    except:
+                        raise("index:{}\n sample_id:{}".format(str(index), str(sample_id)))
                     image_b = data['jpg']
                     image = Image.open(io.BytesIO(image_b)).convert('RGB')
                     caption = data['txt'].decode()
