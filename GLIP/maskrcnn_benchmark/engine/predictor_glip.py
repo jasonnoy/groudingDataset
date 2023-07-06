@@ -295,7 +295,7 @@ class GLIPDemo(object):
         for idx, bbox in enumerate(prediction.bbox):
             top_left, bottom_right = bbox[:2].tolist(), bbox[2:].tolist()
             if len(qualified) == 0:
-                qualified[[top_left, bottom_right]] = idx
+                qualified[(top_left, bottom_right)] = idx
                 continue
             add = True
             for tl, rb in zip(qualified.keys()):
@@ -303,7 +303,7 @@ class GLIPDemo(object):
                     add = False
                     break
             if add:
-                qualified[[top_left, bottom_right]] = idx
+                qualified[(top_left, bottom_right)] = idx
         return prediction[qualified.keys()]
 
     def _post_process(self, prediction, threshold=0.5):
