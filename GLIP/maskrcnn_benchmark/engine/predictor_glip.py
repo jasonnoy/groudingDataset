@@ -319,14 +319,14 @@ class GLIPDemo(object):
     def filter_object(self, prediction):
         ids = []
         labels = prediction.get_field("labels").tolist()
-        for l in labels:
+        for idx, l in enumerate(labels):
             print("l:", l)
             if l > len(self.entities):
                 print("filtered")
                 continue
             else:
                 print("added")
-                ids.append(l)
+                ids.append(idx)
             print("ids:", ids)
         return prediction[ids]
 
