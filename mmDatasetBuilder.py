@@ -24,6 +24,7 @@ def get_label_names(predictions, model):
             if i <= len(model.new_entities):
                 new_labels.append(model.new_entities[i - model.plus])
             else:
+                print("i:", i)
                 new_labels.append('object')
         # labels = [self.entities[i - self.plus] for i in labels ]
     else:
@@ -129,8 +130,9 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
             new_entities.append("{}-{}".format(chunk, entity_dict[chunk]))
     glip_demo.new_entities = new_entities
     new_to_old_entity = dict(zip(new_entities, nouns))
+    print("new_entities:", new_entities)
     new_entity_to_id = dict(zip(new_entities, [noun_chunk[0].idx for noun_chunk in doc.noun_chunks]))  # starting position of the first token
-    # print("nouns:", nouns)
+    print("nouns:", nouns)
     # ids = []
     # texts = []
     total_groundings = {}
@@ -178,6 +180,8 @@ if __name__ == "__main__":
         print("processing")
         with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(os.path.join(output_path, meta_filename), 'a', encoding='utf-8') as f2:
             for data, line in tqdm(zip(tar_dataset, f1)):
+                if count != 9:
+                    continue
                 meta_data = json.loads(line)
                 if meta_data['status'] == "success":
                     size = (int(meta_data['width']), int(meta_data['height']))
@@ -194,6 +198,8 @@ if __name__ == "__main__":
                     meta_data.update(ret)
                     print(meta_data)
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
+                break
+            break
         f1.close()
         f2.close()
     print("done")
