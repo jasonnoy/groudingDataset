@@ -304,7 +304,7 @@ class GLIPDemo(object):
                 continue
             add = True
             for tl, rb in *qualified.keys(), :
-                iou = get_iou(top_left, bottom_right, tl, rb)
+                # iou = get_iou(top_left, bottom_right, tl, rb)
                 # print("iou to idx={}:{}".format(idx, iou))
                 if get_iou(top_left, bottom_right, tl, rb) > threshold:
                     add = False
@@ -314,6 +314,18 @@ class GLIPDemo(object):
         ids = list(qualified.values())
         # print("keys:", ids)
         return prediction[ids]
+
+
+    def filter_object(self, prediction):
+        ids = []
+        labels = prediction.get_field("labels").tolist()
+        for l in labels:
+            if l > len(self.entities):
+                continue
+            else:
+                ids.append(l)
+        return prediction[ids]
+
 
     def _post_process(self, prediction, threshold=0.5):
         scores = prediction.get_field("scores")
@@ -330,10 +342,10 @@ class GLIPDemo(object):
                 thresh[i] = self.confidence_threshold[lb - 1]
         keep = torch.nonzero(scores > thresh).squeeze(1)
         prediction = prediction[keep]
-
         scores = prediction.get_field("scores")
         _, idx = scores.sort(0, descending=True)
         prediction = prediction[idx]
+        prediction = self.filter_object(prediction)
         prediction = self.filter_iou(prediction)
         return prediction
 
