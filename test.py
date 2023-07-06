@@ -26,7 +26,7 @@ if __name__ == "__main__":
                     size = (int(meta_data['width']), int(meta_data['height']))
                     index = data['id']
                     sample_id = meta_data['SAMPLE_ID']
-                    assert (index == sample_id)
+                    assert (str(index) == str(sample_id))
                     print("id:", index)
                     print("sample id:", sample_id)
                     # print("data:", data)
