@@ -322,9 +322,12 @@ class GLIPDemo(object):
         for l in labels:
             print("l:", l)
             if l > len(self.entities):
+                print("filtered")
                 continue
             else:
+                print("added")
                 ids.append(l)
+            print("ids:", ids)
         return prediction[ids]
 
 
