@@ -51,6 +51,15 @@ def output_decorator(groundings):
     return res
 
 
+def load_img(pil_image):
+    img_size = pil_image.size
+    # if img_size != (640, 480):
+    #     pil_image = pil_image.resize((640, 480))
+    # convert to BGR format
+    image = np.array(pil_image)[:, :, [2, 1, 0]]
+    return image, img_size
+
+
 def load(path):
     pil_image = Image.open(path).convert("RGB")
     img_size = pil_image.size
@@ -100,7 +109,7 @@ def parse_and_grounding_single_class(img, caption, idx, nlp, output_path):
 
 
 def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_img=False):
-    image, image_size = load(img)
+    image, image_size = load_img(img)
     # image = np.array(img)[:, :, [2, 1, 0]]
     doc = nlp(caption)
     nouns = [t.text.lower() for t in doc.noun_chunks]
