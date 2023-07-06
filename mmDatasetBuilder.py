@@ -165,6 +165,7 @@ if __name__ == "__main__":
             for data, line in zip(tar_dataset, f1):
                 meta_data = json.loads(line)
                 image = data.get("image")
+                print("image")
                 caption = data.get("caption")
                 index = data.get("id")
                 ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, True)

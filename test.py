@@ -1,24 +1,34 @@
-def IOU(lt1_x, lt1_y, rb1_x, rb1_y, lt2_x, lt2_y, rb2_x, rb2_y):
-    """
-    Compute the Intersection over Union of two bounding boxes.
-    """
-    W = min(rb1_x, rb2_x) - max(lt1_x, lt2_x)
-    H = min(rb1_y, rb2_y) - max(lt1_y, lt2_y)
-    if W <= 0 or H <= 0:
-        return 0
-    SA = (rb1_x - lt1_x) * (rb1_y - lt1_y)
-    SB = (rb2_x - lt2_x) * (rb2_y - lt2_y)
-    cross = W * H
-    return cross/(SA + SB - cross)
+import json
+import os
+import webdataset as wds
+
+
+def read_tar(tar_path):
+    return wds.WebDataset(tar_path)
 
 
 if __name__ == "__main__":
-    lt1_x = 1
-    lt1_y = 1
-    rb1_x = 2
-    rb1_y = 2
-    lt2_x = 2
-    lt2_y = 2
-    rb2_x = 3
-    rb2_y = 3
-    print(IOU(lt1_x, lt1_y, rb1_x, rb1_y, lt2_x, lt2_y, rb2_x, rb2_y))
+    # nlp = spacy.load("en_core_web_trf")
+    input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00032"
+    output_path = "/gpfs/gpfs1/zphz/jjh/test_dataset/part-00032"
+    ids = [0, 1, 2, 3, 4, 5]
+    for idx in ids:
+        res = {}
+        tar_filename = "{}.tar".format(3200000+idx)
+        tar_dataset = read_tar(os.path.join(input_path, tar_filename))
+        meta_filename = "{}.meta.jsonl".format(3200000+idx)
+        with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(os.path.join(output_path, meta_filename), 'a', encoding='utf-8') as f2:
+            for data, line in zip(tar_dataset, f1):
+                meta_data = json.loads(line)
+                image = data.get("image")
+                print("image")
+                caption = data.get("caption")
+                index = data.get("id")
+                # ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, True)
+                # meta_data.update(ret)
+                f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
+                break
+        f1.close()
+        f2.close()
+        break
+    print("done")
