@@ -2,6 +2,7 @@ import json
 import os
 import webdataset as wds
 from PIL import Image
+import io
 
 
 def read_tar(tar_path):
@@ -25,11 +26,13 @@ if __name__ == "__main__":
                     size = (int(meta_data['width']), int(meta_data['height']))
                     index = data['id']
                     sample_id = meta_data['SAMPLE_ID']
+                    assert (index == sample_id)
                     print("id:", index)
                     print("sample id:", sample_id)
                     # print("data:", data)
                     image_b = data['jpg']
-                    image = Image.frombytes(mode="RGB", data=image_b, size=size, decoder_name="raw")
+                    image = Image.open(io.BytesIO(image_b)).convert('RGB')
+                    # image = Image.frombytes(mode="RGB", data=image_b, size=size, decoder_name="raw")
                     image.save("test.png", format="png")
                     caption = data['txt']
 
