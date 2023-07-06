@@ -22,7 +22,9 @@ if __name__ == "__main__":
             for data, line in zip(tar_dataset, f1):
                 meta_data = json.loads(line)
                 if meta_data['status'] == "success":
+                    print("origin size: {}, {}".format(meta_data['width'], meta_data['height']))
                     size = (int(meta_data['width']), int(meta_data['height']))
+                    print("size:", size)
                     # print("data:", data)
                     image_b = data['jpg']
                     image = Image.frombytes(mode="RGB", data=image_b, size=size, decoder_name="raw")
