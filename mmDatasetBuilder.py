@@ -36,8 +36,7 @@ def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entit
         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
         entity = new_to_old_entity[new_labels[idx]]
         pos = new_entity_to_id[new_labels[idx]]
-        res[entity].append(top_left+bottom_right)
-        res[entity].append(pos)
+        res[entity].append([top_left+bottom_right, pos])
     return res
 
 
