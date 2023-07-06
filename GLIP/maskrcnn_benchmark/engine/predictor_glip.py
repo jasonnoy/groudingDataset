@@ -318,6 +318,7 @@ class GLIPDemo(object):
     def _post_process(self, prediction, threshold=0.5):
         scores = prediction.get_field("scores")
         labels = prediction.get_field("labels").tolist()
+        print("labels:", labels)
         thresh = scores.clone()
         for i, lb in enumerate(labels):
             if isinstance(self.confidence_threshold, float):
