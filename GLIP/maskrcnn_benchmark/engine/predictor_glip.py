@@ -10,6 +10,7 @@ from torchvision import transforms as T
 import pdb
 from maskrcnn_benchmark.modeling.detector import build_detection_model
 from maskrcnn_benchmark.utils.checkpoint import DetectronCheckpointer
+from maskrcnn_benchmark.utils.dist import get_iou
 from maskrcnn_benchmark.structures.image_list import to_image_list
 from maskrcnn_benchmark.structures.boxlist_ops import boxlist_iou
 from maskrcnn_benchmark.structures.bounding_box import BoxList
@@ -160,6 +161,7 @@ class GLIPDemo(object):
             alpha = 0.0):
         predictions = self.compute_prediction(original_image, original_caption, custom_entity)
         top_predictions = self._post_process(predictions, thresh)
+
         result = original_image.copy()
         result = self.overlay_boxes(result, top_predictions)
         return result, top_predictions
@@ -286,6 +288,24 @@ class GLIPDemo(object):
         _, idx = scores.sort(0, descending=True)
         return predictions[idx]
 
+
+    def filter_iou(self, prediction, threshold=0.9):
+        # predictions in descending order
+        qualified = {}
+        for idx, bbox in enumerate(prediction.bbox):
+            top_left, bottom_right = bbox[:2].tolist(), bbox[2:].tolist()
+            if len(qualified) == 0:
+                qualified[[top_left, bottom_right]] = idx
+                continue
+            add = True
+            for tl, rb in zip(qualified.keys()):
+                if get_iou(top_left, bottom_right, tl, rb) > threshold:
+                    add = False
+                    break
+            if add:
+                qualified[[top_left, bottom_right]] = idx
+        return prediction[qualified.keys()]
+
     def _post_process(self, prediction, threshold=0.5):
         scores = prediction.get_field("scores")
         labels = prediction.get_field("labels").tolist()
@@ -304,7 +324,9 @@ class GLIPDemo(object):
 
         scores = prediction.get_field("scores")
         _, idx = scores.sort(0, descending=True)
-        return prediction[idx]
+        prediction = prediction[idx]
+        prediction = self.filter_iou(prediction)
+        return prediction
 
     def compute_colors_for_labels(self, labels):
         """
