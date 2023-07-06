@@ -24,7 +24,7 @@ if __name__ == "__main__":
                 meta_data = json.loads(line)
                 if meta_data['status'] == "success":
                     size = (int(meta_data['width']), int(meta_data['height']))
-                    index = data['id']
+                    index = data['id'].decode()
                     sample_id = meta_data['SAMPLE_ID']
                     print(index)
                     print(sample_id)
