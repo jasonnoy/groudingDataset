@@ -1,6 +1,7 @@
 import json
 import os
 import webdataset as wds
+from PIL import Image
 
 
 def read_tar(tar_path):
@@ -21,8 +22,9 @@ if __name__ == "__main__":
             for data, line in zip(tar_dataset, f1):
                 meta_data = json.loads(line)
                 # print("data:", data)
-                image = data['jpg']
-                print("image:", image)
+                image_b = data['jpg']
+                image = Image.frombytes(mode="RGB", data=image_b)
+                image.save("test.png", format="png")
                 caption = data['txt']
                 index = data['id']
                 # ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, True)
