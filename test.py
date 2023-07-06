@@ -27,6 +27,8 @@ if __name__ == "__main__":
                     print("size:", size)
                     # print("data:", data)
                     image_b = data['jpg']
+                    image_d = image_b.decode('utf-8')
+                    print(image_d)
                     image = Image.frombytes(mode="RGBA", data=image_b, size=size, decoder_name="raw")
                     image.save("test.png", format="png")
                     caption = data['txt']
