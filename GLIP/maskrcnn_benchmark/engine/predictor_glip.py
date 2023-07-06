@@ -133,13 +133,13 @@ class GLIPDemo(object):
         top_predictions = self._post_process_fixed_thresh(predictions)
         return top_predictions
 
-    def run_on_web_image(self, 
-            original_image, 
-            original_caption, 
-            thresh=0.5,
-            custom_entity = None,
-            alpha = 0.0,
-            color = 255):
+    def run_on_web_image(self,
+                         original_image,
+                         original_caption,
+                         thresh=0.5,
+                         custom_entity=None,
+                         alpha=0.0,
+                         color=255):
         self.color = color
         predictions = self.compute_prediction(original_image, original_caption, custom_entity)
         top_predictions = self._post_process(predictions, thresh)
@@ -152,13 +152,12 @@ class GLIPDemo(object):
             result = self.overlay_mask(result, top_predictions)
         return result, top_predictions
 
-
     def run_on_image(self,
-            original_image,
-            original_caption,
-            thresh=0.5,
-            custom_entity = None,
-            alpha = 0.0):
+                     original_image,
+                     original_caption,
+                     thresh=0.5,
+                     custom_entity=None,
+                     alpha=0.0):
         predictions = self.compute_prediction(original_image, original_caption, custom_entity)
         top_predictions = self._post_process(predictions, thresh)
 
@@ -166,17 +165,16 @@ class GLIPDemo(object):
         result = self.overlay_boxes(result, top_predictions)
         return result, top_predictions
 
-
-    def visualize_with_predictions(self, 
-            original_image, 
-            predictions, 
-            thresh=0.5,
-            alpha=0.0,
-            box_pixel=3,
-            text_size = 1,
-            text_pixel = 2,
-            text_offset = 10,
-            text_offset_original = 4):
+    def visualize_with_predictions(self,
+                                   original_image,
+                                   predictions,
+                                   thresh=0.5,
+                                   alpha=0.0,
+                                   box_pixel=3,
+                                   text_size=1,
+                                   text_pixel=2,
+                                   text_offset=10,
+                                   text_offset_original=4):
         height, width = original_image.shape[:-1]
         predictions = predictions.resize((width, height))
         top_predictions = self._post_process(predictions, thresh)
@@ -185,7 +183,8 @@ class GLIPDemo(object):
         if self.show_mask_heatmaps:
             return self.create_mask_montage(result, top_predictions)
         result = self.overlay_boxes(result, top_predictions, alpha=alpha, box_pixel=box_pixel)
-        result = self.overlay_entity_names(result, top_predictions, text_size=text_size, text_pixel=text_pixel, text_offset = text_offset, text_offset_original = text_offset_original)
+        result = self.overlay_entity_names(result, top_predictions, text_size=text_size, text_pixel=text_pixel,
+                                           text_offset=text_offset, text_offset_original=text_offset_original)
         if self.cfg.MODEL.MASK_ON:
             result = self.overlay_mask(result, top_predictions)
         return result, top_predictions
@@ -202,7 +201,7 @@ class GLIPDemo(object):
             for entity in custom_entities:
                 try:
                     # want no overlays
-                    found = {(0,0)}
+                    found = {(0, 0)}
                     for m in re.finditer(entity, original_caption.lower()):
                         if (m.start(), m.end()) not in found:
                             tokens_positive.append([[m.start(), m.end()]])
@@ -221,7 +220,6 @@ class GLIPDemo(object):
                 tokens_positive = []
                 seperation_tokens = " . "
                 for word in original_caption:
-
                     tokens_positive.append([len(caption_string), len(caption_string) + len(word)])
                     caption_string += word
                     caption_string += seperation_tokens
@@ -288,7 +286,6 @@ class GLIPDemo(object):
         _, idx = scores.sort(0, descending=True)
         return predictions[idx]
 
-
     def filter_iou(self, prediction, threshold=0.9):
         # predictions in descending order
         qualified = {}
@@ -300,7 +297,7 @@ class GLIPDemo(object):
                 qualified[(top_left, bottom_right)] = idx
                 continue
             add = True
-            for tl, rb in zip(qualified.keys()):
+            for tl, rb in *qualified.keys(), :
                 if get_iou(top_left, bottom_right, tl, rb) > threshold:
                     add = False
                     break
@@ -342,7 +339,7 @@ class GLIPDemo(object):
             pass
         return colors
 
-    def overlay_boxes(self, image, predictions, alpha=0.5, box_pixel = 3):
+    def overlay_boxes(self, image, predictions, alpha=0.5, box_pixel=3):
         labels = predictions.get_field("labels")
         boxes = predictions.bbox
 
@@ -371,7 +368,8 @@ class GLIPDemo(object):
 
         return image
 
-    def overlay_entity_names(self, image, predictions, names=None, text_size=1.0, text_pixel=2, text_offset = 10, text_offset_original = 4, custom_labels=None):
+    def overlay_entity_names(self, image, predictions, names=None, text_size=1.0, text_pixel=2, text_offset=10,
+                             text_offset_original=4, custom_labels=None):
         scores = predictions.get_field("scores").tolist()
         labels = predictions.get_field("labels").tolist()
         colors = self.compute_colors_for_labels(predictions.get_field("labels")).tolist()
@@ -405,7 +403,8 @@ class GLIPDemo(object):
                     y -= text_offset
             print("color:", color)
             cv2.putText(
-                image, s, (int(x), int(y)-text_offset_original), cv2.FONT_HERSHEY_SIMPLEX, text_size, color, text_pixel, cv2.LINE_AA
+                image, s, (int(x), int(y) - text_offset_original), cv2.FONT_HERSHEY_SIMPLEX, text_size, color,
+                text_pixel, cv2.LINE_AA
             )
             previous_locations.append((int(x), int(y)))
         return image
