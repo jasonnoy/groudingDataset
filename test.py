@@ -27,7 +27,7 @@ if __name__ == "__main__":
                     print("size:", size)
                     # print("data:", data)
                     image_b = data['jpg']
-                    image = Image.frombytes(mode="RGB", data=image_b, size=size, decoder_name="raw")
+                    image = Image.frombytes(mode="RGBA", data=image_b, size=size, decoder_name="raw")
                     image.save("test.png", format="png")
                     caption = data['txt']
                     index = data['id']
