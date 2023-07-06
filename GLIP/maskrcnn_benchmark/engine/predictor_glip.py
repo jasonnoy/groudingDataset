@@ -350,6 +350,8 @@ class GLIPDemo(object):
         _, idx = scores.sort(0, descending=True)
         prediction = prediction[idx]
         prediction = self.filter_object(prediction)
+        print("new labels")
+        print(prediction.get_field("labels").tolist())
         prediction = self.filter_iou(prediction)
         return prediction
 
