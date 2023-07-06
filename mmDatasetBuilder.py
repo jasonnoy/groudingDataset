@@ -171,7 +171,6 @@ if __name__ == "__main__":
                     assert (str(index) == str(sample_id))
                     image_b = data['jpg']
                     image = Image.open(io.BytesIO(image_b)).convert('RGB')
-                    image.save("test.png", format="png")
                     caption = data['txt']
 
                     ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, True)
