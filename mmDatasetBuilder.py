@@ -117,6 +117,9 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
     # image = np.array(img)[:, :, [2, 1, 0]]
     doc = nlp(caption)
     nouns = [t.text.lower() for t in doc.noun_chunks]
+    if len(nouns) == 0:
+        print("No entities found, using caption as entity, caption: {}".format(caption))
+        nouns = [caption.lower()]
     entity_dict = {}
     new_entities = []
     # to handle duplicates in entities
@@ -127,9 +130,6 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
         else:
             entity_dict[chunk] += 1
             new_entities.append("{}-{}".format(chunk, entity_dict[chunk]))
-    if len(new_entities) == 0:
-        print("No entities found, using caption as entity, caption: {}".format(caption))
-        new_entities = [caption]
     glip_demo.new_entities = new_entities
     new_to_old_entity = dict(zip(new_entities, nouns))
     new_entity_to_id = dict(zip(new_entities, [noun_chunk[0].idx for noun_chunk in doc.noun_chunks]))  # starting position of the first token
