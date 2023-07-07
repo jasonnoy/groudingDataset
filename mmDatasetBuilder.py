@@ -57,12 +57,11 @@ def output_decorator(groundings):
 
 
 def load_img(pil_image):
-    img_size = pil_image.size
     # if img_size != (640, 480):
     #     pil_image = pil_image.resize((640, 480))
     # convert to BGR format
     image = np.array(pil_image)[:, :, [2, 1, 0]]
-    return image, img_size
+    return image
 
 
 def load(path):
@@ -114,9 +113,61 @@ def parse_and_grounding_single_class(img, caption, idx, nlp, output_path):
 
 
 def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_img=False):
-    image, image_size = load_img(img)
+    image = load_img(img)
     # image = np.array(img)[:, :, [2, 1, 0]]
     doc = nlp(caption)
+    nouns = [t.text.lower() for t in doc.noun_chunks]
+    empty_nouns = False
+    if len(nouns) == 0:
+        print("No entities found, using caption as entity, caption: {}".format(caption))
+        nouns = [caption.lower()]
+        empty_nouns = True
+    entity_dict = {}
+    new_entities = []
+    # to handle duplicates in entities
+    for chunk in nouns:
+        if chunk not in entity_dict:
+            new_entities.append(chunk)
+            entity_dict[chunk] = 0
+        else:
+            entity_dict[chunk] += 1
+            new_entities.append("{}-{}".format(chunk, entity_dict[chunk]))
+    glip_demo.new_entities = new_entities
+    new_to_old_entity = dict(zip(new_entities, nouns))
+    if not empty_nouns:
+        new_entity_to_id = dict(zip(new_entities, [noun_chunk[0].idx for noun_chunk in doc.noun_chunks]))  # starting position of the first token
+    else:
+        # use caption as only entity
+        new_entity_to_id = {new_entities[0]: 0}
+    total_groundings = {}
+    result, pred = glip_demo.run_on_image(image, caption, 0, custom_entity=nouns, save_img=save_img)
+
+    new_labels = get_label_names(pred, glip_demo)
+    # print("labels:", labels)
+    if save_img:
+        result = glip_demo.overlay_entity_names(result, pred, custom_labels=new_labels, text_size=0.8, text_offset=-25,
+                                                text_offset_original=-40, text_pixel=2)
+        imsave(result, caption, output_path)
+
+    groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
+    total_groundings.update(groundings)
+    # for noun_chunk in doc.noun_chunks:
+    #     chunk_text = noun_chunk.text
+    #     # if no detection
+    #     if len(pred.bbox) == 0:
+    #         continue
+    #     nouns.append(chunk_text)
+    #     ids.append([t.idx for t in noun_chunk])
+    #     text = " ".join(t.text for t in noun_chunk.subtree)
+    #     texts.append(text)
+
+    res = output_decorator(total_groundings)
+    return res
+
+
+def batch_parse_and_grounding_multi_class(imgs, captions, batch_size, nlp, output_path, save_img=False):
+    images = [load_img(img) for img in imgs]
+    docs = [nlp(caption) for caption in captions]
     nouns = [t.text.lower() for t in doc.noun_chunks]
     empty_nouns = False
     if len(nouns) == 0:
@@ -153,16 +204,6 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
 
     groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
     total_groundings.update(groundings)
-    # for noun_chunk in doc.noun_chunks:
-    #     chunk_text = noun_chunk.text
-    #     # if no detection
-    #     if len(pred.bbox) == 0:
-    #         continue
-    #     nouns.append(chunk_text)
-    #     ids.append([t.idx for t in noun_chunk])
-    #     text = " ".join(t.text for t in noun_chunk.subtree)
-    #     texts.append(text)
-
     res = output_decorator(total_groundings)
     return res
 
@@ -175,7 +216,7 @@ if __name__ == "__main__":
     nlp = spacy.load("en_core_web_trf")
     input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00032"
     output_path = "/gpfs/gpfs1/zphz/jjh/test_dataset/part-00032"
-    ids = [1, 2, 3, 4]
+    ids = [0, 1, 2, 3, 4]
     for idx in ids:
         res = {}
         tar_filename = "{}.tar".format(3200000+idx)
@@ -202,8 +243,6 @@ if __name__ == "__main__":
                 else:
                     meta_data['grounding'] = None
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
-                print("write success...")
-                time.sleep(30)
                 break
         f1.close()
         f2.close()

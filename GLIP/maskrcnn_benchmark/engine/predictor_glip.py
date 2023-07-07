@@ -167,6 +167,23 @@ class GLIPDemo(object):
             result = self.overlay_boxes(result, top_predictions)
         return result, top_predictions
 
+
+    def run_on_images(self,
+                     original_images,
+                     original_captions,
+                     thresh=0.5,
+                     custom_entities=None,
+                     alpha=0.0,
+                     save_img=False):
+        predictions = self.batch_compute_prediction(original_images, original_captions, custom_entities)
+        top_predictions = [self._post_process(prediction, thresh) for prediction in predictions]
+        results = None
+        if save_img:
+            results = [img.copy() for img in original_images]
+            results = [self.overlay_boxes(result, top_prediction) for result,top_prediction in zip(results, top_predictions)]
+        return results, top_predictions
+
+
     def visualize_with_predictions(self,
                                    original_image,
                                    predictions,
@@ -190,6 +207,121 @@ class GLIPDemo(object):
         if self.cfg.MODEL.MASK_ON:
             result = self.overlay_mask(result, top_predictions)
         return result, top_predictions
+
+
+    def batch_compute_prediction(self, original_images, original_captions, custom_entities_list=None):
+        # images
+        image = self.transforms(original_image)
+        image_list = to_image_list(image, self.cfg.DATALOADER.SIZE_DIVISIBILITY)
+        image_list = image_list.to(self.device)
+        if custom_entities:
+            self.entities = custom_entities
+            tokenized = self.tokenizer([original_caption], return_tensors="pt")
+            tokens_positive = []
+            for entity in custom_entities:
+                try:
+                    # want no overlays
+                    found = {(0, 0)}
+                    for m in re.finditer(entity, original_caption.lower()):
+                        if (m.start(), m.end()) not in found:
+                            tokens_positive.append([[m.start(), m.end()]])
+                            found.add((m.start(), m.end()))
+                except:
+                    print("noun entities:", custom_entities)
+                    print("entity:", entity)
+                    print("caption:", original_caption.lower())
+        else:
+            # caption
+            print("Empty entities")
+            if isinstance(original_caption, list):
+                # we directly provided a list of category names
+                self.entities = original_caption
+                caption_string = ""
+                tokens_positive = []
+                seperation_tokens = " . "
+                for word in original_caption:
+                    tokens_positive.append([len(caption_string), len(caption_string) + len(word)])
+                    caption_string += word
+                    caption_string += seperation_tokens
+                original_caption = caption_string
+                tokenized = self.tokenizer([caption_string], return_tensors="pt")
+                tokens_positive = [tokens_positive]
+            else:
+                tokenized = self.tokenizer([original_caption], return_tensors="pt")
+                tokens_positive = self.run_ner(original_caption)
+        # process positive map
+        positive_map = create_positive_map(tokenized, tokens_positive)
+
+        if self.cfg.MODEL.RPN_ARCHITECTURE == "VLDYHEAD":
+            plus = 1
+        else:
+            plus = 0
+
+        positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
+        self.plus = plus
+        self.positive_map_label_to_token = positive_map_label_to_token
+
+        # compute predictions
+        with torch.no_grad():
+            predictions = self.model(image_list, captions=[original_caption], positive_map=positive_map_label_to_token)
+            predictions = [o.to(self.cpu_device) for o in predictions]
+
+        # # always single image is passed at a time
+        prediction = predictions[0]
+
+        # reshape prediction (a BoxList) into the original image size
+        height, width = original_image.shape[:-1]
+        prediction = prediction.resize((width, height))
+
+        return prediction
+
+    def _post_process_fixed_thresh(self, predictions):
+        scores = predictions.get_field("scores")
+        labels = predictions.get_field("labels").tolist()
+        thresh = scores.clone()
+        for i, lb in enumerate(labels):
+            if isinstance(self.confidence_threshold, float):
+                thresh[i] = self.confidence_threshold
+            elif len(self.confidence_threshold) == 1:
+                thresh[i] = self.confidence_threshold[0]
+            else:
+                thresh[i] = self.confidence_threshold[lb - 1]
+        keep = torch.nonzero(scores > thresh).squeeze(1)
+        predictions = predictions[keep]
+
+        scores = predictions.get_field("scores")
+        _, idx = scores.sort(0, descending=True)
+        return predictions[idx]
+
+    def filter_iou(self, prediction, threshold=0.9):
+        # predictions in descending order
+        qualified = {}
+        # labels = prediction.get_field("labels").tolist()
+        # scores = prediction.get_field("scores").tolist()
+        for idx, bbox in enumerate(prediction.bbox):
+            top_left, bottom_right = bbox[:2].tolist(), bbox[2:].tolist()
+            # print("idx:", idx)
+            # print("cur label:", labels[idx])
+            # print("cur score:", scores[idx])
+            # print("top_left:", top_left, "bottom_right:", bottom_right)
+            top_left = (top_left[0], top_left[1])
+            bottom_right = (bottom_right[0], bottom_right[1])
+            if len(qualified) == 0:
+                qualified[(top_left, bottom_right)] = idx
+                continue
+            add = True
+            for tl, rb in *qualified.keys(), :
+                # iou = get_iou(top_left, bottom_right, tl, rb)
+                # print("iou to idx={}:{}".format(idx, iou))
+                if get_iou(top_left, bottom_right, tl, rb) > threshold:
+                    add = False
+                    break
+            if add:
+                qualified[(top_left, bottom_right)] = idx
+        ids = list(qualified.values())
+        # print("keys:", ids)
+        return prediction[ids]
+
 
     def compute_prediction(self, original_image, original_caption, custom_entities=None):
         # image
