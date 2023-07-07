@@ -206,12 +206,8 @@ if __name__ == "__main__":
                 else:
                     meta_data['grounding'] = None
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
-                print("write success...")
-                time.sleep(30)
-                break
         f1.close()
         f2.close()
-        break
     print("done")
 
     # with open(os.path.join(input_path, "meta.json"), 'r', encoding='utf-8') as f1:
