@@ -173,12 +173,14 @@ if __name__ == "__main__":
         tar_filename = "{}.tar".format(3200000+idx)
         tar_dataset = read_tar(os.path.join(input_path, tar_filename))
         meta_filename = "{}.meta.jsonl".format(3200000+idx)
-        count = 0
         print("processing {}".format(3200000+idx))
         with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(os.path.join(output_path, meta_filename), 'a', encoding='utf-8') as f2:
-            for data, line in tqdm(zip(tar_dataset, f1)):
+            # for data, line in tqdm(zip(tar_dataset, f1)):
+            iter_tar = iter(tar_dataset)
+            for i, line in tqdm(enumerate(f1)):
                 meta_data = json.loads(line)
                 if meta_data['status'] == "success":
+                    data = next(iter_tar)
                     size = (int(meta_data['width']), int(meta_data['height']))
                     index = data['id'].decode()
                     sample_id = meta_data['SAMPLE_ID']
@@ -187,10 +189,9 @@ if __name__ == "__main__":
                     image_b = data['jpg']
                     image = Image.open(io.BytesIO(image_b)).convert('RGB')
                     caption = data['txt'].decode()
-                    ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, count < 5)  # save first 5 grounding images for each tar
+                    ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, i < 5)  # save first 5 grounding images for each tar
                     meta_data.update(ret)
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
-                count += 1
         f1.close()
         f2.close()
     print("done")
