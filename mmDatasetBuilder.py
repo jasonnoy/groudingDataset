@@ -132,9 +132,11 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
             new_entities.append("{}-{}".format(chunk, entity_dict[chunk]))
     glip_demo.new_entities = new_entities
     new_to_old_entity = dict(zip(new_entities, nouns))
-    new_entity_to_id = dict(zip(new_entities, [noun_chunk[0].idx for noun_chunk in doc.noun_chunks]))  # starting position of the first token
-    # ids = []
-    # texts = []
+    if len(doc.noun_chunks) > 0:
+        new_entity_to_id = dict(zip(new_entities, [noun_chunk[0].idx for noun_chunk in doc.noun_chunks]))  # starting position of the first token
+    else:
+        # use caption as only entity
+        new_entity_to_id = {new_entities[0]: 0}
     total_groundings = {}
     result, pred = glip_demo.run_on_image(image, caption, 0, custom_entity=nouns, save_img=save_img)
 
