@@ -141,7 +141,7 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
         # use caption as only entity
         new_entity_to_id = {new_entities[0]: 0}
     total_groundings = {}
-    result, pred = glip_demo.run_on_image(image, caption, 0, custom_entity=nouns, save_img=save_img)
+    result, pred = glip_demo.run_on_image(image, caption, 0.55, custom_entity=nouns, save_img=save_img)
 
     new_labels = get_label_names(pred, glip_demo)
     # print("labels:", labels)
@@ -197,8 +197,12 @@ if __name__ == "__main__":
                     image_b = data['jpg']
                     image = Image.open(io.BytesIO(image_b)).convert('RGB')
                     caption = data['txt'].decode()
-                    ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, i < 5)  # save first 5 grounding images for each tar
-                    meta_data.update(ret)
+                    try:
+                        ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, i < 5)  # save first 5 grounding images for each tar
+                        meta_data.update(ret)
+                    except Exception as e:
+                        print("failed with image: {}".format(caption))
+                        meta_data['grounding'] = None
                 else:
                     meta_data['grounding'] = None
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
