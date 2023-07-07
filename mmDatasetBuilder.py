@@ -191,6 +191,8 @@ if __name__ == "__main__":
                     caption = data['txt'].decode()
                     ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, i < 5)  # save first 5 grounding images for each tar
                     meta_data.update(ret)
+                else:
+                    meta_data['grounding'] = None
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
         f1.close()
         f2.close()
