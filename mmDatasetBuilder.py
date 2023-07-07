@@ -9,6 +9,7 @@ from collections import defaultdict
 from tqdm import tqdm
 import io
 import webdataset as wds
+import time
 
 
 def get_label_names(predictions, model):
@@ -174,7 +175,7 @@ if __name__ == "__main__":
     nlp = spacy.load("en_core_web_trf")
     input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00032"
     output_path = "/gpfs/gpfs1/zphz/jjh/test_dataset/part-00032"
-    ids = [0, 1, 2, 3, 4]
+    ids = [1, 2, 3, 4]
     for idx in ids:
         res = {}
         tar_filename = "{}.tar".format(3200000+idx)
@@ -201,8 +202,12 @@ if __name__ == "__main__":
                 else:
                     meta_data['grounding'] = None
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
+                print("write success...")
+                time.sleep(30)
+                break
         f1.close()
         f2.close()
+        break
     print("done")
 
     # with open(os.path.join(input_path, "meta.json"), 'r', encoding='utf-8') as f1:
