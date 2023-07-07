@@ -8,7 +8,7 @@ import re
 import torch
 from tqdm import tqdm
 from collections import defaultdict
-
+import io
 from maskrcnn_benchmark.data.datasets.evaluation import evaluate, im_detect_bbox_aug
 from ..utils.comm import is_main_process
 from ..utils.comm import all_gather
@@ -24,18 +24,22 @@ def imshow(img, file_name = "tmp.jpg"):
     plt.axis("off")
     #plt.figtext(0.5, 0.09, "test", wrap=True, horizontalalignment='center', fontsize=20)
     plt.savefig(file_name)
-def load(url_or_file_name):
-    try:
-        response = requests.get(url_or_file_name)
-    except:
-        response = None
-    if response is None:
-        pil_image = Image.open(url_or_file_name).convert("RGB")
-    else:
-        pil_image = Image.open(BytesIO(response.content)).convert("RGB")
+def load(image_b):
+    pil_image = Image.open(io.BytesIO(image_b)).convert('RGB')
     # convert to BGR format
     image = np.array(pil_image)[:, :, [2, 1, 0]]
     return image
+
+
+def inference_with_entities(
+        model,
+        data_loader,
+        device="cuda",
+        cfg=None,
+        output_folder=None,
+        threshold=0.5
+):
+
 def inference_default(
         model,
         data_loader,
