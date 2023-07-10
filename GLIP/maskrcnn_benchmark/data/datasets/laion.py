@@ -74,16 +74,20 @@ class Laion(data.Dataset):
         self.root = root
         self.transform = transforms
         self.nlp = nlp
-        wds_ds = wds.WebDataset(os.path.join(root, "{}.tar".format(index)))
-        self.samples = [[d['id'], d['jpg'], d['txt']] for d in wds_ds]
         self.rpn_architecture = rpn_architecture
+
+        wds_ds = wds.WebDataset(os.path.join(root, "{}.tar".format(index)))
+        self.samples = [[d['id'].decode(), pil_loader(d['jpg']), d['txt'].decode()] for d in wds_ds]
+        images = self.samples[:, 1]
+        if self.transform is not None:
+            images = [self.transform(image) for image in images]
+        self.samples[:, 1] = to_image_list(images, size_divisible=32).tensors
 
     def __getitem__(self, index):
         idx, image, caption = self.samples[index]
         # print("id:", idx)
         # print("caption:", caption)
-        image = pil_loader(image)
-        caption = caption.decode()
+        # image = pil_loader(image)
         doc = self.nlp(caption)
         nouns = [t.text.lower() for t in doc.noun_chunks]
         empty_nouns = False
@@ -127,13 +131,6 @@ class Laion(data.Dataset):
         else:
             plus = 0
         positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
-
-        if self.transform is not None:
-            print("transform")
-            image = self.transform(image)
-
-        image = to_image_list(image, size_divisible=32).tensors
-
         return image, new_entities, positive_map_label_to_token, new_to_old_entity, new_entity_to_id
 
     def __len__(self):
