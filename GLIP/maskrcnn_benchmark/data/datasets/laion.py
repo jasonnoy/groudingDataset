@@ -132,7 +132,7 @@ class Laion(data.Dataset):
             print("transform")
             image = self.transform(image)
 
-        image = to_image_list(image, size_divisible=32)
+        image = to_image_list(image, size_divisible=32).tensors
 
         return image, new_entities, positive_map_label_to_token, new_to_old_entity, new_entity_to_id
 
