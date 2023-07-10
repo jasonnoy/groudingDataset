@@ -207,7 +207,7 @@ if __name__ == "__main__":
         # tar_filename = "{}.tar".format(part_index+idx)
         # tar_dataset = read_tar(os.path.join(input_path, tar_filename))
         tokenizer = AutoTokenizer.from_pretrained("/gpfs/gpfs1/zphz/official_pretrains/hugging_face/bert-base-uncased")
-        laion_dataset = Laion("{}.tar".format(part_index+idx), input_path, nlp, tokenizer)
+        laion_dataset = Laion(str(part_index+idx), input_path, nlp, tokenizer)
         print(laion_dataset[:10])
         meta_filename = "{}.meta.jsonl".format(part_index+idx)
         print("processing {}".format(part_index+idx))
