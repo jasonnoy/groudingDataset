@@ -67,6 +67,41 @@ class BatchCollator(object):
         return images, targets, img_ids, positive_map, positive_map_eval, greenlight_map
 
 
+class BatchGroundingCollator(object):
+    """
+    From a list of samples from the dataset,
+    returns the batched images and targets.
+    This should be passed to the DataLoader
+    """
+
+    def __init__(self, size_divisible=0):
+        self.size_divisible = size_divisible
+
+    def __call__(self, batch):
+        transposed_batch = list(zip(*batch))
+
+        images = to_image_list(transposed_batch[0], self.size_divisible)
+        entities = transposed_batch[1]
+        img_ids = transposed_batch[2]
+        positive_maps = transposed_batch[3]
+        new_to_old_entity_list = transposed_batch[4]
+        new_entity_to_id_list = transposed_batch[5]
+
+        # compute batched positive map
+        max_len = max([v.get_field("positive_map").shape[1] for v in positive_maps])
+        nb_boxes = sum([v.get_field("positive_map").shape[0] for v in positive_maps])
+        batched_pos_map = torch.zeros((nb_boxes, max_len), dtype=torch.bool)
+        cur_count = 0
+        for cur_pos in positive_maps:
+            batched_pos_map[cur_count: cur_count + len(cur_pos), : cur_pos.shape[1]] = cur_pos
+            cur_count += len(cur_pos)
+
+        assert cur_count == len(batched_pos_map)
+        positive_map = batched_pos_map.float()
+
+        return images, entities, img_ids, positive_map, new_to_old_entity_list, new_entity_to_id_list
+
+
 class BBoxAugCollator(object):
     """
     From a list of samples from the dataset,

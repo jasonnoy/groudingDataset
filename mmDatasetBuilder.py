@@ -1,5 +1,6 @@
 import torch.utils.data
 from GLIP.maskrcnn_benchmark.data.datasets.laion import Laion
+from GLIP.maskrcnn_benchmark.data.collate_batch import BatchGroundingCollator
 from GLIP import *
 import numpy as np
 from PIL import Image
@@ -169,7 +170,7 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
 
 
 def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path, save_img=False):
-    dataloader = torch.utils.data.DataLoader(laion_dataset, shuffle=False, num_workers=4, batch_size=batch_size)
+    dataloader = torch.utils.data.DataLoader(laion_dataset, shuffle=False, num_workers=4, batch_size=batch_size, collate_fn=BatchGroundingCollator())
     total_groundings = []
     for batch in tqdm(dataloader):
         # print("batch:", batch)

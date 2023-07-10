@@ -12,6 +12,7 @@ from GLIP.maskrcnn_benchmark.structures.image_list import to_image_list
 
 def pil_loader(image_b):
     pil_image = Image.open(io.BytesIO(image_b)).convert('RGB')
+    pil_image = pil_image.resize((800))
     # convert to BGR format
     image = np.array(pil_image)[:, :, [2, 1, 0]]
     return image
@@ -79,21 +80,23 @@ class Laion(data.Dataset):
 
         wds_ds = wds.WebDataset(os.path.join(root, "{}.tar".format(index)))
         self.samples = [[d['id'].decode(), pil_loader(d['jpg']), d['txt'].decode()] for d in wds_ds]
-        if self.transform is None:
-            images = [s[1] for s in self.samples]
-        else:
-            images = [self.transform(s[1]) for s in self.samples]
-        tensors = []
-        print("Processing dataset...")
-        for i in tqdm(range(0, len(self.samples), batch_size)):
-            batch_images = images[i: i+batch_size]
-            tensors.extend(to_image_list(batch_images, size_divisible=32).tensors)
-        assert (len(tensors) == len(self.samples))
-        for i in range(len(tensors)):
-            self.samples[i][1] = tensors[i]
+        # if self.transform is None:
+        #     images = [s[1] for s in self.samples]
+        # else:
+        #     images = [self.transform(s[1]) for s in self.samples]
+        # tensors = []
+        # print("Processing dataset...")
+        # for i in tqdm(range(0, len(self.samples), batch_size)):
+        #     batch_images = images[i: i+batch_size]
+        #     tensors.extend(to_image_list(batch_images, size_divisible=32).tensors)
+        # assert (len(tensors) == len(self.samples))
+        # for i in range(len(tensors)):
+        #     self.samples[i][1] = tensors[i]
 
     def __getitem__(self, index):
         idx, image, caption = self.samples[index]
+        if self.transform is not None:
+            image = self.transform(image)
         doc = self.nlp(caption)
         nouns = [t.text.lower() for t in doc.noun_chunks]
         empty_nouns = False
