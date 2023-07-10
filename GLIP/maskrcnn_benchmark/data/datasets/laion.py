@@ -78,7 +78,10 @@ class Laion(data.Dataset):
 
         wds_ds = wds.WebDataset(os.path.join(root, "{}.tar".format(index)))
         self.samples = [[d['id'].decode(), pil_loader(d['jpg']), d['txt'].decode()] for d in wds_ds]
-        images = [s[1] for s in self.samples]
+        if self.transform is None:
+            images = [s[1] for s in self.samples]
+        else:
+            images = [self.transform(s[1]) for s in self.samples]
         tensors = []
         for i in range(0, len(self.samples), batch_size):
             batch_images = images[i: i+batch_size]
@@ -89,12 +92,6 @@ class Laion(data.Dataset):
 
     def __getitem__(self, index):
         idx, image, caption = self.samples[index]
-        # print("id:", idx)
-        # print("caption:", caption)
-        # image = pil_loader(image)
-        if self.transform is not None:
-            image = self.transform(image)
-        # self.samples[:, 1] = to_image_list(images, size_divisible=32).tensors
         doc = self.nlp(caption)
         nouns = [t.text.lower() for t in doc.noun_chunks]
         empty_nouns = False
