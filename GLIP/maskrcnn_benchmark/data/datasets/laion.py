@@ -132,3 +132,6 @@ class Laion(data.Dataset):
             image = self.transform(image)
 
         return image, new_entities, positive_map_label_to_token, new_to_old_entity, new_entity_to_id
+
+    def __len__(self):
+        return len(self.samples)
