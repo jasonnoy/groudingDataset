@@ -198,7 +198,7 @@ class GeneralizedVLRCNN(nn.Module):
         images = to_image_list(images)
         # batch_size = images.tensors.shape[0]
         device = images.tensors.device
-
+        print("device:", device)
 
         if self.cfg.GLIPKNOW.PARALLEL_LANGUAGE_INPUT:
             language_dict_features, positive_map = self._forward_language_parallel(
@@ -281,6 +281,7 @@ class GeneralizedVLRCNN(nn.Module):
                     null_loss += 0.0 * param.sum()
                 proposal_losses = {('rpn_null_loss', null_loss)}
         else:
+            print("vl_rcnn image size:", len(images))
             proposals, proposal_losses, fused_visual_features = self.rpn(images, visual_features, targets, language_dict_features, positive_map,
                                               captions, swint_feature_c4)
         print("proposals:", proposals)

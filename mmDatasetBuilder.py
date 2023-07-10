@@ -1,3 +1,5 @@
+import torch.utils.data
+
 from GLIP import *
 import numpy as np
 from PIL import Image
@@ -165,47 +167,23 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
     return res
 
 
-def batch_parse_and_grounding_multi_class(imgs, captions, batch_size, nlp, output_path, save_img=False):
-    images = [load_img(img) for img in imgs]
-    docs = [nlp(caption) for caption in captions]
-    nouns = [t.text.lower() for t in doc.noun_chunks]
-    empty_nouns = False
-    if len(nouns) == 0:
-        print("No entities found, using caption as entity, caption: {}".format(caption))
-        nouns = [caption.lower()]
-        empty_nouns = True
-    entity_dict = {}
-    new_entities = []
-    # to handle duplicates in entities
-    for chunk in nouns:
-        if chunk not in entity_dict:
-            new_entities.append(chunk)
-            entity_dict[chunk] = 0
-        else:
-            entity_dict[chunk] += 1
-            new_entities.append("{}-{}".format(chunk, entity_dict[chunk]))
-    glip_demo.new_entities = new_entities
-    new_to_old_entity = dict(zip(new_entities, nouns))
-    if not empty_nouns:
-        new_entity_to_id = dict(zip(new_entities, [noun_chunk[0].idx for noun_chunk in doc.noun_chunks]))  # starting position of the first token
-    else:
-        # use caption as only entity
-        new_entity_to_id = {new_entities[0]: 0}
-    total_groundings = {}
-    result, pred = glip_demo.run_on_image(image, caption, 0, custom_entity=nouns, save_img=save_img)
-
-    new_labels = get_label_names(pred, glip_demo)
-    # print("labels:", labels)
-    if save_img:
-        image_size = pred.size
-        result = glip_demo.overlay_entity_names(result, pred, custom_labels=new_labels, text_size=0.8, text_offset=-25,
-                                                text_offset_original=-40, text_pixel=2)
-        imsave(result, caption, output_path)
-
-    groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
-    total_groundings.update(groundings)
-    res = output_decorator(total_groundings)
-    return res
+def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path, save_img=False):
+    dataloader = torch.utils.data.DataLoader(laion_dataset, shuffle=False, num_workers=4, batch_size=batch_size)
+    total_groundings = []
+    for batch in tqdm(dataloader):
+        results, preds = glip_demo.run_on_batched_images(*batch[:3], thresh=0.55, save_img=save_img)
+        new_to_old_entities = batch[3]
+        new_entity_to_ids = batch[4]
+        for result, pred, new_entity_to_id, new_to_old_entity in zip(results, preds, new_entity_to_ids, new_to_old_entities):
+            new_labels = get_label_names(pred, glip_demo)
+            if save_img:
+                result = glip_demo.overlay_entity_names(result, pred, custom_labels=new_labels, text_size=0.8,
+                                                        text_offset=-25,
+                                                        text_offset_original=-40, text_pixel=2)
+                imsave(result, caption, output_path)
+            groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
+            total_groundings.append(output_decorator(groundings))
+    return total_groundings
 
 
 def read_tar(tar_path):
@@ -214,8 +192,10 @@ def read_tar(tar_path):
 
 if __name__ == "__main__":
     nlp = spacy.load("en_core_web_trf")
-    input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00032"
-    output_path = "/gpfs/gpfs1/zphz/jjh/test_dataset/part-00032"
+    input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00033"
+    output_path = "/gpfs/gpfs1/zphz/jjh/test_dataset/part-00033"
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
     ids = [0, 1, 2, 3, 4]
     for idx in ids:
         res = {}
@@ -223,6 +203,10 @@ if __name__ == "__main__":
         tar_dataset = read_tar(os.path.join(input_path, tar_filename))
         meta_filename = "{}.meta.jsonl".format(3200000+idx)
         print("processing {}".format(3200000+idx))
+        groundings = batch_parse_and_grounding_multi_class(tar_dataset, batch_size=10, save_img=False, output_path=output_path)
+        print("grounding 0: ", groundings[0])
+        print("groundings size:", len(groundings))
+        break
         with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(os.path.join(output_path, meta_filename), 'a', encoding='utf-8') as f2:
             # for data, line in tqdm(zip(tar_dataset, f1)):
             iter_tar = iter(tar_dataset)
@@ -248,22 +232,3 @@ if __name__ == "__main__":
         f2.close()
         break
     print("done")
-
-    # with open(os.path.join(input_path, "meta.json"), 'r', encoding='utf-8') as f1:
-    #     meta = json.loads(f1.read())
-    # f1.close()
-    # for filename in tqdm(os.listdir(input_path)):
-    #     if not filename.endswith(".png"):
-    #         continue
-    #     idx = filename.split(".")[0]
-    #     output_path = os.path.join("output_1", str(idx))
-    #     if not os.path.exists(output_path):
-    #         os.mkdir(output_path)
-    #     caption = meta[str(idx)]['caption']
-    #     # ret = parse_and_grounding_single_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path)
-    #     ret = parse_and_grounding_multi_class(os.path.join(input_path, filename), caption, str(idx), nlp, output_path, True)
-    #
-    #     res.append(ret)
-    # with open("output_1/test.json", "w", encoding='utf-8') as f2:
-    #     f2.write(json.dumps(res))
-    # f2.close()

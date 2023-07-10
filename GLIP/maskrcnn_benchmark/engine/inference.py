@@ -30,15 +30,15 @@ def load(image_b):
     image = np.array(pil_image)[:, :, [2, 1, 0]]
     return image
 
-
-def inference_with_entities(
-        model,
-        data_loader,
-        device="cuda",
-        cfg=None,
-        output_folder=None,
-        threshold=0.5
-):
+#
+# def inference_with_entities(
+#         model,
+#         data_loader,
+#         device="cuda",
+#         cfg=None,
+#         output_folder=None,
+#         threshold=0.5
+# ):
 
 def inference_default(
         model,

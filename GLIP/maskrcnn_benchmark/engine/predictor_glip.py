@@ -172,8 +172,6 @@ class GLIPDemo(object):
                               new_entities,
                               positive_map_label_to_tokens,
                               thresh=0.5,
-                              custom_entities=None,
-                              alpha=0.0,
                               save_img=False):
         predictions = self.model(images, new_entities, positive_map_label_to_tokens)
         top_predictions = [self._post_process(prediction, thresh) for prediction in predictions]
