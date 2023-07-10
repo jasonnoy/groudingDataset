@@ -27,6 +27,7 @@ class ImageList(object):
 
 
 def to_image_list(tensors, size_divisible=0):
+    print(type(tensors))
     """
     tensors can be an ImageList, a torch.Tensor or
     an iterable of Tensors. It can't be a numpy array.

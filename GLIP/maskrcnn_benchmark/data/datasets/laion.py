@@ -12,8 +12,8 @@ from GLIP.maskrcnn_benchmark.structures.image_list import to_image_list
 def pil_loader(image_b):
     pil_image = Image.open(io.BytesIO(image_b)).convert('RGB')
     # convert to BGR format
-    # image = np.array(pil_image)[:, :, [2, 1, 0]]
-    return pil_image
+    image = np.array(pil_image)[:, :, [2, 1, 0]]
+    return image
 
 
 def create_positive_map(tokenized, tokens_positive):
@@ -129,6 +129,7 @@ class Laion(data.Dataset):
         positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
 
         if self.transform is not None:
+            print("transform")
             image = self.transform(image)
 
         image = to_image_list(image, size_divisible=32)
