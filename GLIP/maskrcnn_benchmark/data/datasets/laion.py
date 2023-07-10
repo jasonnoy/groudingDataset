@@ -12,7 +12,7 @@ from GLIP.maskrcnn_benchmark.structures.image_list import to_image_list
 
 def pil_loader(image_b):
     pil_image = Image.open(io.BytesIO(image_b)).convert('RGB')
-    pil_image = pil_image.resize((800))
+    # pil_image = pil_image.resize((800))
     # convert to BGR format
     image = np.array(pil_image)[:, :, [2, 1, 0]]
     return image
