@@ -99,7 +99,7 @@ class BatchGroundingCollator(object):
         assert cur_count == len(batched_pos_map)
         positive_map = batched_pos_map.float()
 
-        return images, entities, img_ids, positive_map, new_to_old_entity_list, new_entity_to_id_list
+        return images, entities, positive_map, new_to_old_entity_list, new_entity_to_id_list
 
 
 class BBoxAugCollator(object):
