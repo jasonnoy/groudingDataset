@@ -1,7 +1,6 @@
 import os
 import io
 import numpy as np
-import json
 from PIL import Image
 import webdataset as wds
 import torch.utils.data as data
