@@ -87,8 +87,8 @@ class BatchGroundingCollator(object):
         new_entity_to_id_list = transposed_batch[4]
 
         # compute batched positive map
-        max_len = max([v.get_field("positive_map").shape[1] for v in positive_maps])
-        nb_boxes = sum([v.get_field("positive_map").shape[0] for v in positive_maps])
+        max_len = max([v.shape[1] for v in positive_maps])
+        nb_boxes = sum([v.shape[0] for v in positive_maps])
         batched_pos_map = torch.zeros((nb_boxes, max_len), dtype=torch.bool)
         cur_count = 0
         for cur_pos in positive_maps:
