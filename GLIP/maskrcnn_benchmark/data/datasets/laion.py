@@ -78,8 +78,7 @@ class Laion(data.Dataset):
 
         wds_ds = wds.WebDataset(os.path.join(root, "{}.tar".format(index)))
         self.samples = [[d['id'].decode(), pil_loader(d['jpg']), d['txt'].decode()] for d in wds_ds]
-        self.samples = np.array(self.samples)
-        images = self.samples[:, 1]
+        images = [s[1] for s in self.samples]
         if self.transform is not None:
             images = [self.transform(image) for image in images]
         self.samples[:, 1] = to_image_list(images, size_divisible=32).tensors
