@@ -175,7 +175,7 @@ if __name__ == "__main__":
     nlp = spacy.load("en_core_web_trf")
     input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00032"
     output_path = "/gpfs/gpfs1/zphz/jjh/test_dataset/part-00032"
-    ids = list(range(5, 200))
+    ids = list(range(51, 100))
     for idx in ids:
         res = {}
         tar_filename = "{}.tar".format(3200000+idx)
