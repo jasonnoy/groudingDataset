@@ -82,10 +82,9 @@ class BatchGroundingCollator(object):
 
         images = to_image_list(transposed_batch[0], self.size_divisible)
         entities = transposed_batch[1]
-        img_ids = transposed_batch[2]
-        positive_maps = transposed_batch[3]
-        new_to_old_entity_list = transposed_batch[4]
-        new_entity_to_id_list = transposed_batch[5]
+        positive_maps = transposed_batch[2]
+        new_to_old_entity_list = transposed_batch[3]
+        new_entity_to_id_list = transposed_batch[4]
 
         # compute batched positive map
         max_len = max([v.get_field("positive_map").shape[1] for v in positive_maps])
