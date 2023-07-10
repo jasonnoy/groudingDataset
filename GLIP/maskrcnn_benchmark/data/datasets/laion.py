@@ -69,7 +69,7 @@ class Laion(data.Dataset):
             and returns a transformed version. E.g, ``transforms.ToTensor``
     """
 
-    def __init__(self, index, root, nlp, tokenizer, transforms=None, rpn_architecture="VLDYHEAD"):
+    def __init__(self, index, root, nlp, tokenizer, transforms=None, rpn_architecture="VLDYHEAD", batch_size=100):
         self.tokenizer = tokenizer
         self.root = root
         self.transform = transforms
@@ -78,6 +78,13 @@ class Laion(data.Dataset):
 
         wds_ds = wds.WebDataset(os.path.join(root, "{}.tar".format(index)))
         self.samples = [[d['id'].decode(), pil_loader(d['jpg']), d['txt'].decode()] for d in wds_ds]
+        self.samples = np.array(self.samples)
+        images = self.samples[:, 1]
+        tensors = []
+        for i in range(0, len(self.samples), batch_size):
+            batch_images = images[i: i+batch_size]
+            tensors.extend(to_image_list(batch_images, size_divisible=32).tensors)
+        self.samples[:, 1] = tensors
 
     def __getitem__(self, index):
         idx, image, caption = self.samples[index]
