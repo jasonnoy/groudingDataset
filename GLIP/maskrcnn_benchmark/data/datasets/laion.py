@@ -73,8 +73,9 @@ class Laion(data.Dataset):
         self.tokenizer = tokenizer
         self.root = root
         self.transform = transforms
-        self.samples = wds.WebDataset(os.path.join(root, "{}.tar".format(index)))
         self.nlp = nlp
+        wds_ds = wds.WebDataset(os.path.join(root, "{}.tar".format(index)))
+        self.samples = [(d['id'], d['jpg'], d['txt']) for d in wds_ds]
 
     def __getitem__(self, index):
         idx, image, caption = self.samples[index]
