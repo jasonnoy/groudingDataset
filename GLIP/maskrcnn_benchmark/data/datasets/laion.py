@@ -139,8 +139,8 @@ class Laion(data.Dataset):
             plus = 1
         else:
             plus = 0
-        positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
-        return image, new_entities, positive_map_label_to_token, new_to_old_entity, new_entity_to_id
+        # positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
+        return image, new_entities, positive_map, new_to_old_entity, new_entity_to_id
 
     def __len__(self):
         return len(self.samples)
