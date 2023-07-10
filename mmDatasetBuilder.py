@@ -197,12 +197,13 @@ if __name__ == "__main__":
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     ids = [0, 1, 2, 3, 4]
+    part_index = 3200000
     for idx in ids:
         res = {}
-        tar_filename = "{}.tar".format(3200000+idx)
+        tar_filename = "{}.tar".format(part_index+idx)
         tar_dataset = read_tar(os.path.join(input_path, tar_filename))
-        meta_filename = "{}.meta.jsonl".format(3200000+idx)
-        print("processing {}".format(3200000+idx))
+        meta_filename = "{}.meta.jsonl".format(part_index+idx)
+        print("processing {}".format(part_index+idx))
         groundings = batch_parse_and_grounding_multi_class(tar_dataset, batch_size=10, save_img=False, output_path=output_path)
         print("grounding 0: ", groundings[0])
         print("groundings size:", len(groundings))
