@@ -78,7 +78,9 @@ class Laion(data.Dataset):
         self.samples = [(d['id'], d['jpg'], d['txt']) for d in wds_ds]
 
     def __getitem__(self, index):
-        idx, image, caption = self.samples[index]
+        print("sample:", self.samples[index])
+        idx, image, caption = zip(*self.samples[index])
+        print("id:", id)
         image = pil_loader(image)
         caption = caption.decode()
         doc = self.nlp(caption)
