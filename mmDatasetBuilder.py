@@ -209,7 +209,9 @@ if __name__ == "__main__":
         tokenizer = AutoTokenizer.from_pretrained("/gpfs/gpfs1/zphz/official_pretrains/hugging_face/bert-base-uncased")
         batch_size = 10
         laion_dataset = Laion(str(part_index+idx), input_path, nlp, tokenizer, transforms=glip_demo.transforms)
-        print(laion_dataset[0])
+        print(laion_dataset[0][0].shape)
+        print(laion_dataset[1][0].shape)
+        print(laion_dataset[2][0].shape)
         meta_filename = "{}.meta.jsonl".format(part_index+idx)
         print("processing {}".format(part_index+idx))
         groundings = batch_parse_and_grounding_multi_class(laion_dataset, batch_size=batch_size, save_img=False, output_path=output_path)

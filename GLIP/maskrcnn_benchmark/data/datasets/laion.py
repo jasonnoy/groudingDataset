@@ -5,6 +5,7 @@ from PIL import Image
 import webdataset as wds
 import torch.utils.data as data
 import re
+from tqdm import tqdm
 import torch
 from GLIP.maskrcnn_benchmark.structures.image_list import to_image_list
 
@@ -83,7 +84,8 @@ class Laion(data.Dataset):
         else:
             images = [self.transform(s[1]) for s in self.samples]
         tensors = []
-        for i in range(0, len(self.samples), batch_size):
+        print("Processing dataset...")
+        for i in tqdm(range(0, len(self.samples), batch_size)):
             batch_images = images[i: i+batch_size]
             tensors.extend(to_image_list(batch_images, size_divisible=32).tensors)
         assert (len(tensors) == len(self.samples))
