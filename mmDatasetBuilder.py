@@ -197,7 +197,7 @@ if __name__ == "__main__":
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     ids = [0, 1, 2, 3, 4]
-    part_index = 3200000
+    part_index = 3300000
     for idx in ids:
         res = {}
         tar_filename = "{}.tar".format(part_index+idx)
