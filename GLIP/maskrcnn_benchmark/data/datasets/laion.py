@@ -7,6 +7,7 @@ import webdataset as wds
 import torch.utils.data as data
 import re
 import torch
+from GLIP.maskrcnn_benchmark.structures.image_list import to_image_list
 
 
 def pil_loader(image_b):
@@ -130,6 +131,8 @@ class Laion(data.Dataset):
 
         if self.transform is not None:
             image = self.transform(image)
+
+        image = to_image_list(image, size_divisible=32)
 
         return image, new_entities, positive_map_label_to_token, new_to_old_entity, new_entity_to_id
 
