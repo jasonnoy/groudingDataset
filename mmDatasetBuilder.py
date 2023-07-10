@@ -1,5 +1,5 @@
 import torch.utils.data
-
+from GLIP.maskrcnn_benchmark.data.datasets.laion import Laion
 from GLIP import *
 import numpy as np
 from PIL import Image
@@ -203,12 +203,13 @@ if __name__ == "__main__":
     part_index = 3300000
     for idx in ids:
         res = {}
-        tar_filename = "{}.tar".format(part_index+idx)
-        tar_dataset = read_tar(os.path.join(input_path, tar_filename))
-        print(tar_dataset[:10])
+        # tar_filename = "{}.tar".format(part_index+idx)
+        # tar_dataset = read_tar(os.path.join(input_path, tar_filename))
+        laion_dataset = Laion("{}.tar".format(part_index+idx), input_path, nlp)
+        print(laion_dataset[:10])
         meta_filename = "{}.meta.jsonl".format(part_index+idx)
         print("processing {}".format(part_index+idx))
-        groundings = batch_parse_and_grounding_multi_class(tar_dataset, batch_size=10, save_img=False, output_path=output_path)
+        groundings = batch_parse_and_grounding_multi_class(laion_dataset, batch_size=10, save_img=False, output_path=output_path)
         print("grounding 0: ", groundings[0])
         print("groundings size:", len(groundings))
         break
