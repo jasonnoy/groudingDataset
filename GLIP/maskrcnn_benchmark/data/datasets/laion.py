@@ -76,6 +76,7 @@ class Laion(data.Dataset):
         self.nlp = nlp
         wds_ds = wds.WebDataset(os.path.join(root, "{}.tar".format(index)))
         self.samples = [[d['id'], d['jpg'], d['txt']] for d in wds_ds]
+        self.rpn_architecture = rpn_architecture
 
     def __getitem__(self, index):
         idx, image, caption = self.samples[index]
@@ -121,7 +122,7 @@ class Laion(data.Dataset):
         # process positive map
         positive_map = create_positive_map(tokenized, tokens_positive)
 
-        if self.cfg.MODEL.RPN_ARCHITECTURE == "VLDYHEAD":
+        if self.rpn_architecture == "VLDYHEAD":
             plus = 1
         else:
             plus = 0
