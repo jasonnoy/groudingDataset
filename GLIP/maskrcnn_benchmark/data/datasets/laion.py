@@ -11,7 +11,7 @@ from GLIP.maskrcnn_benchmark.structures.image_list import to_image_list
 
 
 SOLUTION = "480p"
-RESOLUTIONS = {"240p": [320, 240], "480p": [720, 480], "720p": [1280, 720], "1080p": [1920, 1080], "2K": [2560, 1440], "4K": [4096, 2160]}
+RESOLUTIONS = {"240p": [240, 320], "480p": [480, 720], "720p": [720, 1280], "1080p": [1080, 1920], "2K": [1440, 2560], "4K": [2160, 4096]}
 TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
 FACTOR_DICT = {}
 mid = int(math.sqrt(TOTAL_PIXEL))
@@ -26,8 +26,7 @@ def pil_loader(image_b):
     pil_image = Image.open(io.BytesIO(image_b)).convert('RGB')
     # pil_image = pil_image.resize((800))
     # convert to BGR format
-    image = np.array(pil_image)[:, :, [2, 1, 0]]
-    return image
+    return pil_image
 
 
 def create_positive_map(tokenized, tokens_positive):
@@ -120,11 +119,15 @@ class Laion(data.Dataset):
 
     def __getitem__(self, index):
         idx, image, caption = self.samples[index]
-        image_size = image.shape[-2:]
-        image_resize_shape = compute_image_shape(image_size)
+        image_shape = image.shape[:2]
+        image_resize_shape = compute_image_shape(image_shape)
+        print("origin shape:", image_shape)
+        print("new shape:", image_resize_shape)
+        image = image.resize(image_resize_shape)
+        image = np.array(image)[:, :, [2, 1, 0]]
 
         if self.transform is not None:
-            image = self.transform(image, image_resize_shape)
+            image = self.transform(image)
         doc = self.nlp(caption)
         nouns = [t.text.lower() for t in doc.noun_chunks]
         empty_nouns = False

@@ -58,7 +58,7 @@ class GLIPDemo(object):
 
         self.tokenizer = self.build_tokenizer()
 
-    def build_transform(self, image_resize_shape):
+    def build_transform(self):
         """
         Creates a basic transformation that was used to train the models
         """
@@ -80,7 +80,6 @@ class GLIPDemo(object):
         transform = T.Compose(
             [
                 T.ToPILImage(),
-                T.Resize(self.min_image_size) if self.min_image_size is not None else lambda x: x,
                 T.ToTensor(),
                 to_bgr_transform,
                 normalize_transform,
