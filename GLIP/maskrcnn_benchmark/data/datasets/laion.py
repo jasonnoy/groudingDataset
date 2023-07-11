@@ -101,7 +101,7 @@ class Laion(data.Dataset):
             and returns a transformed version. E.g, ``transforms.ToTensor``
     """
 
-    def __init__(self, index, root, nlp, tokenizer, transforms=None, rpn_architecture="VLDYHEAD", batch_size=100):
+    def __init__(self, index, root, nlp, tokenizer, transforms=None, rpn_architecture="VLDYHEAD"):
         self.tokenizer = tokenizer
         self.root = root
         self.transform = transforms
