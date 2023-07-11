@@ -173,10 +173,8 @@ class GLIPDemo(object):
                               thresh=0.5,
                               save_img=False):
         images = to_image_list(images)
-        images.to(self.device)
-        print("predictor device:", self.device)
+        images = images.to(self.device)
         print("images device:", images.tensors.device)
-        print("run_on_batched_images captions:", captions)
         predictions = self.model(images, captions, positive_map_label_to_tokens)
         top_predictions = [self._post_process(prediction, thresh) for prediction in predictions]
         results = None
