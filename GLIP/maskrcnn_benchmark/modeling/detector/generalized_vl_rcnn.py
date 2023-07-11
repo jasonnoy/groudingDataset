@@ -196,6 +196,7 @@ class GeneralizedVLRCNN(nn.Module):
             raise ValueError("In training mode, targets should be passed")
         
         images = to_image_list(images)
+        print("images:", images.tensors)
         # batch_size = images.tensors.shape[0]
         device = images.tensors.device
         print("device:", device)
