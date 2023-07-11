@@ -173,10 +173,10 @@ class GeneralizedVLRCNN(nn.Module):
                 p.requires_grad = False
 
     def forward(self, 
-        images, 
-        targets=None, 
+        images,
         captions=None, 
         positive_map=None,
+        targets=None,
         greenlight_map=None):
         """
         Arguments:
