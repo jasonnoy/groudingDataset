@@ -110,18 +110,6 @@ class Laion(data.Dataset):
 
         wds_ds = wds.WebDataset(os.path.join(root, "{}.tar".format(index)))
         self.samples = [[d['id'].decode(), pil_loader(d['jpg']), d['txt'].decode()] for d in wds_ds]
-        # if self.transform is None:
-        #     images = [s[1] for s in self.samples]
-        # else:
-        #     images = [self.transform(s[1]) for s in self.samples]
-        # tensors = []
-        # print("Processing dataset...")
-        # for i in tqdm(range(0, len(self.samples), batch_size)):
-        #     batch_images = images[i: i+batch_size]
-        #     tensors.extend(to_image_list(batch_images, size_divisible=32).tensors)
-        # assert (len(tensors) == len(self.samples))
-        # for i in range(len(tensors)):
-        #     self.samples[i][1] = tensors[i]
 
     def __getitem__(self, index):
         idx, image, caption = self.samples[index]
@@ -177,7 +165,7 @@ class Laion(data.Dataset):
         else:
             plus = 0
         # positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
-        return image, new_entities, positive_map, new_to_old_entity, new_entity_to_id
+        return image, caption, positive_map, new_entities, new_to_old_entity, new_entity_to_id
 
     def __len__(self):
         return len(self.samples)
