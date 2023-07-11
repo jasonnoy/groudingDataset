@@ -18,8 +18,8 @@ mid = int(math.sqrt(TOTAL_PIXEL))
 for i_t in range(mid+1)[1:]:
     if TOTAL_PIXEL % i_t == 0:
         FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
-for k, v in FACTOR_DICT.items():
-    FACTOR_DICT[v] = k
+update_dict = dict(zip(FACTOR_DICT.values(), FACTOR_DICT.keys()))
+FACTOR_DICT.update(update_dict)
 
 
 def pil_loader(image_b):
