@@ -172,6 +172,7 @@ class GLIPDemo(object):
                               positive_map_label_to_tokens,
                               thresh=0.5,
                               save_img=False):
+        images.to(self.device)
         predictions = self.model(images, new_entities, positive_map_label_to_tokens)
         top_predictions = [self._post_process(prediction, thresh) for prediction in predictions]
         results = None
