@@ -31,7 +31,6 @@ def load(url):
 
 glip_demo = GLIPDemo(
     cfg,
-    min_image_size=800,
     confidence_threshold=0.7,
     show_mask_heatmaps=False
 )

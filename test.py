@@ -3,11 +3,20 @@ import os
 import webdataset as wds
 from PIL import Image
 import io
+# import math
 
 
 def read_tar(tar_path):
     return wds.WebDataset(tar_path)
 
+#
+# TOTAL_PIXEL = 345600
+# FACTOR_DICT = {}
+# mid = int(math.sqrt(TOTAL_PIXEL))
+# for i_t in range(mid+1)[1:]:
+#     if TOTAL_PIXEL % i_t == 0:
+#         FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
+# print(FACTOR_DICT)
 
 if __name__ == "__main__":
     # nlp = spacy.load("en_core_web_trf")

@@ -80,7 +80,7 @@ class BatchGroundingCollator(object):
     def __call__(self, batch):
         transposed_batch = list(zip(*batch))
 
-        images = to_image_list(transposed_batch[0], self.size_divisible)
+        images = transposed_batch[0]
         entities = transposed_batch[1]
         positive_maps = transposed_batch[2]
         new_to_old_entity_list = transposed_batch[3]

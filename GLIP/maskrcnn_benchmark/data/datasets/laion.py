@@ -5,9 +5,21 @@ from PIL import Image
 import webdataset as wds
 import torch.utils.data as data
 import re
-from tqdm import tqdm
+import math
 import torch
 from GLIP.maskrcnn_benchmark.structures.image_list import to_image_list
+
+
+SOLUTION = "480p"
+RESOLUTIONS = {"240p": [320, 240], "480p": [720, 480], "720p": [1280, 720], "1080p": [1920, 1080], "2K": [2560, 1440], "4K": [4096, 2160]}
+TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
+FACTOR_DICT = {}
+mid = int(math.sqrt(TOTAL_PIXEL))
+for i_t in range(mid+1)[1:]:
+    if TOTAL_PIXEL % i_t == 0:
+        FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
+for k, v in FACTOR_DICT.items():
+    FACTOR_DICT[v] = k
 
 
 def pil_loader(image_b):
@@ -61,6 +73,19 @@ def create_positive_map_label_to_token_from_positive_map(positive_map, plus=0):
     return positive_map_label_to_token
 
 
+def compute_image_shape(original_shape):
+    ratio = original_shape[0] / original_shape[1]
+    edge = int(math.sqrt(TOTAL_PIXEL/ratio))
+    if edge in FACTOR_DICT:
+        return [FACTOR_DICT[edge], edge]
+    prev = 1
+    for cur in FACTOR_DICT.keys():
+        if cur > edge > prev:
+            return [FACTOR_DICT[cur], cur]
+        prev = cur
+    return RESOLUTIONS[SOLUTION]  # just in case
+
+
 class Laion(data.Dataset):
     """ Laion dataset.
 
@@ -95,8 +120,11 @@ class Laion(data.Dataset):
 
     def __getitem__(self, index):
         idx, image, caption = self.samples[index]
+        image_size = image.shape[-2:]
+        image_resize_shape = compute_image_shape(image_size)
+
         if self.transform is not None:
-            image = self.transform(image)
+            image = self.transform(image, image_resize_shape)
         doc = self.nlp(caption)
         nouns = [t.text.lower() for t in doc.noun_chunks]
         empty_nouns = False

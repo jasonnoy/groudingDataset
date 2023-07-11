@@ -58,7 +58,7 @@ class GLIPDemo(object):
 
         self.tokenizer = self.build_tokenizer()
 
-    def build_transform(self):
+    def build_transform(self, image_resize_shape):
         """
         Creates a basic transformation that was used to train the models
         """
