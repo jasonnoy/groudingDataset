@@ -176,6 +176,7 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
         results, preds = glip_demo.run_on_batched_images(*batch[:3], thresh=0.55, save_img=save_img)
         new_to_old_entities = batch[3]
         new_entity_to_ids = batch[4]
+        print(results, preds, new_entity_to_ids, new_to_old_entities)
         for result, pred, new_entity_to_id, new_to_old_entity in zip(results, preds, new_entity_to_ids, new_to_old_entities):
             new_labels = get_label_names(pred, glip_demo)
             if save_img:
