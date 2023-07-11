@@ -11,7 +11,7 @@ from GLIP.maskrcnn_benchmark.structures.image_list import to_image_list
 
 
 SOLUTION = "480p"
-RESOLUTIONS = {"240p": [320, 240], "480p": [720, 480], "720p": [1280, 720], "1080p": [1920, 1080], "2K": [2560, 1440], "4K": [4096, 2160]}
+RESOLUTIONS = {"240p": (320, 240), "480p": (720, 480), "720p": (1280, 720), "1080p": (1920, 1080), "2K": (2560, 1440), "4K": (4096, 2160)}
 TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
 FACTOR_DICT = {}
 mid = int(math.sqrt(TOTAL_PIXEL))
@@ -80,14 +80,14 @@ def compute_image_shape(original_shape):
     ratio = original_shape[1] / original_shape[0]
     edge = int(math.sqrt(TOTAL_PIXEL/ratio))
     if edge in FACTOR_DICT:
-        return [edge, FACTOR_DICT[edge]]
+        return edge, FACTOR_DICT[edge]
     prev = 1
     for cur in FACTOR_DICT.keys():
         if edge > cur:
             prev = cur
             continue
         fit = prev if edge - prev < cur - edge else cur
-        return [fit, FACTOR_DICT[fit]]
+        return fit, FACTOR_DICT[fit]
     return RESOLUTIONS[SOLUTION]  # just in case
 
 
