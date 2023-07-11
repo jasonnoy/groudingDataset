@@ -82,6 +82,7 @@ class BatchGroundingCollator(object):
 
         images = transposed_batch[0]
         entities = transposed_batch[1]
+        print("collate entities:", entities)
         positive_maps = transposed_batch[2]
         new_to_old_entity_list = transposed_batch[3]
         new_entity_to_id_list = transposed_batch[4]
