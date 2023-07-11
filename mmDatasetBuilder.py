@@ -193,6 +193,7 @@ def read_tar(tar_path):
 
 
 def build_training_text(record: dict):
+
     return
 
 

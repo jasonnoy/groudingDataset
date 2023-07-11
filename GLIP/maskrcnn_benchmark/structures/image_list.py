@@ -22,7 +22,9 @@ class ImageList(object):
         self.image_sizes = image_sizes
 
     def to(self, *args, **kwargs):
+        print("cast device:", self.tensors.device)
         cast_tensor = self.tensors.to(*args, **kwargs)
+        print("cast device:", cast_tensor)
         return ImageList(cast_tensor, self.image_sizes)
 
 
