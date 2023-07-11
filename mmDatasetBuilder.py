@@ -173,15 +173,18 @@ def read_tar(tar_path):
 
 if __name__ == "__main__":
     nlp = spacy.load("en_core_web_trf")
-    input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00032"
-    output_path = "/gpfs/gpfs1/zphz/jjh/test_dataset/part-00032"
-    ids = list(range(51, 100))
+    input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00033"
+    output_path = "/gpfs/gpfs1/zphz/jjh/test_dataset/part-00033"
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
+    part_index = 3300000
+    ids = list(range(0, 1))
     for idx in ids:
         res = {}
-        tar_filename = "{}.tar".format(3200000+idx)
+        tar_filename = "{}.tar".format(part_index+idx)
         tar_dataset = read_tar(os.path.join(input_path, tar_filename))
-        meta_filename = "{}.meta.jsonl".format(3200000+idx)
-        print("processing {}".format(3200000+idx))
+        meta_filename = "{}.meta.jsonl".format(part_index+idx)
+        print("processing {}".format(part_index+idx))
         with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(os.path.join(output_path, meta_filename), 'a', encoding='utf-8') as f2:
             # for data, line in tqdm(zip(tar_dataset, f1)):
             iter_tar = iter(tar_dataset)
