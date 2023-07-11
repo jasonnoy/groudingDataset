@@ -26,8 +26,13 @@ mid = int(math.sqrt(TOTAL_PIXEL))
 for i_t in range(mid+1)[1:]:
     if TOTAL_PIXEL % i_t == 0:
         FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
-update_dict = dict(zip(FACTOR_DICT.values(), FACTOR_DICT.keys()))
+vs = list(FACTOR_DICT.values())
+vs.reverse()
+ks = list(FACTOR_DICT.keys())
+ks.reverse()
+update_dict = dict(zip(vs, ks))
 FACTOR_DICT.update(update_dict)
+print(FACTOR_DICT)
 
 #
 # if __name__ == "__main__":

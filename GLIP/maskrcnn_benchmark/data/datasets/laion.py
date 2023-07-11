@@ -18,7 +18,11 @@ mid = int(math.sqrt(TOTAL_PIXEL))
 for i_t in range(mid+1)[1:]:
     if TOTAL_PIXEL % i_t == 0:
         FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
-update_dict = dict(zip(FACTOR_DICT.values(), FACTOR_DICT.keys()))
+vs = list(FACTOR_DICT.values())
+vs.reverse()
+ks = list(FACTOR_DICT.keys())
+ks.reverse()
+update_dict = dict(zip(vs, ks))
 FACTOR_DICT.update(update_dict)
 
 
@@ -73,15 +77,17 @@ def create_positive_map_label_to_token_from_positive_map(positive_map, plus=0):
 
 
 def compute_image_shape(original_shape):
-    ratio = original_shape[0] / original_shape[1]
+    ratio = original_shape[1] / original_shape[0]
     edge = int(math.sqrt(TOTAL_PIXEL/ratio))
     if edge in FACTOR_DICT:
-        return [FACTOR_DICT[edge], edge]
+        return [edge, FACTOR_DICT[edge]]
     prev = 1
     for cur in FACTOR_DICT.keys():
-        if cur > edge > prev:
-            return [FACTOR_DICT[cur], cur]
-        prev = cur
+        if edge > cur:
+            prev = cur
+            continue
+        fit = prev if edge - prev < cur - edge else cur
+        return [fit, FACTOR_DICT[fit]]
     return RESOLUTIONS[SOLUTION]  # just in case
 
 
