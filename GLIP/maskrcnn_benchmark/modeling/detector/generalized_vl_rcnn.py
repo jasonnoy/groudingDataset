@@ -198,6 +198,7 @@ class GeneralizedVLRCNN(nn.Module):
         # batch_size = images.tensors.shape[0]
         device = images.tensors.device
         print("device:", device)
+        print("captions:", captions)
 
         if self.cfg.GLIPKNOW.PARALLEL_LANGUAGE_INPUT:
             language_dict_features, positive_map = self._forward_language_parallel(

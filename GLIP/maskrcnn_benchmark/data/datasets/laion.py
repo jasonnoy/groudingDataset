@@ -127,8 +127,8 @@ class Laion(data.Dataset):
         idx, image, caption = self.samples[index]
         image_shape = image.size
         image_resize_shape = compute_image_shape(image_shape)
-        print("origin shape:", image_shape)
-        print("new shape:", image_resize_shape)
+        # print("origin shape:", image_shape)
+        # print("new shape:", image_resize_shape)
         image = image.resize(image_resize_shape)
         image = np.array(image)[:, :, [2, 1, 0]]
 
