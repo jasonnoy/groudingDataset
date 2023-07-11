@@ -219,7 +219,7 @@ class GeneralizedVLRCNN(nn.Module):
                     if not self.mlm_loss_for_only_positives:
                         greenlight_map = None
                     input_ids, mlm_labels = random_word(
-                        input_ids=tokenized.input_ids, 
+                        input_ids=tokenized.input_ids,
                         mask_token_id=self.tokenizer.mask_token_id,
                         vocabs=self.tokenizer_vocab_ids,
                         padding_token_id=self.tokenizer.pad_token_id,

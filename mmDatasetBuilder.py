@@ -192,6 +192,10 @@ def read_tar(tar_path):
     return wds.WebDataset(tar_path)
 
 
+def build_training_text(record: dict):
+
+
+
 if __name__ == "__main__":
     nlp = spacy.load("en_core_web_trf")
     input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00033"
