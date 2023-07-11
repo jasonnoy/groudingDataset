@@ -11,7 +11,7 @@ from GLIP.maskrcnn_benchmark.structures.image_list import to_image_list
 
 
 SOLUTION = "480p"
-RESOLUTIONS = {"240p": [240, 320], "480p": [480, 720], "720p": [720, 1280], "1080p": [1080, 1920], "2K": [1440, 2560], "4K": [2160, 4096]}
+RESOLUTIONS = {"240p": [320, 240], "480p": [720, 480], "720p": [1280, 720], "1080p": [1920, 1080], "2K": [2560, 1440], "4K": [4096, 2160]}
 TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
 FACTOR_DICT = {}
 mid = int(math.sqrt(TOTAL_PIXEL))
@@ -119,7 +119,7 @@ class Laion(data.Dataset):
 
     def __getitem__(self, index):
         idx, image, caption = self.samples[index]
-        image_shape = image.shape[:2]
+        image_shape = image.size
         image_resize_shape = compute_image_shape(image_shape)
         print("origin shape:", image_shape)
         print("new shape:", image_resize_shape)
