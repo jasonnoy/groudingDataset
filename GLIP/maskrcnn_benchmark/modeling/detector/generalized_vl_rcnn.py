@@ -70,7 +70,7 @@ class GeneralizedVLRCNN(nn.Module):
         detections / masks from it.
     """
 
-    def __init__(self, cfg):
+    def __init__(self, cfg, tokenizer=None, language_backbone=None):
         super(GeneralizedVLRCNN, self).__init__()
         self.cfg = cfg
 
@@ -89,11 +89,16 @@ class GeneralizedVLRCNN(nn.Module):
                 self.tokenizer = CLIPTokenizerFast.from_pretrained("openai/clip-vit-base-patch32",
                                                                             from_slow=True)
         else:
-            self.tokenizer = AutoTokenizer.from_pretrained(cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH)
+            if tokenizer is not None:
+                self.tokenizer = tokenizer
+            else:
+                self.tokenizer = AutoTokenizer.from_pretrained(cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH)
         self.tokenizer_vocab = self.tokenizer.get_vocab()
         self.tokenizer_vocab_ids = [item for key, item in self.tokenizer_vocab.items()]
-
-        self.language_backbone = build_language_backbone(cfg)
+        if language_backbone is not None:
+            self.language_backbone = language_backbone
+        else:
+            self.language_backbone = build_language_backbone(cfg)
 
         self.rpn = build_rpn(cfg)
         self.roi_heads = build_roi_heads(cfg)
