@@ -177,15 +177,21 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
         new_to_old_entities = batch[3]
         new_entity_to_ids = batch[4]
         print(results, preds, new_entity_to_ids, new_to_old_entities)
-        for result, pred, new_entity_to_id, new_to_old_entity in zip(results, preds, new_entity_to_ids, new_to_old_entities):
-            new_labels = get_label_names(pred, glip_demo)
-            if save_img:
-                result = glip_demo.overlay_entity_names(result, pred, custom_labels=new_labels, text_size=0.8,
-                                                        text_offset=-25,
-                                                        text_offset_original=-40, text_pixel=2)
-                imsave(result, caption, output_path)
-            groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
-            total_groundings.append(output_decorator(groundings))
+        if results:
+            for result, pred, new_entity_to_id, new_to_old_entity in zip(results, preds, new_entity_to_ids, new_to_old_entities):
+                new_labels = get_label_names(pred, glip_demo)
+                if save_img:
+                    result = glip_demo.overlay_entity_names(result, pred, custom_labels=new_labels, text_size=0.8,
+                                                            text_offset=-25,
+                                                            text_offset_original=-40, text_pixel=2)
+                    imsave(result, caption, output_path)
+                groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
+                total_groundings.append(output_decorator(groundings))
+        else:
+            for pred, new_entity_to_id, new_to_old_entity in zip(preds, new_entity_to_ids, new_to_old_entities):
+                new_labels = get_label_names(pred, glip_demo)
+                groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
+                total_groundings.append(output_decorator(groundings))
     return total_groundings
 
 
