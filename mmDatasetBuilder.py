@@ -176,11 +176,12 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
     total_groundings = []
     for batch in tqdm(dataloader):
         results, preds = glip_demo.run_on_batched_images(*batch[:4], thresh=0.55, save_img=save_img)
+        captions = batch[1]
         new_entities = batch[3]
         new_to_old_entities = batch[4]
         new_entity_to_ids = batch[5]
         if results:
-            for result, pred, entities, new_entity_to_id, new_to_old_entity in zip(results, preds, new_entities, new_entity_to_ids, new_to_old_entities):
+            for result, pred, caption, entities, new_entity_to_id, new_to_old_entity in zip(results, preds, captions, new_entities, new_entity_to_ids, new_to_old_entities):
                 new_labels = get_label_names(pred, glip_demo, entities)
                 if save_img:
                     result = glip_demo.overlay_entity_names(result, pred, custom_labels=new_labels, text_size=0.8,
