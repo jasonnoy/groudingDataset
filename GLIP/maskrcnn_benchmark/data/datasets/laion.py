@@ -153,13 +153,13 @@ class Laion(data.Dataset):
         for entity in nouns:
             # want no overlays
             found = {(0, 0)}
-            for m in re.finditer(entity, caption.lower()):
-                print("caption:", caption)
-                print("entity:", entity)
-
-                if (m.start(), m.end()) not in found:
-                    tokens_positive.append([[m.start(), m.end()]])
-                    found.add((m.start(), m.end()))
+            try:
+                for m in re.finditer(entity, caption.lower()):
+                    if (m.start(), m.end()) not in found:
+                        tokens_positive.append([[m.start(), m.end()]])
+                        found.add((m.start(), m.end()))
+            except Exception as e:
+                raise ValueError("caption:{}, entity:{}".format(entity, caption.lower()))
 
         # process positive map
         positive_map = create_positive_map(tokenized, tokens_positive)
