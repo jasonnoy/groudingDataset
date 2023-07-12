@@ -415,13 +415,16 @@ class GLIPDemo(object):
         _, idx = scores.sort(0, descending=True)
         prediction = prediction[idx]
         print("after score filter:")
-        print(prediction.get_field("scores"))
+        print("scores:", prediction.get_field("scores"))
+        print("labels:", prediction.get_field("labels"))
         prediction = self.filter_object(prediction, entities)
         print("after object filter:")
-        print(prediction.get_field("scores"))
+        print("scores:", prediction.get_field("scores"))
+        print("labels:", prediction.get_field("labels"))
         prediction = self.filter_iou(prediction)
         print("final:")
-        print(prediction.get_field("scores"))
+        print("scores:", prediction.get_field("scores"))
+        print("labels:", prediction.get_field("labels"))
         return prediction
 
     def compute_colors_for_labels(self, labels):
