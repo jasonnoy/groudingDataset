@@ -154,6 +154,9 @@ class Laion(data.Dataset):
             # want no overlays
             found = {(0, 0)}
             for m in re.finditer(entity, caption.lower()):
+                print("caption:", caption)
+                print("entity:", entity)
+
                 if (m.start(), m.end()) not in found:
                     tokens_positive.append([[m.start(), m.end()]])
                     found.add((m.start(), m.end()))
