@@ -17,6 +17,7 @@ from maskrcnn_benchmark.structures.bounding_box import BoxList
 from maskrcnn_benchmark import layers as L
 from maskrcnn_benchmark.modeling.roi_heads.mask_head.inference import Masker
 from maskrcnn_benchmark.utils import cv2_util
+from PIL import Image
 
 engine = inflect.engine()
 
@@ -182,7 +183,7 @@ class GLIPDemo(object):
         top_predictions = [self._post_process(prediction, entity_list, thresh) for prediction, entity_list in zip(predictions, entity_lists)]
         results = None
         if save_img:
-            results = [img.numpy().copy() for img in origin_images]
+            results = [convert_tensor_to_pil(img) for img in origin_images]
             results = [self.overlay_boxes(result, top_prediction) for result, top_prediction in
                        zip(results, top_predictions)]
         return results, top_predictions
@@ -620,3 +621,11 @@ def remove_punctuation(text: str) -> str:
     for p in punct:
         text = text.replace(p, '')
     return text.strip()
+
+
+def convert_tensor_to_pil(image):
+    image = image.squeeze(0)
+    image = image.permute(1, 2, 0)
+    image = image.numpy()
+    image = (image * 255).astype(np.uint8)
+    return Image.fromarray(image)
