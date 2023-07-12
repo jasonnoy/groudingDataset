@@ -193,6 +193,7 @@ class GLIPDemo(object):
 
     def compute_prediction(self, original_image, original_caption, custom_entities=None):
         # image
+        print("original image:", original_image)
         image = self.transforms(original_image)
         image_list = to_image_list(image, self.cfg.DATALOADER.SIZE_DIVISIBILITY)
         print("image:", image_list.tensors)
