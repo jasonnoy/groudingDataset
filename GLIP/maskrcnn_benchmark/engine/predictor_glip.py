@@ -178,6 +178,7 @@ class GLIPDemo(object):
         # print("captions:", captions)
         # print("positive_map_label_to_tokens:", positive_map_label_to_tokens)
         predictions = self.model(images, captions, positive_map_label_to_tokens)
+        predictions = [p.to("cpu") for p in predictions]
         top_predictions = [self._post_process(prediction, entity_list, thresh) for prediction, entity_list in zip(predictions, entity_lists)]
         results = None
         if save_img:
