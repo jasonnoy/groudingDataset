@@ -97,7 +97,7 @@ class BatchGroundingCollator(object):
             cur_count += len(cur_pos)
 
         assert cur_count == len(batched_pos_map)
-        positive_map = batched_pos_map.long()
+        positive_map = batched_pos_map.bool()
 
         return images, captions, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list
 
