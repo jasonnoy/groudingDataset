@@ -203,6 +203,7 @@ class GeneralizedVLRCNN(nn.Module):
         images = to_image_list(images)
         # batch_size = images.tensors.shape[0]
         device = images.tensors.device
+        print("image tensor:", images.tensors)
 
 
         if self.cfg.GLIPKNOW.PARALLEL_LANGUAGE_INPUT:
