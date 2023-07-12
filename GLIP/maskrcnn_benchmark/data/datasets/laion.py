@@ -113,7 +113,7 @@ class Laion(data.Dataset):
 
     def __getitem__(self, index):
         idx, image, caption = self.samples[index]
-        r = "[+-=^*<>{}「」【】()（）/\[\]]"
+        r = "[+=^*<>{}「」【】()（）/\[\]]"
         caption = re.sub(r, ' ', caption)
         image_shape = image.size
         image_resize_shape = compute_image_shape(image_shape)

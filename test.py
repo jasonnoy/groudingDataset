@@ -4,6 +4,7 @@ import webdataset as wds
 from PIL import Image
 import io
 import math
+import re
 
 
 def read_tar(tar_path):
@@ -18,22 +19,27 @@ def read_tar(tar_path):
 #         FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
 # print(FACTOR_DICT)
 
-SOLUTION = "480p"
-RESOLUTIONS = {"240p": [240, 320], "480p": [480, 720], "720p": [720, 1280], "1080p": [1080, 1920], "2K": [1440, 2560], "4K": [2160, 4096]}
-TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
-FACTOR_DICT = {}
-mid = int(math.sqrt(TOTAL_PIXEL))
-for i_t in range(mid+1)[1:]:
-    if TOTAL_PIXEL % i_t == 0:
-        FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
-vs = list(FACTOR_DICT.values())
-vs.reverse()
-ks = list(FACTOR_DICT.keys())
-ks.reverse()
-update_dict = dict(zip(vs, ks))
-FACTOR_DICT.update(update_dict)
-print(FACTOR_DICT)
+# SOLUTION = "480p"
+# RESOLUTIONS = {"240p": [240, 320], "480p": [480, 720], "720p": [720, 1280], "1080p": [1080, 1920], "2K": [1440, 2560], "4K": [2160, 4096]}
+# TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
+# FACTOR_DICT = {}
+# mid = int(math.sqrt(TOTAL_PIXEL))
+# for i_t in range(mid+1)[1:]:
+#     if TOTAL_PIXEL % i_t == 0:
+#         FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
+# vs = list(FACTOR_DICT.values())
+# vs.reverse()
+# ks = list(FACTOR_DICT.keys())
+# ks.reverse()
+# update_dict = dict(zip(vs, ks))
+# FACTOR_DICT.update(update_dict)
+# print(FACTOR_DICT)
 
+if __name__ == '__main__':
+    text = "[ disc, entity:the reign of ragnarok [ disc 1 of 2 ]"
+    r = "[+=^*<>{}「」【】()（）/\[\]]"
+    text = re.sub(r, ' ', text)
+    print(text)
 #
 # if __name__ == "__main__":
 #     # nlp = spacy.load("en_core_web_trf")
