@@ -26,12 +26,8 @@ update_dict = dict(zip(vs, ks))
 FACTOR_DICT.update(update_dict)
 
 
-temp = True
 def pil_loader(image_b):
     pil_image = Image.open(io.BytesIO(image_b)).convert('RGB')
-    if temp:
-        print("image size:", pil_image.size)
-        temp = False
     # pil_image = pil_image.resize((800))
     # convert to BGR format
     return pil_image
