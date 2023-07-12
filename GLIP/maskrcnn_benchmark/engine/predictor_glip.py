@@ -367,7 +367,6 @@ class GLIPDemo(object):
 
         colors = self.compute_colors_for_labels(labels).tolist()
         new_image = image.copy()
-        print("image:", image)
         for box, color in zip(boxes, colors):
             box = box.to(torch.int64)
             top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
