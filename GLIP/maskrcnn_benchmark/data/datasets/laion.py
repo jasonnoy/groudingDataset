@@ -119,6 +119,8 @@ class Laion(data.Dataset):
         # image_resize_shape = compute_image_shape(image_shape)
         # image = image.resize(image_resize_shape)
         image = np.array(image)[:, :, [2, 1, 0]]
+        print("original image:", image)
+        print("shape:", image.shape)
 
         if self.transform is not None:
             image = self.transform(image)
