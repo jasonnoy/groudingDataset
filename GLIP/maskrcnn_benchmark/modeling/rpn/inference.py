@@ -774,6 +774,7 @@ def convert_grounding_to_od_logits(logits, box_cls, positive_map, score_agg=None
     if positive_map is not None:
         # score aggregation method
         if score_agg == "MEAN":
+            print("logits:", logits)
             for label_j in positive_map:
                 print("label_id:", label_j)
                 scores[:, :, label_j - 1] = logits[:, :, torch.LongTensor(positive_map[label_j])].mean(-1)
