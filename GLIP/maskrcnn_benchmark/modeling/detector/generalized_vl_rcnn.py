@@ -203,8 +203,7 @@ class GeneralizedVLRCNN(nn.Module):
         images = to_image_list(images)
         # batch_size = images.tensors.shape[0]
         device = images.tensors.device
-        print("image tensor:", images.tensors)
-
+        print("captions:", captions)
 
         if self.cfg.GLIPKNOW.PARALLEL_LANGUAGE_INPUT:
             language_dict_features, positive_map = self._forward_language_parallel(
@@ -259,6 +258,7 @@ class GeneralizedVLRCNN(nn.Module):
 
         # visual embedding
         swint_feature_c4 = None
+        print("language_dict_features:", language_dict_features)
         if 'vl' in self.cfg.MODEL.SWINT.VERSION:
             # the backbone only updates the "hidden" field in language_dict_features
             inputs = {"img": images.tensors, "lang": language_dict_features}
