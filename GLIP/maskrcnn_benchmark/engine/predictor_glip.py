@@ -168,15 +168,15 @@ class GLIPDemo(object):
 
     def run_on_batched_images(self,
                               images,
-                              captions,
+                              entities,
                               positive_map_label_to_tokens,
                               thresh=0.5,
                               save_img=False):
         images = to_image_list(images)
         images = images.to(self.device)
         print("images device:", images.tensors.device)
-        predictions = self.model(images, captions, positive_map_label_to_tokens)
-        top_predictions = [self._post_process(prediction, thresh) for prediction in predictions]
+        predictions = self.model(images, entities, positive_map_label_to_tokens)
+        top_predictions = [self._post_process(prediction, entity_list, thresh) for prediction, entity_list in zip(predictions, entities)]
         results = None
         if save_img:
             results = [img.copy() for img in images]
@@ -381,17 +381,17 @@ class GLIPDemo(object):
         # print("keys:", ids)
         return prediction[ids]
 
-    def filter_object(self, prediction):
+    def filter_object(self, prediction, entities):
         ids = []
         labels = prediction.get_field("labels").tolist()
         for idx, l in enumerate(labels):
-            if l > len(self.entities):
+            if l > len(entities):
                 continue
             else:
                 ids.append(idx)
         return prediction[ids]
 
-    def _post_process(self, prediction, threshold=0.5):
+    def _post_process(self, prediction, entities, threshold=0.5):
         scores = prediction.get_field("scores")
         labels = prediction.get_field("labels").tolist()
         # print("labels:", labels)
@@ -409,7 +409,7 @@ class GLIPDemo(object):
         scores = prediction.get_field("scores")
         _, idx = scores.sort(0, descending=True)
         prediction = prediction[idx]
-        prediction = self.filter_object(prediction)
+        prediction = self.filter_object(prediction, entities)
         prediction = self.filter_iou(prediction)
         return prediction
 
