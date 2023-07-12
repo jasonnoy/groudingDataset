@@ -169,8 +169,8 @@ class GLIPDemo(object):
     def run_on_batched_images(self,
                               images,
                               captions,
-                              entity_lists,
                               positive_map_label_to_tokens,
+                              entity_lists,
                               thresh=0.5,
                               save_img=False):
         images = to_image_list(images)
