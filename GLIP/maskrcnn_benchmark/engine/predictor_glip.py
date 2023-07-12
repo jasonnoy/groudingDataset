@@ -370,9 +370,9 @@ class GLIPDemo(object):
         for box, color in zip(boxes, colors):
             box = box.to(torch.int64)
             top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
-            print("image shape:", new_image.shape)
-            print("top_left:", top_left)
-            print("bottom_right:", bottom_right)
+            # print("image shape:", new_image.shape)
+            # print("top_left:", top_left)
+            # print("bottom_right:", bottom_right)
             new_image = cv2.rectangle(
                 new_image, tuple(top_left), tuple(bottom_right), tuple(color), box_pixel)
 
