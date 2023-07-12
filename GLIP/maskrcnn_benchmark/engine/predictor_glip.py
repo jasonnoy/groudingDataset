@@ -176,6 +176,8 @@ class GLIPDemo(object):
                               save_img=False):
         images = to_image_list(origin_images)
         images = images.to(self.device)
+        print("image:", images.tensors)
+        print("shape:", images.tensors.shape)
         # print("captions:", captions)
         # print("positive_map_label_to_tokens:", positive_map_label_to_tokens)
         predictions = self.model(images, captions, positive_map_label_to_tokens)
