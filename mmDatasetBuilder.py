@@ -18,6 +18,8 @@ from transformers import AutoTokenizer
 
 def get_label_names(predictions, model, new_entities):
     labels = predictions.get_field("labels").tolist()
+    print("model labels:", labels)
+    print("get_label_names entities:", new_entities)
     new_labels = []
     if model.cfg.MODEL.RPN_ARCHITECTURE == "VLDYHEAD":
         plus = 1

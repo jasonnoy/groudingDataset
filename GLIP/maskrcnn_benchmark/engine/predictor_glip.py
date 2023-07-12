@@ -174,7 +174,6 @@ class GLIPDemo(object):
                               save_img=False):
         images = to_image_list(images)
         images = images.to(self.device)
-        print("images device:", images.tensors.device)
         predictions = self.model(images, entities, positive_map_label_to_tokens)
         top_predictions = [self._post_process(prediction, entity_list, thresh) for prediction, entity_list in zip(predictions, entities)]
         results = None
