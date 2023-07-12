@@ -195,6 +195,8 @@ class GLIPDemo(object):
         # image
         image = self.transforms(original_image)
         image_list = to_image_list(image, self.cfg.DATALOADER.SIZE_DIVISIBILITY)
+        print("image:", image_list.tensors)
+        print("shape:", image_list.tensors.shape)
         image_list = image_list.to(self.device)
         if custom_entities:
             self.entities = custom_entities
