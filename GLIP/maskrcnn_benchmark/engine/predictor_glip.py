@@ -168,14 +168,15 @@ class GLIPDemo(object):
 
     def run_on_batched_images(self,
                               images,
-                              entities,
+                              captions,
+                              entity_lists,
                               positive_map_label_to_tokens,
                               thresh=0.5,
                               save_img=False):
         images = to_image_list(images)
         images = images.to(self.device)
-        predictions = self.model(images, entities, positive_map_label_to_tokens)
-        top_predictions = [self._post_process(prediction, entity_list, thresh) for prediction, entity_list in zip(predictions, entities)]
+        predictions = self.model(images, captions, positive_map_label_to_tokens)
+        top_predictions = [self._post_process(prediction, entity_list, thresh) for prediction, entity_list in zip(predictions, entity_lists)]
         results = None
         if save_img:
             results = [img.copy() for img in images]
