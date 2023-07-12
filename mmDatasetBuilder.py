@@ -202,12 +202,12 @@ if __name__ == "__main__":
                     image_b = data['jpg']
                     image = Image.open(io.BytesIO(image_b)).convert('RGB')
                     caption = data['txt'].decode()
-                    try:
-                        ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, i < 5)  # save first 5 grounding images for each tar
-                        meta_data.update(ret)
-                    except Exception as e:
-                        print("failed with image: {}".format(caption))
-                        meta_data['grounding'] = None
+                    # try:
+                    ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, i < 5)  # save first 5 grounding images for each tar
+                    meta_data.update(ret)
+                    # except Exception as e:
+                    #     print("failed with image: {}".format(caption))
+                    #     meta_data['grounding'] = None
                 else:
                     meta_data['grounding'] = None
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
