@@ -259,7 +259,6 @@ class GeneralizedVLRCNN(nn.Module):
             visual_features, language_dict_features, swint_feature_c4 = self.backbone(inputs)
         else:
             visual_features = self.backbone(images.tensors)
-        print("visiaul_features:", visual_features)
         # rpn force boxes
         if targets:
             targets = [target.to(device)
