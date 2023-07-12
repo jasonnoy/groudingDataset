@@ -179,7 +179,6 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
         new_entities = batch[3]
         new_to_old_entities = batch[4]
         new_entity_to_ids = batch[5]
-        print(results, preds, new_entity_to_ids, new_to_old_entities)
         if results:
             for result, pred, entities, new_entity_to_id, new_to_old_entity in zip(results, preds, new_entities, new_entity_to_ids, new_to_old_entities):
                 new_labels = get_label_names(pred, glip_demo, entities)
@@ -224,7 +223,7 @@ if __name__ == "__main__":
         laion_dataset = Laion(str(part_index+idx), input_path, nlp, tokenizer, transforms=glip_demo.transforms)
         meta_filename = "{}.meta.jsonl".format(part_index+idx)
         print("processing {}".format(part_index+idx))
-        groundings = batch_parse_and_grounding_multi_class(laion_dataset, batch_size=batch_size, save_img=False, output_path=output_path)
+        groundings = batch_parse_and_grounding_multi_class(laion_dataset, batch_size=batch_size, save_img=True, output_path=output_path)
         print("grounding 0: ", groundings[0])
         print("groundings size:", len(groundings))
         break
