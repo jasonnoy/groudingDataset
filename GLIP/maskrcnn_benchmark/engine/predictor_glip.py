@@ -17,7 +17,6 @@ from maskrcnn_benchmark.structures.bounding_box import BoxList
 from maskrcnn_benchmark import layers as L
 from maskrcnn_benchmark.modeling.roi_heads.mask_head.inference import Masker
 from maskrcnn_benchmark.utils import cv2_util
-from PIL import Image
 
 engine = inflect.engine()
 
@@ -183,7 +182,7 @@ class GLIPDemo(object):
         top_predictions = [self._post_process(prediction, entity_list, thresh) for prediction, entity_list in zip(predictions, entity_lists)]
         results = None
         if save_img:
-            results = origin_images
+            results = [convert_tensor_to_pil(image) for image in origin_images]
             print("results:", results)
             results = [self.overlay_boxes(result, top_prediction) for result, top_prediction in
                        zip(results, top_predictions)]
@@ -629,4 +628,4 @@ def convert_tensor_to_pil(image):
     image = image.permute(1, 2, 0)
     image = image.numpy()
     image = (image * 255).astype(np.uint8)
-    return Image.fromarray(image)
+    return image
