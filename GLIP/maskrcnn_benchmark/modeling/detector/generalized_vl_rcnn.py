@@ -258,8 +258,6 @@ class GeneralizedVLRCNN(nn.Module):
 
         # visual embedding
         swint_feature_c4 = None
-        print("language_dict_features:", language_dict_features)
-        print("language_dict_features size:", language_dict_features.shape)
         print("image tensor:", images.tensors)
         print("image tensor shape:", images.tensors.shape)
         if 'vl' in self.cfg.MODEL.SWINT.VERSION:
