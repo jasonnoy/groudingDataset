@@ -179,6 +179,7 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
     for batch in tqdm(dataloader):
         results, preds = glip_demo.run_on_batched_images(*batch[:3], thresh=0.55, save_img=save_img)
         new_entities = batch[3]
+        print("new_entities:", new_entities)
         new_to_old_entities = batch[4]
         new_entity_to_ids = batch[5]
         print(results, preds, new_entity_to_ids, new_to_old_entities)
