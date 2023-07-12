@@ -189,6 +189,8 @@ if __name__ == "__main__":
             # for data, line in tqdm(zip(tar_dataset, f1)):
             iter_tar = iter(tar_dataset)
             for i, line in tqdm(enumerate(f1)):
+                if i > 10:
+                    time.sleep(100)
                 meta_data = json.loads(line)
                 if meta_data['status'] == "success":
                     data = next(iter_tar)
