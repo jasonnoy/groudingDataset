@@ -392,6 +392,8 @@ class GLIPDemo(object):
 
     def _post_process(self, prediction, entities, threshold=0.5):
         scores = prediction.get_field("scores")
+        print("before post process")
+        print("scores:", scores)
         labels = prediction.get_field("labels").tolist()
         # print("labels:", labels)
         # print("scores:", scores)
@@ -410,6 +412,8 @@ class GLIPDemo(object):
         prediction = prediction[idx]
         prediction = self.filter_object(prediction, entities)
         prediction = self.filter_iou(prediction)
+        print("after:")
+        print(prediction.get_field("scores"))
         return prediction
 
     def compute_colors_for_labels(self, labels):
