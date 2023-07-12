@@ -398,7 +398,8 @@ class GLIPDemo(object):
         print("before post process")
         print("scores:", scores)
         labels = prediction.get_field("labels").tolist()
-        # print("labels:", labels)
+        print("entities:", entities)
+        print("labels:", labels)
         # print("scores:", scores)
         thresh = scores.clone()
         for i, lb in enumerate(labels):
@@ -413,9 +414,13 @@ class GLIPDemo(object):
         scores = prediction.get_field("scores")
         _, idx = scores.sort(0, descending=True)
         prediction = prediction[idx]
+        print("after score filter:")
+        print(prediction.get_field("scores"))
         prediction = self.filter_object(prediction, entities)
+        print("after object filter:")
+        print(prediction.get_field("scores"))
         prediction = self.filter_iou(prediction)
-        print("after:")
+        print("final:")
         print(prediction.get_field("scores"))
         return prediction
 

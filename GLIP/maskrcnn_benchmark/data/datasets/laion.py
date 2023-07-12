@@ -126,7 +126,6 @@ class Laion(data.Dataset):
             image = self.transform(image)
         doc = self.nlp(caption)
         nouns = [t.text.lower() for t in doc.noun_chunks]
-        print("laion, nouns:", nouns)
         empty_nouns = False
         if len(nouns) == 0:
             print("No entities found, using caption as entity, caption: {}".format(caption))
