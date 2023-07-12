@@ -258,14 +258,18 @@ class GeneralizedVLRCNN(nn.Module):
 
         # visual embedding
         swint_feature_c4 = None
-        # print("language_dict_features:", language_dict_features)
+        print("language_dict_features:", language_dict_features)
+        print("language_dict_features size:", language_dict_features.shape)
+        print("image tensor:", images.tensors)
+        print("image tensor shape:", images.tensors.shape)
         if 'vl' in self.cfg.MODEL.SWINT.VERSION:
             # the backbone only updates the "hidden" field in language_dict_features
             inputs = {"img": images.tensors, "lang": language_dict_features}
             visual_features, language_dict_features, swint_feature_c4 = self.backbone(inputs)
+            print("vl")
         else:
             visual_features = self.backbone(images.tensors)
-        print("visual_features:", visual_features)
+        # print("visual_features:", visual_features)
 
         # rpn force boxes
         if targets:
