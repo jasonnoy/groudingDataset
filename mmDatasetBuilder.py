@@ -247,8 +247,8 @@ if __name__ == "__main__":
                     meta_data.update(grounding)
                 else:
                     meta_data['grounding'] = None
+                print("meta data:", meta_data)
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
-                f2.close()
                 break
         f1.close()
         f2.close()
