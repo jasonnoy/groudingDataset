@@ -672,8 +672,11 @@ class ATSSPostProcessor(torch.nn.Module):
         box_regression = box_regression.reshape(N, -1, 4)
 
         candidate_inds = box_cls > self.pre_nms_thresh
+        print("candidate_inds", candidate_inds)
+
         pre_nms_top_n = candidate_inds.reshape(N, -1).sum(1)
         pre_nms_top_n = pre_nms_top_n.clamp(max=self.pre_nms_top_n)
+        print("candidate_inds", candidate_inds)
 
         centerness = permute_and_flatten(centerness, N, A, 1, H, W)
         centerness = centerness.reshape(N, -1).sigmoid()
