@@ -238,7 +238,7 @@ class GLIPDemo(object):
         _, idx = scores.sort(0, descending=True)
         return predictions[idx]
 
-    def filter_iou(self, prediction, threshold=0.9):
+    def filter_iou(self, prediction, threshold=0.8):
         # predictions in descending order
         qualified = {}
         # labels = prediction.get_field("labels").tolist()
@@ -259,6 +259,7 @@ class GLIPDemo(object):
                 # iou = get_iou(top_left, bottom_right, tl, rb)
                 # print("iou to idx={}:{}".format(idx, iou))
                 if get_iou(top_left, bottom_right, tl, rb) > threshold:
+                    print("IOU score:", get_iou(top_left, bottom_right, tl, rb))
                     add = False
                     break
             if add:
@@ -357,8 +358,6 @@ class GLIPDemo(object):
         return prediction[ids]
 
     def _post_process(self, prediction, list_loc, threshold=0.5):
-        list_beg = list_loc[0]
-        list_end = list_loc[1]
         scores = prediction.get_field("scores")
         print("before post process")
         print("scores:", scores)
