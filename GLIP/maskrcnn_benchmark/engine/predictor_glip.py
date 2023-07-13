@@ -196,6 +196,7 @@ class GLIPDemo(object):
         print("original image:", original_image)
         print("shape:", original_image.shape)
         image = self.transforms(original_image)
+        print("transformed image:", image)
         image_list = to_image_list(image, self.cfg.DATALOADER.SIZE_DIVISIBILITY)
         print("image:", image_list.tensors)
         print("shape:", image_list.tensors.shape)
