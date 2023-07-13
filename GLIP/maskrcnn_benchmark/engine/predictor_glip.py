@@ -350,6 +350,7 @@ class GLIPDemo(object):
         labels = prediction.get_field("labels").tolist()
         for idx, l in enumerate(labels):
             if l > list_loc[1] or l <= list_loc[0]:
+                print("filtered:", l)
                 continue
             else:
                 ids.append(idx)
