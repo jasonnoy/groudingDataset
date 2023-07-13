@@ -193,13 +193,8 @@ class GLIPDemo(object):
 
     def compute_prediction(self, original_image, original_caption, custom_entities=None):
         # image
-        print("original image:", original_image)
-        print("shape:", original_image.shape)
         image = self.transforms(original_image)
-        print("transformed image:", image)
         image_list = to_image_list(image, self.cfg.DATALOADER.SIZE_DIVISIBILITY)
-        print("image:", image_list.tensors)
-        print("shape:", image_list.tensors.shape)
         image_list = image_list.to(self.device)
         if custom_entities:
             self.entities = custom_entities
@@ -219,7 +214,6 @@ class GLIPDemo(object):
                     print("caption:", original_caption.lower())
         else:
             # caption
-            print("Empty entities")
             if isinstance(original_caption, list):
                 # we directly provided a list of category names
                 self.entities = original_caption
