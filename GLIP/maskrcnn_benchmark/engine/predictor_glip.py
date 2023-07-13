@@ -194,6 +194,9 @@ class GLIPDemo(object):
             results = [image.copy() for image in origin_images]
             results = [self.overlay_boxes(result, top_prediction) for result, top_prediction in
                        zip(results, top_predictions)]
+        images.to("cpu")
+        del images
+        torch.cuda.empty_cache()
         return results, top_predictions
 
     def visualize_with_predictions(self,
