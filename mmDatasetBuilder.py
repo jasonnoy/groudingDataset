@@ -240,6 +240,7 @@ if __name__ == "__main__":
                     grounding = next(grounding_iter)
                     # size = (int(meta_data['width']), int(meta_data['height']))
                     # index = data['id'].decode()
+                    print("grounding:", grounding)
                     image_id = grounding['SAMPLE_ID']
                     sample_id = meta_data['SAMPLE_ID']
                     if str(image_id) != str(sample_id):
