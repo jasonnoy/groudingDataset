@@ -627,13 +627,13 @@ class ATSSPostProcessor(torch.nn.Module):
         N, _, H, W = box_regression.shape
 
         A = box_regression.size(1) // 4
+        print("box_cls0:", box_cls)
 
         if box_cls is not None:
             C = box_cls.size(1) // A
 
         if token_logits is not None:
             T = token_logits.size(1) // A
-        print("T:", T)
 
         # put in the same format as anchors
         if box_cls is not None:
