@@ -245,10 +245,6 @@ class GLIPDemo(object):
         scores = prediction.get_field("scores").tolist()
         for idx, bbox in enumerate(prediction.bbox):
             top_left, bottom_right = bbox[:2].tolist(), bbox[2:].tolist()
-            print("idx:", idx)
-            print("cur label:", labels[idx])
-            print("cur score:", scores[idx])
-            print("top_left:", top_left, "bottom_right:", bottom_right)
             top_left = (top_left[0], top_left[1])
             bottom_right = (bottom_right[0], bottom_right[1])
             if len(qualified) == 0:
@@ -257,15 +253,12 @@ class GLIPDemo(object):
             add = True
             for tl, rb in *qualified.keys(),:
                 iou = get_iou(top_left, bottom_right, tl, rb)
-                print("idx, iou={}:{}".format(idx, iou))
                 if get_iou(top_left, bottom_right, tl, rb) > threshold:
                     add = False
                     break
             if add:
-                print("idx{} add".format(idx))
                 qualified[(top_left, bottom_right)] = idx
         ids = list(qualified.values())
-        print("add keys:", ids)
         return prediction[ids]
 
     def compute_prediction(self, original_image, original_caption, custom_entities=None):
@@ -346,12 +339,10 @@ class GLIPDemo(object):
         return prediction
 
     def filter_object(self, prediction, list_loc):
-        print("list loc:", list_loc)
         ids = []
         labels = prediction.get_field("labels").tolist()
         for idx, l in enumerate(labels):
             if l > list_loc[1] or l <= list_loc[0]:
-                print("filtered:", l)
                 continue
             else:
                 ids.append(idx)
@@ -359,11 +350,11 @@ class GLIPDemo(object):
 
     def _post_process(self, prediction, list_loc, threshold=0.5):
         scores = prediction.get_field("scores")
-        print("before post process")
-        print("scores:", scores)
+        # print("before post process")
+        # print("scores:", scores)
         labels = prediction.get_field("labels").tolist()
-        print("labels:", labels)
-        print("scores:", scores)
+        # print("labels:", labels)
+        # print("scores:", scores)
         thresh = scores.clone()
         for i, lb in enumerate(labels):
             if isinstance(self.confidence_threshold, float):
@@ -377,17 +368,17 @@ class GLIPDemo(object):
         scores = prediction.get_field("scores")
         _, idx = scores.sort(0, descending=True)
         prediction = prediction[idx]
-        print("after score filter:")
-        print("scores:", prediction.get_field("scores"))
-        print("labels:", prediction.get_field("labels"))
+        # print("after score filter:")
+        # print("scores:", prediction.get_field("scores"))
+        # print("labels:", prediction.get_field("labels"))
         prediction = self.filter_object(prediction, list_loc)
-        print("after object filter:")
-        print("scores:", prediction.get_field("scores"))
-        print("labels:", prediction.get_field("labels"))
+        # print("after object filter:")
+        # print("scores:", prediction.get_field("scores"))
+        # print("labels:", prediction.get_field("labels"))
         prediction = self.filter_iou(prediction)
-        print("final:")
-        print("scores:", prediction.get_field("scores"))
-        print("labels:", prediction.get_field("labels"))
+        # print("final:")
+        # print("scores:", prediction.get_field("scores"))
+        # print("labels:", prediction.get_field("labels"))
         return prediction
 
     def compute_colors_for_labels(self, labels):

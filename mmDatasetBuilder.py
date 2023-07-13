@@ -184,7 +184,6 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
         image_ids = batch[7]
         entire_entities = reduce(add, new_entities)
         if results:
-            print("entire_entities:", entire_entities)
             for result, pred, caption, new_entity_to_id, new_to_old_entity, index in zip(results, preds, captions, new_entity_to_ids, new_to_old_entities, image_ids):
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
                 old_labels = [new_to_old_entity[label] for label in new_labels]
@@ -200,7 +199,6 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
                 groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
                 total_groundings.append(output_decorator(groundings, index))
-        break
     return total_groundings
 
 
@@ -226,13 +224,15 @@ if __name__ == "__main__":
         # tar_filename = "{}.tar".format(part_index+idx)
         # tar_dataset = read_tar(os.path.join(input_path, tar_filename))
         tokenizer = AutoTokenizer.from_pretrained("/gpfs/gpfs1/zphz/official_pretrains/hugging_face/bert-base-uncased")
-        batch_size = 10
+        batch_size = 12
         laion_dataset = Laion(str(part_index+idx), input_path, nlp, tokenizer, transforms=glip_demo.transforms)
         meta_filename = "{}.meta.jsonl".format(part_index+idx)
         print("processing {}".format(part_index+idx))
         groundings = batch_parse_and_grounding_multi_class(laion_dataset, batch_size=batch_size, save_img=True, output_path=output_path)
-
-        with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(os.path.join(output_path, meta_filename), 'a', encoding='utf-8') as f2:
+        output_meta_path = os.path.join(output_path, meta_filename)
+        if os.path.exists(output_meta_path):
+            os.remove(output_meta_path)
+        with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'a', encoding='utf-8') as f2:
             grounding_iter = iter(groundings)
             for i, line in tqdm(enumerate(f1)):
                 meta_data = json.loads(line)
@@ -247,10 +247,7 @@ if __name__ == "__main__":
                     meta_data.update(grounding)
                 else:
                     meta_data['grounding'] = None
-                print("meta data:", meta_data)
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
-                break
         f1.close()
         f2.close()
-        break
     print("done")
