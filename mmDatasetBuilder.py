@@ -172,7 +172,7 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
 def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path, save_img=False):
     dataloader = torch.utils.data.DataLoader(laion_dataset, shuffle=False, num_workers=4, batch_size=batch_size, collate_fn=BatchGroundingCollator())
     total_groundings = []
-    for batch in tqdm(dataloader):
+    for i, batch in tqdm(enumerate(dataloader)):
         origin_images = batch[6] if save_img else None
         results, preds = glip_demo.run_on_batched_images(*batch[:4], origin_images=origin_images, thresh=0.55, save_img=save_img)
         captions = batch[1]
@@ -195,7 +195,8 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
                 new_labels = get_label_names(pred, glip_demo, entities)
                 groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
                 total_groundings.append(output_decorator(groundings))
-        break
+        if i > 9:
+            break
     return total_groundings
 
 
@@ -221,7 +222,7 @@ if __name__ == "__main__":
         # tar_filename = "{}.tar".format(part_index+idx)
         # tar_dataset = read_tar(os.path.join(input_path, tar_filename))
         tokenizer = AutoTokenizer.from_pretrained("/gpfs/gpfs1/zphz/official_pretrains/hugging_face/bert-base-uncased")
-        batch_size = 10
+        batch_size = 1
         laion_dataset = Laion(str(part_index+idx), input_path, nlp, tokenizer, transforms=glip_demo.transforms)
         meta_filename = "{}.meta.jsonl".format(part_index+idx)
         print("processing {}".format(part_index+idx))
