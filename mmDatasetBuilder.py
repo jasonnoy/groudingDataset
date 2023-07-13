@@ -265,6 +265,7 @@ if __name__ == "__main__":
                 meta_data = json.loads(line)
                 if meta_data['status'] == "success":
                     grounding = next(grounding_iter)
+                    print("grounding:", grounding)
                     # size = (int(meta_data['width']), int(meta_data['height']))
                     # index = data['id'].decode()
                     image_id = grounding['SAMPLE_ID']
