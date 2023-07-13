@@ -480,6 +480,8 @@ class GLIPDemo(object):
                              text_offset_original=4, custom_labels=None):
         scores = predictions.get_field("scores").tolist()
         labels = predictions.get_field("labels").tolist()
+        print("labels:", labels)
+        print("scores:", scores)
         colors = self.compute_colors_for_labels(predictions.get_field("labels")).tolist()
         if custom_labels:
             new_labels = custom_labels
@@ -487,7 +489,7 @@ class GLIPDemo(object):
             new_labels = []
             for i in labels:
                 if i <= len(entities):
-                    new_labels.append(entities[i - 1])
+                    new_labels.append(entities[i])
                 else:
                     new_labels.append('object')
         boxes = predictions.bbox
