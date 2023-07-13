@@ -345,16 +345,20 @@ class GLIPDemo(object):
         return prediction
 
     def filter_object(self, prediction, list_loc):
+        print("list loc:", list_loc)
         ids = []
         labels = prediction.get_field("labels").tolist()
         for idx, l in enumerate(labels):
             if l > list_loc[1] or l <= list_loc[0]:
+                print("filtered:", l)
                 continue
             else:
                 ids.append(idx)
         return prediction[ids]
 
     def _post_process(self, prediction, list_loc, threshold=0.5):
+        list_beg = list_loc[0]
+        list_end = list_loc[1]
         scores = prediction.get_field("scores")
         print("before post process")
         print("scores:", scores)
