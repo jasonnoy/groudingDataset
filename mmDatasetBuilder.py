@@ -206,9 +206,33 @@ def read_tar(tar_path):
     return wds.WebDataset(tar_path)
 
 
-def build_training_text(record: dict):
+def get_relative_coords(coords, width, height):
+    x_1 = round(coords[0] / width, 3)
+    y_1 = round(coords[1] / height, 3)
+    x_2 = round(coords[2] / width, 3)
+    y_2 = round(coords[3] / height, 3)
+    return x_1, y_1, x_2, y_2
 
-    return
+
+def build_training_text(record: dict):
+    width = record['width']
+    height = record['height']
+    caption = list(record['caption'])
+    groundings = record['groundings'].values()
+    sorted_groundings = sorted(groundings, key=lambda x: x[1], reverse=True)
+    for grounding_pair in sorted_groundings:
+        locs = grounding_pair[0]
+        pos = grounding_pair[1]
+        loc_strs = []
+        for coords in locs:
+            loc_str = ",".join(get_relative_coords(coords, width, height))
+            loc_strs.append(loc_str)
+        grouning_str = ";".join(loc_strs)
+        grouning_str = "[{}]".format(grouning_str)
+        caption.insert(pos, grouning_str)
+    caption = "".join(caption)
+    print("caption:", caption)
+    return caption
 
 
 if __name__ == "__main__":
@@ -245,6 +269,7 @@ if __name__ == "__main__":
                     if str(image_id) != str(sample_id):
                         print("index:{}\n sample_id:{}".format(str(image_id), str(sample_id)))
                     meta_data.update(grounding)
+                    meta_data['annot_caption'] = build_training_text(record=meta_data)
                 else:
                     meta_data['grounding'] = None
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
