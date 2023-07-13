@@ -199,7 +199,8 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
                 groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
                 total_groundings.append(output_decorator(groundings, index))
-        break
+        if i == 1:
+            break
     return total_groundings
 
 
@@ -220,6 +221,7 @@ def build_training_text(record: dict):
     height = record['height']
     caption = list(record['caption'])
     groundings = record['groundings'].values()
+    print("groundings:", groundings)
     sorted_groundings = sorted(groundings, key=lambda x: x[1], reverse=True)
     for grounding_pair in sorted_groundings:
         locs = grounding_pair[0]
