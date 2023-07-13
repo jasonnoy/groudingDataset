@@ -116,8 +116,8 @@ class Laion(data.Dataset):
         r = "[+=^*<>{}「」【】()（）/\[\]]"
         caption = re.sub(r, ' ', caption)
         image_shape = image.size
-        # image_resize_shape = compute_image_shape(image_shape)
-        # image = image.resize(image_resize_shape)
+        image_resize_shape = compute_image_shape(image_shape)
+        image = image.resize(image_resize_shape)
         origin_image = np.array(image)[:, :, [2, 1, 0]]
 
         if self.transform is not None:
