@@ -159,6 +159,7 @@ class GLIPDemo(object):
                      custom_entity=None,
                      alpha=0.0,
                      save_img=False):
+        print("entities:", custom_entity)
         predictions = self.compute_prediction(original_image, original_caption, custom_entity)
         top_predictions = self._post_process(predictions, thresh)
         result = None
@@ -329,8 +330,8 @@ class GLIPDemo(object):
     def _post_process(self, prediction, threshold=0.5):
         scores = prediction.get_field("scores")
         labels = prediction.get_field("labels").tolist()
-        # print("labels:", labels)
-        # print("scores:", scores)
+        print("labels:", labels)
+        print("scores:", scores)
         thresh = scores.clone()
         for i, lb in enumerate(labels):
             if isinstance(self.confidence_threshold, float):
