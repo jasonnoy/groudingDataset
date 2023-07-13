@@ -633,6 +633,7 @@ class ATSSPostProcessor(torch.nn.Module):
 
         if token_logits is not None:
             T = token_logits.size(1) // A
+        print("T:", T)
 
         # put in the same format as anchors
         if box_cls is not None:
