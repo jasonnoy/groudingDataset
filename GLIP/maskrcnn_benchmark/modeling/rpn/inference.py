@@ -640,6 +640,7 @@ class ATSSPostProcessor(torch.nn.Module):
             #print('Classification.')
             box_cls = permute_and_flatten(box_cls, N, A, C, H, W)
             box_cls = box_cls.sigmoid()
+        print("box_cls1:", box_cls)
 
         # binary focal loss version
         if token_logits is not None:
@@ -667,7 +668,6 @@ class ATSSPostProcessor(torch.nn.Module):
                                                         positive_map=positive_map,
                                                         score_agg=self.score_agg)
             box_cls = scores
-        print("box_cls1:", box_cls)
 
         box_regression = permute_and_flatten(box_regression, N, A, 4, H, W)
         box_regression = box_regression.reshape(N, -1, 4)
