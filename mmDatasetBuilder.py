@@ -221,12 +221,11 @@ if __name__ == "__main__":
         # tar_filename = "{}.tar".format(part_index+idx)
         # tar_dataset = read_tar(os.path.join(input_path, tar_filename))
         tokenizer = AutoTokenizer.from_pretrained("/gpfs/gpfs1/zphz/official_pretrains/hugging_face/bert-base-uncased")
-        batch_size = 1
+        batch_size = 10
         laion_dataset = Laion(str(part_index+idx), input_path, nlp, tokenizer, transforms=glip_demo.transforms)
         meta_filename = "{}.meta.jsonl".format(part_index+idx)
         print("processing {}".format(part_index+idx))
         groundings = batch_parse_and_grounding_multi_class(laion_dataset, batch_size=batch_size, save_img=True, output_path=output_path)
-        print("grounding 0: ", groundings[0])
         print("groundings size:", len(groundings))
         break
         with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(os.path.join(output_path, meta_filename), 'a', encoding='utf-8') as f2:
