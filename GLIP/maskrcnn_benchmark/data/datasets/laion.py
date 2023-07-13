@@ -116,15 +116,19 @@ class Laion(data.Dataset):
         r = "[+=^*<>{}「」【】()（）/\[\]]"
         caption = re.sub(r, ' ', caption)
         image_shape = image.size
-        print("image size:", image_shape)
+        if index == 0:
+            print("image size:", image_shape)
         # image_resize_shape = compute_image_shape(image_shape)
         # image = image.resize(image_resize_shape)
         image = np.array(image)[:, :, [2, 1, 0]]
-        print("original image:", image)
-        print("shape:", image.shape)
+        if index == 0:
+            print("original image:", image)
+            print("shape:", image.shape)
 
         if self.transform is not None:
             image = self.transform(image)
+        if index == 0:
+            print("after transform:", image)
         doc = self.nlp(caption)
         nouns = [t.text.lower() for t in doc.noun_chunks]
         empty_nouns = False
