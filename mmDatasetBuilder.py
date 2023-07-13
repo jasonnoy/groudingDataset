@@ -58,7 +58,7 @@ def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entit
 
 
 def output_decorator(groundings, idx):
-    res = {"groundings": groundings, "SAMPLE_ID:": idx}
+    res = {"groundings": groundings, "SAMPLE_ID": idx}
     return res
 
 
@@ -240,7 +240,6 @@ if __name__ == "__main__":
                     grounding = next(grounding_iter)
                     # size = (int(meta_data['width']), int(meta_data['height']))
                     # index = data['id'].decode()
-                    print("grounding:", grounding)
                     image_id = grounding['SAMPLE_ID']
                     sample_id = meta_data['SAMPLE_ID']
                     if str(image_id) != str(sample_id):
