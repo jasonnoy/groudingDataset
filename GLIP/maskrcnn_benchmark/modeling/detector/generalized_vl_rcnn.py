@@ -248,7 +248,7 @@ class GeneralizedVLRCNN(nn.Module):
                     language_dict_features["masks"] = 1 - tokenized.special_tokens_mask
                 
                 language_dict_features["mlm_labels"] = mlm_labels
-
+        print("language_dict_features:", language_dict_features)
         # visual embedding
         swint_feature_c4 = None
         if 'vl' in self.cfg.MODEL.SWINT.VERSION:
