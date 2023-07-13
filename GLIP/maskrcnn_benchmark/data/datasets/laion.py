@@ -9,7 +9,7 @@ import math
 import torch
 from GLIP.maskrcnn_benchmark.structures.image_list import to_image_list
 
-SOLUTION = "1080p"
+SOLUTION = "720p"
 RESOLUTIONS = {"240p": (320, 240), "480p": (720, 480), "720p": (1280, 720), "1080p": (1920, 1080), "2K": (2560, 1440),
                "4K": (4096, 2160)}
 TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
