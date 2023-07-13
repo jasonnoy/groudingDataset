@@ -651,6 +651,7 @@ class ATSSPostProcessor(torch.nn.Module):
             scores = convert_grounding_to_od_logits(logits=token_logits, box_cls=box_cls, positive_map=positive_map,
                                                     score_agg=self.score_agg)
             box_cls = scores
+        print("box_cls2:", box_cls)
 
         # binary dot product focal version
         if dot_product_logits is not None:
@@ -668,6 +669,7 @@ class ATSSPostProcessor(torch.nn.Module):
                                                         positive_map=positive_map,
                                                         score_agg=self.score_agg)
             box_cls = scores
+        print("box_cls3:", box_cls)
 
         box_regression = permute_and_flatten(box_regression, N, A, 4, H, W)
         box_regression = box_regression.reshape(N, -1, 4)
@@ -685,7 +687,7 @@ class ATSSPostProcessor(torch.nn.Module):
         # multiply the classification scores with centerness scores
 
         box_cls = box_cls * centerness[:, :, None]
-        print("box_cls2:", box_cls)
+        print("box_cls4:", box_cls)
 
         results = []
 
