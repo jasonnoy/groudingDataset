@@ -252,8 +252,6 @@ class GeneralizedVLRCNN(nn.Module):
 
         # visual embedding
         swint_feature_c4 = None
-        print("image tensor:", images.tensors)
-        print("image tensor shape:", images.tensors.shape)
         if 'vl' in self.cfg.MODEL.SWINT.VERSION:
             # the backbone only updates the "hidden" field in language_dict_features
             inputs = {"img": images.tensors, "lang": language_dict_features}
@@ -284,7 +282,7 @@ class GeneralizedVLRCNN(nn.Module):
         else:
             proposals, proposal_losses, fused_visual_features = self.rpn(images, visual_features, targets, language_dict_features, positive_map,
                                               captions, swint_feature_c4)
-        print("proposals:", proposals)
+        # print("proposals:", proposals)
         if self.roi_heads:
             if self.cfg.MODEL.ROI_MASK_HEAD.PREDICTOR.startswith("VL"):
                 if self.training:

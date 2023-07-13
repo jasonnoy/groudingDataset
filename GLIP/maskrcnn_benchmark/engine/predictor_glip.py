@@ -168,16 +168,15 @@ class GLIPDemo(object):
         return result, top_predictions
 
     def run_on_batched_images(self,
-                              origin_images,
+                              images,
                               captions,
                               positive_map_label_to_tokens,
                               entity_lists,
+                              origin_images=None,
                               thresh=0.5,
                               save_img=False):
-        images = to_image_list(origin_images)
+        images = to_image_list(images)
         images = images.to(self.device)
-        print("image:", images.tensors)
-        print("shape:", images.tensors.shape)
         # print("captions:", captions)
         # print("positive_map_label_to_tokens:", positive_map_label_to_tokens)
         predictions = self.model(images, captions, positive_map_label_to_tokens)
@@ -185,8 +184,7 @@ class GLIPDemo(object):
         top_predictions = [self._post_process(prediction, entity_list, thresh) for prediction, entity_list in zip(predictions, entity_lists)]
         results = None
         if save_img:
-            results = [convert_tensor_to_pil(image) for image in origin_images]
-            print("results:", results)
+            results = [image.copy() for image in origin_images]
             results = [self.overlay_boxes(result, top_prediction) for result, top_prediction in
                        zip(results, top_predictions)]
         return results, top_predictions
@@ -625,10 +623,3 @@ def remove_punctuation(text: str) -> str:
         text = text.replace(p, '')
     return text.strip()
 
-
-def convert_tensor_to_pil(image):
-    image = image.squeeze(0)
-    image = image.permute(1, 2, 0)
-    image = image.numpy()
-    image = (image * 255).astype(np.uint8)
-    return image

@@ -116,19 +116,12 @@ class Laion(data.Dataset):
         r = "[+=^*<>{}「」【】()（）/\[\]]"
         caption = re.sub(r, ' ', caption)
         image_shape = image.size
-        if index == 0:
-            print("image size:", image_shape)
         # image_resize_shape = compute_image_shape(image_shape)
         # image = image.resize(image_resize_shape)
-        image = np.array(image)[:, :, [2, 1, 0]]
-        if index == 0:
-            print("original image:", image)
-            print("shape:", image.shape)
+        origin_image = np.array(image)[:, :, [2, 1, 0]]
 
         if self.transform is not None:
-            image = self.transform(image)
-        if index == 0:
-            print("after transform:", image)
+            image = self.transform(origin_image)
         doc = self.nlp(caption)
         nouns = [t.text.lower() for t in doc.noun_chunks]
         empty_nouns = False
@@ -175,7 +168,7 @@ class Laion(data.Dataset):
         else:
             plus = 0
         # positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
-        return image, caption, positive_map, new_entities, new_to_old_entity, new_entity_to_id
+        return image, caption, positive_map, new_entities, new_to_old_entity, new_entity_to_id, origin_image
 
     def __len__(self):
         return len(self.samples)
