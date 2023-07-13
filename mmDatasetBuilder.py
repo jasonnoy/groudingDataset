@@ -39,7 +39,8 @@ def get_label_names(predictions, model, new_entities):
 
 
 def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity):
-    res = defaultdict(list)
+    # res = defaultdict(list)
+    res = {"-1": {"-1": []}}
     for idx, box in enumerate(pred.bbox):
         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
         if new_labels[idx] in new_to_old_entity:
@@ -48,7 +49,9 @@ def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entit
         else:
             entity = new_labels[idx]
             pos = -1
-        res[entity].append([top_left+bottom_right, pos])
+        # res[entity].append([top_left+bottom_right, pos])
+        res[entity][pos].append(top_left+bottom_right)
+    del res["-1"]
     return res
 
 
@@ -216,13 +219,20 @@ def get_relative_coords(coords, width, height):
     return x_1, y_1, x_2, y_2
 
 
-def build_training_text(record: dict):
+# def sort_groundings(groundings: list):
+
+
+def build_training_text(record):
     width = record['width']
     height = record['height']
     caption = list(record['caption'])
     groundings = record['groundings'].values()
-    print("groundings:", groundings)
-    sorted_groundings = sorted(groundings, key=lambda x: x[1], reverse=True)
+    loc_pos_list = []
+    for g in groundings:
+        for pos, locs in g.items():
+            loc_pos_list.append([locs, pos])
+    print("loc_pos_list:", loc_pos_list)
+    sorted_groundings = sorted(loc_pos_list, key=lambda x: x[1], reverse=True)
     for grounding_pair in sorted_groundings:
         locs = grounding_pair[0]
         pos = grounding_pair[1]
