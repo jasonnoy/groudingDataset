@@ -14,6 +14,8 @@ import io
 import webdataset as wds
 import time
 from transformers import AutoTokenizer
+from functools import reduce
+from operator import add
 
 
 def get_label_names(predictions, model, new_entities):
@@ -179,20 +181,22 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
         new_entities = batch[3]
         new_to_old_entities = batch[4]
         new_entity_to_ids = batch[5]
+        entire_entities = reduce(add, new_entities)
         if results:
-            for result, pred, caption, entities, new_entity_to_id, new_to_old_entity in zip(results, preds, captions, new_entities, new_entity_to_ids, new_to_old_entities):
-                new_labels = get_label_names(pred, glip_demo, entities)
+            print("entire_entities:", entire_entities)
+            for result, pred, caption, new_entity_to_id, new_to_old_entity in zip(results, preds, captions, new_entity_to_ids, new_to_old_entities):
+                new_labels = get_label_names(pred, glip_demo, entire_entities)
                 old_labels = [new_to_old_entity[label] for label in new_labels]
                 if save_img:
-                    result = glip_demo.overlay_entity_names(result, pred, entities, custom_labels=old_labels, text_size=0.8,
+                    result = glip_demo.overlay_entity_names(result, pred, entire_entities, custom_labels=old_labels, text_size=0.8,
                                                             text_offset=-25,
                                                             text_offset_original=-40, text_pixel=2)
                     imsave(result, caption, output_path)
                 groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
                 total_groundings.append(output_decorator(groundings))
         else:
-            for pred, entities, new_entity_to_id, new_to_old_entity in zip(preds, new_entities, new_entity_to_ids, new_to_old_entities):
-                new_labels = get_label_names(pred, glip_demo, entities)
+            for pred, new_entity_to_id, new_to_old_entity in zip(preds, new_entity_to_ids, new_to_old_entities):
+                new_labels = get_label_names(pred, glip_demo, entire_entities)
                 groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
                 total_groundings.append(output_decorator(groundings))
         break
