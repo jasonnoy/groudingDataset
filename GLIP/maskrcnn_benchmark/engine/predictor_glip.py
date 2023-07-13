@@ -241,14 +241,14 @@ class GLIPDemo(object):
     def filter_iou(self, prediction, threshold=0.8):
         # predictions in descending order
         qualified = {}
-        # labels = prediction.get_field("labels").tolist()
-        # scores = prediction.get_field("scores").tolist()
+        labels = prediction.get_field("labels").tolist()
+        scores = prediction.get_field("scores").tolist()
         for idx, bbox in enumerate(prediction.bbox):
             top_left, bottom_right = bbox[:2].tolist(), bbox[2:].tolist()
-            # print("idx:", idx)
-            # print("cur label:", labels[idx])
-            # print("cur score:", scores[idx])
-            # print("top_left:", top_left, "bottom_right:", bottom_right)
+            print("idx:", idx)
+            print("cur label:", labels[idx])
+            print("cur score:", scores[idx])
+            print("top_left:", top_left, "bottom_right:", bottom_right)
             top_left = (top_left[0], top_left[1])
             bottom_right = (bottom_right[0], bottom_right[1])
             if len(qualified) == 0:
@@ -256,10 +256,9 @@ class GLIPDemo(object):
                 continue
             add = True
             for tl, rb in *qualified.keys(),:
-                # iou = get_iou(top_left, bottom_right, tl, rb)
-                # print("iou to idx={}:{}".format(idx, iou))
+                iou = get_iou(top_left, bottom_right, tl, rb)
+                print("idx, iou={}:{}".format(idx, iou))
                 if get_iou(top_left, bottom_right, tl, rb) > threshold:
-                    print("IOU score:", get_iou(top_left, bottom_right, tl, rb))
                     add = False
                     break
             if add:
