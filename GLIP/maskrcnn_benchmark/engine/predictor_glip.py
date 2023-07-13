@@ -181,14 +181,14 @@ class GLIPDemo(object):
         # print("positive_map_label_to_tokens:", positive_map_label_to_tokens)
         predictions = self.model(images, captions, positive_map_label_to_tokens)
         predictions = [p.to("cpu") for p in predictions]
-        for origin_image, prediction in zip(origin_images, predictions):
-            height, width = origin_image.shape[:-1]
-            prediction = prediction.resize((width, height))
+        # for origin_image, prediction in zip(origin_images, predictions):
+        #     height, width = origin_image.shape[:-1]
+        #     prediction = prediction.resize((width, height))
+        predictions = [prediction.resize((origin_image.shape[1], origin_image.shape[0])) for prediction, origin_image in zip(predictions, origin_images)]
         top_predictions = [self._post_process(prediction, entity_list, thresh) for prediction, entity_list in zip(predictions, entity_lists)]
         results = None
         if save_img:
-            for image, origin_image in zip(images, origin_images):
-            results = [image.copy() for image in zip(origin_images, origin_images)]
+            results = [image.copy() for image in origin_images]
             results = [self.overlay_boxes(result, top_prediction) for result, top_prediction in
                        zip(results, top_predictions)]
         return results, top_predictions
@@ -455,9 +455,6 @@ class GLIPDemo(object):
         for box, color in zip(boxes, colors):
             box = box.to(torch.int64)
             top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
-            print("image shape:", new_image.size)
-            print("top_left:", top_left)
-            print("bottom_right:", bottom_right)
             new_image = cv2.rectangle(
                 new_image, tuple(top_left), tuple(bottom_right), tuple(color), box_pixel)
 
