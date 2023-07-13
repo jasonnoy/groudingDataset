@@ -587,4 +587,5 @@ def get_entity_list_locs(entity_lists):
         beg = cur_beg
         end = cur_beg + len(entity_list)
         res.append((beg, end))
+        cur_beg = end
     return res
