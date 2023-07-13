@@ -57,8 +57,8 @@ def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entit
 #     return res
 
 
-def output_decorator(groundings):
-    res = {"groundings": groundings}
+def output_decorator(groundings, idx):
+    res = {"groundings": groundings, "SAMPLE_ID:": idx}
     return res
 
 
@@ -181,10 +181,11 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
         new_entities = batch[3]
         new_to_old_entities = batch[4]
         new_entity_to_ids = batch[5]
+        image_ids = batch[7]
         entire_entities = reduce(add, new_entities)
         if results:
             print("entire_entities:", entire_entities)
-            for result, pred, caption, new_entity_to_id, new_to_old_entity in zip(results, preds, captions, new_entity_to_ids, new_to_old_entities):
+            for result, pred, caption, new_entity_to_id, new_to_old_entity, index in zip(results, preds, captions, new_entity_to_ids, new_to_old_entities, image_ids):
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
                 old_labels = [new_to_old_entity[label] for label in new_labels]
                 if save_img:
@@ -193,12 +194,12 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
                                                             text_offset_original=-40, text_pixel=2)
                     imsave(result, caption, output_path)
                 groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
-                total_groundings.append(output_decorator(groundings))
+                total_groundings.append(output_decorator(groundings, index))
         else:
-            for pred, new_entity_to_id, new_to_old_entity in zip(preds, new_entity_to_ids, new_to_old_entities):
+            for pred, new_entity_to_id, new_to_old_entity, index in zip(preds, new_entity_to_ids, new_to_old_entities, image_ids):
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
                 groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
-                total_groundings.append(output_decorator(groundings))
+                total_groundings.append(output_decorator(groundings, index))
         break
     return total_groundings
 
@@ -230,25 +231,20 @@ if __name__ == "__main__":
         meta_filename = "{}.meta.jsonl".format(part_index+idx)
         print("processing {}".format(part_index+idx))
         groundings = batch_parse_and_grounding_multi_class(laion_dataset, batch_size=batch_size, save_img=True, output_path=output_path)
-        print("groundings size:", len(groundings))
-        break
+
         with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(os.path.join(output_path, meta_filename), 'a', encoding='utf-8') as f2:
-            # for data, line in tqdm(zip(tar_dataset, f1)):
-            iter_tar = iter(tar_dataset)
+            grounding_iter = iter(groundings)
             for i, line in tqdm(enumerate(f1)):
                 meta_data = json.loads(line)
                 if meta_data['status'] == "success":
-                    data = next(iter_tar)
-                    size = (int(meta_data['width']), int(meta_data['height']))
-                    index = data['id'].decode()
+                    grounding = next(grounding_iter)
+                    # size = (int(meta_data['width']), int(meta_data['height']))
+                    # index = data['id'].decode()
+                    image_id = grounding['SAMPLE_ID']
                     sample_id = meta_data['SAMPLE_ID']
-                    if str(index) != str(sample_id):
-                        print("index:{}\n sample_id:{}".format(str(index), str(sample_id)))
-                    image_b = data['jpg']
-                    image = Image.open(io.BytesIO(image_b)).convert('RGB')
-                    caption = data['txt'].decode()
-                    ret = parse_and_grounding_multi_class(image, caption, str(idx), nlp, output_path, i < 5)  # save first 5 grounding images for each tar
-                    meta_data.update(ret)
+                    if str(image_id) != str(sample_id):
+                        print("index:{}\n sample_id:{}".format(str(image_id), str(sample_id)))
+                    meta_data.update(grounding)
                 else:
                     meta_data['grounding'] = None
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
