@@ -238,7 +238,7 @@ class GLIPDemo(object):
         _, idx = scores.sort(0, descending=True)
         return predictions[idx]
 
-    def filter_iou(self, prediction, threshold=0.8):
+    def filter_iou(self, prediction, threshold=0.95):
         # predictions in descending order
         qualified = {}
         labels = prediction.get_field("labels").tolist()
