@@ -627,7 +627,6 @@ class ATSSPostProcessor(torch.nn.Module):
         N, _, H, W = box_regression.shape
 
         A = box_regression.size(1) // 4
-        print("box_cls0:", box_cls)
 
         if box_cls is not None:
             C = box_cls.size(1) // A
@@ -637,10 +636,8 @@ class ATSSPostProcessor(torch.nn.Module):
 
         # put in the same format as anchors
         if box_cls is not None:
-            #print('Classification.')
             box_cls = permute_and_flatten(box_cls, N, A, C, H, W)
             box_cls = box_cls.sigmoid()
-        print("box_cls1:", box_cls)
 
         # binary focal loss version
         if token_logits is not None:
@@ -651,7 +648,6 @@ class ATSSPostProcessor(torch.nn.Module):
             scores = convert_grounding_to_od_logits(logits=token_logits, box_cls=box_cls, positive_map=positive_map,
                                                     score_agg=self.score_agg)
             box_cls = scores
-        print("box_cls2:", box_cls)
 
         # binary dot product focal version
         if dot_product_logits is not None:
@@ -669,16 +665,13 @@ class ATSSPostProcessor(torch.nn.Module):
                                                         positive_map=positive_map,
                                                         score_agg=self.score_agg)
             box_cls = scores
-        print("box_cls3:", box_cls)
 
         box_regression = permute_and_flatten(box_regression, N, A, 4, H, W)
         box_regression = box_regression.reshape(N, -1, 4)
 
         candidate_inds = box_cls > self.pre_nms_thresh
-        print("candidate_inds", candidate_inds)
         pre_nms_top_n = candidate_inds.reshape(N, -1).sum(1)
         pre_nms_top_n = pre_nms_top_n.clamp(max=self.pre_nms_top_n)
-        print("candidate_inds", candidate_inds)
 
         centerness = permute_and_flatten(centerness, N, A, 1, H, W)
         centerness = centerness.reshape(N, -1).sigmoid()
@@ -686,7 +679,6 @@ class ATSSPostProcessor(torch.nn.Module):
         # multiply the classification scores with centerness scores
 
         box_cls = box_cls * centerness[:, :, None]
-        print("box_cls4:", box_cls)
 
         results = []
 
@@ -776,18 +768,14 @@ class ATSSPostProcessor(torch.nn.Module):
 
 
 def convert_grounding_to_od_logits(logits, box_cls, positive_map, score_agg=None):
-    print("logits:", logits)
     scores = torch.zeros(logits.shape[0], logits.shape[1], box_cls.shape[2]).to(logits.device)
     # 256 -> 80, average for each class
     if positive_map is not None:
         # score aggregation method
         if score_agg == "MEAN":
             for label_j, p_map in enumerate(positive_map):
-                print("label_id:", label_j)
-                print("positive_map:", p_map)
                 # print("torch.LongTensor(positive_map[label_j]):", torch.LongTensor(positive_map[label_j]))
                 scores[:, :, label_j] = logits[:, :, p_map].mean(-1)
-                print("scores:", scores[:, :, label_j])
 
         elif score_agg == "MAX":
             # torch.max() returns (values, indices)

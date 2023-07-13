@@ -112,7 +112,6 @@ class GLIPDemo(object):
         relevant_phrases = noun_phrases
         labels = noun_phrases
         self.entities = labels
-        print("entities:", self.entities)
 
         tokens_positive = []
 
@@ -357,12 +356,12 @@ class GLIPDemo(object):
 
     def _post_process(self, prediction, entities, threshold=0.5):
         scores = prediction.get_field("scores")
-        print("before post process")
-        print("scores:", scores)
+        # print("before post process")
+        # print("scores:", scores)
         labels = prediction.get_field("labels").tolist()
-        print("entities:", entities)
-        print("labels:", labels)
-        print("scores:", scores)
+        # print("entities:", entities)
+        # print("labels:", labels)
+        # print("scores:", scores)
         thresh = scores.clone()
         for i, lb in enumerate(labels):
             if isinstance(self.confidence_threshold, float):
@@ -376,17 +375,17 @@ class GLIPDemo(object):
         scores = prediction.get_field("scores")
         _, idx = scores.sort(0, descending=True)
         prediction = prediction[idx]
-        print("after score filter:")
-        print("scores:", prediction.get_field("scores"))
-        print("labels:", prediction.get_field("labels"))
+        # print("after score filter:")
+        # print("scores:", prediction.get_field("scores"))
+        # print("labels:", prediction.get_field("labels"))
         prediction = self.filter_object(prediction, entities)
-        print("after object filter:")
-        print("scores:", prediction.get_field("scores"))
-        print("labels:", prediction.get_field("labels"))
+        # print("after object filter:")
+        # print("scores:", prediction.get_field("scores"))
+        # print("labels:", prediction.get_field("labels"))
         prediction = self.filter_iou(prediction)
-        print("final:")
-        print("scores:", prediction.get_field("scores"))
-        print("labels:", prediction.get_field("labels"))
+        # print("final:")
+        # print("scores:", prediction.get_field("scores"))
+        # print("labels:", prediction.get_field("labels"))
         return prediction
 
     def compute_colors_for_labels(self, labels):
@@ -434,8 +433,6 @@ class GLIPDemo(object):
                              text_offset_original=4, custom_labels=None):
         scores = predictions.get_field("scores").tolist()
         labels = predictions.get_field("labels").tolist()
-        print("labels:", labels)
-        print("scores:", scores)
         colors = self.compute_colors_for_labels(predictions.get_field("labels")).tolist()
         if custom_labels:
             new_labels = custom_labels
@@ -530,8 +527,6 @@ def create_positive_map(tokenized, tokens_positive):
                 beg_pos = tokenized.char_to_token(beg)
                 end_pos = tokenized.char_to_token(end - 1)
             except Exception as e:
-                print("beg:", beg, "end:", end)
-                print("token_positive:", tokens_positive)
                 # print("beg_pos:", beg_pos, "end_pos:", end_pos)
                 raise e
             if beg_pos is None:
