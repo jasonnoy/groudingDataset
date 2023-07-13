@@ -184,7 +184,10 @@ class GLIPDemo(object):
         top_predictions = [self._post_process(prediction, entity_list, thresh) for prediction, entity_list in zip(predictions, entity_lists)]
         results = None
         if save_img:
-            results = [image.copy() for image in origin_images]
+            for image, origin_image in zip(images, origin_images):
+            results = [image.copy() for image in zip(origin_images, origin_images)]
+                height, width = origin_image.shape[:-1]
+            prediction = prediction.resize((width, height))
             results = [self.overlay_boxes(result, top_prediction) for result, top_prediction in
                        zip(results, top_predictions)]
         return results, top_predictions
