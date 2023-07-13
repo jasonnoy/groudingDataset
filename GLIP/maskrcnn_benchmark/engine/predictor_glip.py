@@ -184,8 +184,11 @@ class GLIPDemo(object):
         # for origin_image, prediction in zip(origin_images, predictions):
         #     height, width = origin_image.shape[:-1]
         #     prediction = prediction.resize((width, height))
-        predictions = [prediction.resize((origin_image.shape[1], origin_image.shape[0])) for prediction, origin_image in zip(predictions, origin_images)]
-        top_predictions = [self._post_process(prediction, entity_list, thresh) for prediction, entity_list in zip(predictions, entity_lists)]
+        predictions = [prediction.resize((origin_image.shape[1], origin_image.shape[0])) for prediction, origin_image in
+                       zip(predictions, origin_images)]
+        list_locations = get_entity_list_locs(entity_lists)
+        top_predictions = [self._post_process(prediction, list_loc, thresh) for
+                           prediction, entity_list, list_loc in zip(predictions, entity_lists, list_locations)]
         results = None
         if save_img:
             results = [image.copy() for image in origin_images]
@@ -216,8 +219,6 @@ class GLIPDemo(object):
         if self.cfg.MODEL.MASK_ON:
             result = self.overlay_mask(result, top_predictions)
         return result, top_predictions
-
-
 
     def _post_process_fixed_thresh(self, predictions):
         scores = predictions.get_field("scores")
@@ -343,23 +344,21 @@ class GLIPDemo(object):
 
         return prediction
 
-
-    def filter_object(self, prediction, entities):
+    def filter_object(self, prediction, list_loc):
         ids = []
         labels = prediction.get_field("labels").tolist()
         for idx, l in enumerate(labels):
-            if l > len(entities):
+            if l > list_loc[1] or l <= list_loc[0]:
                 continue
             else:
                 ids.append(idx)
         return prediction[ids]
 
-    def _post_process(self, prediction, entities, threshold=0.5):
+    def _post_process(self, prediction, list_loc, threshold=0.5):
         scores = prediction.get_field("scores")
         print("before post process")
         print("scores:", scores)
         labels = prediction.get_field("labels").tolist()
-        print("entities:", entities)
         print("labels:", labels)
         print("scores:", scores)
         thresh = scores.clone()
@@ -378,7 +377,7 @@ class GLIPDemo(object):
         print("after score filter:")
         print("scores:", prediction.get_field("scores"))
         print("labels:", prediction.get_field("labels"))
-        prediction = self.filter_object(prediction, entities)
+        prediction = self.filter_object(prediction, list_loc)
         print("after object filter:")
         print("scores:", prediction.get_field("scores"))
         print("labels:", prediction.get_field("labels"))
@@ -576,3 +575,12 @@ def remove_punctuation(text: str) -> str:
         text = text.replace(p, '')
     return text.strip()
 
+
+def get_entity_list_locs(entity_lists):
+    cur_beg = 0
+    res = []
+    for entity_list in entity_lists:
+        beg = cur_beg
+        end = cur_beg + len(entity_list)
+        res.append((beg, end))
+    return res
