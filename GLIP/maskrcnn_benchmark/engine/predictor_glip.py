@@ -262,9 +262,10 @@ class GLIPDemo(object):
                     add = False
                     break
             if add:
+                print("idx{} add".format(idx))
                 qualified[(top_left, bottom_right)] = idx
         ids = list(qualified.values())
-        # print("keys:", ids)
+        print("add keys:", ids)
         return prediction[ids]
 
     def compute_prediction(self, original_image, original_caption, custom_entities=None):
