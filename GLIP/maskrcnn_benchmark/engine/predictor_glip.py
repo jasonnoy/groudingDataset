@@ -179,8 +179,9 @@ class GLIPDemo(object):
         images = images.to(self.device)
         # print("captions:", captions)
         # print("positive_map_label_to_tokens:", positive_map_label_to_tokens)
-        predictions = self.model(images, captions, positive_map_label_to_tokens)
-        predictions = [p.to("cpu") for p in predictions]
+        with torch.no_grad():
+            predictions = self.model(images, captions, positive_map_label_to_tokens)
+            predictions = [p.to("cpu") for p in predictions]
         # for origin_image, prediction in zip(origin_images, predictions):
         #     height, width = origin_image.shape[:-1]
         #     prediction = prediction.resize((width, height))
@@ -495,9 +496,6 @@ class GLIPDemo(object):
         previous_locations = []
         for box, score, label, color in zip(boxes, scores, new_labels, colors):
             x, y = box[:2]
-            print("box:", box)
-            print("x:", x)
-            print("y:", y)
             s = template.format(label, score).replace("_", " ").replace("(", "").replace(")", "")
             for x_prev, y_prev in previous_locations:
                 if abs(x - x_prev) < abs(text_offset) and abs(y - y_prev) < abs(text_offset):
