@@ -356,12 +356,12 @@ class GLIPDemo(object):
 
     def _post_process(self, prediction, entities, threshold=0.5):
         scores = prediction.get_field("scores")
-        # print("before post process")
-        # print("scores:", scores)
+        print("before post process")
+        print("scores:", scores)
         labels = prediction.get_field("labels").tolist()
-        # print("entities:", entities)
-        # print("labels:", labels)
-        # print("scores:", scores)
+        print("entities:", entities)
+        print("labels:", labels)
+        print("scores:", scores)
         thresh = scores.clone()
         for i, lb in enumerate(labels):
             if isinstance(self.confidence_threshold, float):
@@ -375,17 +375,17 @@ class GLIPDemo(object):
         scores = prediction.get_field("scores")
         _, idx = scores.sort(0, descending=True)
         prediction = prediction[idx]
-        # print("after score filter:")
-        # print("scores:", prediction.get_field("scores"))
-        # print("labels:", prediction.get_field("labels"))
+        print("after score filter:")
+        print("scores:", prediction.get_field("scores"))
+        print("labels:", prediction.get_field("labels"))
         prediction = self.filter_object(prediction, entities)
-        # print("after object filter:")
-        # print("scores:", prediction.get_field("scores"))
-        # print("labels:", prediction.get_field("labels"))
+        print("after object filter:")
+        print("scores:", prediction.get_field("scores"))
+        print("labels:", prediction.get_field("labels"))
         prediction = self.filter_iou(prediction)
-        # print("final:")
-        # print("scores:", prediction.get_field("scores"))
-        # print("labels:", prediction.get_field("labels"))
+        print("final:")
+        print("scores:", prediction.get_field("scores"))
+        print("labels:", prediction.get_field("labels"))
         return prediction
 
     def compute_colors_for_labels(self, labels):

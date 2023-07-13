@@ -248,7 +248,6 @@ class GeneralizedVLRCNN(nn.Module):
                     language_dict_features["masks"] = 1 - tokenized.special_tokens_mask
                 
                 language_dict_features["mlm_labels"] = mlm_labels
-        print("language_dict_features:", language_dict_features)
         # visual embedding
         swint_feature_c4 = None
         if 'vl' in self.cfg.MODEL.SWINT.VERSION:
@@ -257,7 +256,6 @@ class GeneralizedVLRCNN(nn.Module):
             visual_features, language_dict_features, swint_feature_c4 = self.backbone(inputs)
         else:
             visual_features = self.backbone(images.tensors)
-        print("visual_features size:", len(visual_features))
         # rpn force boxes
         if targets:
             targets = [target.to(device)
@@ -281,7 +279,7 @@ class GeneralizedVLRCNN(nn.Module):
         else:
             proposals, proposal_losses, fused_visual_features = self.rpn(images, visual_features, targets, language_dict_features, positive_map,
                                               captions, swint_feature_c4)
-        print("proposals:", proposals)
+        # print("proposals:", proposals)
         if self.roi_heads:
             if self.cfg.MODEL.ROI_MASK_HEAD.PREDICTOR.startswith("VL"):
                 if self.training:
