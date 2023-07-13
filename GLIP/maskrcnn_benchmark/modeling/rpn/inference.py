@@ -666,6 +666,7 @@ class ATSSPostProcessor(torch.nn.Module):
                                                         positive_map=positive_map,
                                                         score_agg=self.score_agg)
             box_cls = scores
+        print("box_cls1:", box_cls)
 
         box_regression = permute_and_flatten(box_regression, N, A, 4, H, W)
         box_regression = box_regression.reshape(N, -1, 4)
@@ -680,6 +681,7 @@ class ATSSPostProcessor(torch.nn.Module):
         # multiply the classification scores with centerness scores
 
         box_cls = box_cls * centerness[:, :, None]
+        print("box_cls2:", box_cls)
 
         results = []
 
