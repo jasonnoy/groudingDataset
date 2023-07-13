@@ -666,17 +666,17 @@ class ATSSPostProcessor(torch.nn.Module):
                                                         positive_map=positive_map,
                                                         score_agg=self.score_agg)
             box_cls = scores
-        print("box_cls3:", box_cls)
+        # print("box_cls3:", box_cls)
 
         box_regression = permute_and_flatten(box_regression, N, A, 4, H, W)
         box_regression = box_regression.reshape(N, -1, 4)
 
         candidate_inds = box_cls > self.pre_nms_thresh
-        print("candidate_inds", candidate_inds)
+        # print("candidate_inds", candidate_inds)
 
         pre_nms_top_n = candidate_inds.reshape(N, -1).sum(1)
         pre_nms_top_n = pre_nms_top_n.clamp(max=self.pre_nms_top_n)
-        print("candidate_inds", candidate_inds)
+        # print("candidate_inds", candidate_inds)
 
         centerness = permute_and_flatten(centerness, N, A, 1, H, W)
         centerness = centerness.reshape(N, -1).sigmoid()
@@ -779,12 +779,12 @@ def convert_grounding_to_od_logits(logits, box_cls, positive_map, score_agg=None
     if positive_map is not None:
         # score aggregation method
         if score_agg == "MEAN":
-            print("logits:", logits)
+            # print("logits:", logits)
             for label_j in positive_map:
-                print("label_id:", label_j)
+                # print("label_id:", label_j)
                 scores[:, :, label_j - 1] = logits[:, :, torch.LongTensor(positive_map[label_j])].mean(-1)
-                print("positive_map:", positive_map[label_j])
-                print("scores:", scores[:, :, label_j - 1])
+                # print("positive_map:", positive_map[label_j])
+                # print("scores:", scores[:, :, label_j - 1])
         elif score_agg == "MAX":
             # torch.max() returns (values, indices)
             for label_j in positive_map:
