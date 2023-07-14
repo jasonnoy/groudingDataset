@@ -285,7 +285,7 @@ if __name__ == "__main__":
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     total_ids = get_id_list(input_path)
-    part_size = len(total_ids) // (world_size-1)
+    part_size = len(total_ids) // max((world_size-1), 1)
     start = rank*part_size
     end = min((rank+1)*part_size, len(total_ids))
     ids = total_ids[start:end]
