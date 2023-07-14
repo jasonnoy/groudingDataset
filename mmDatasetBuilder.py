@@ -266,6 +266,8 @@ if __name__ == "__main__":
     parser.add_argument('--master_port', type=int, default=7878)
     args = parser.parse_args()
 
+    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
+
     config_file = "./GLIP/configs/pretrain/glip_Swin_L.yaml"
     weight_file = "/gpfs/gpfs1/zphz/jjh/models/glip/MODEL/glip_large_model.pth"
     cfg.local_rank = args.local_rank
@@ -285,7 +287,12 @@ if __name__ == "__main__":
         os.mkdir(output_path)
     total_ids = get_id_list(input_path)
     part_index = 3300000
+    part_size = len(total_ids) // (world_size-1)
+    start = rank*part_size
+    end = min((rank+1)*part_size, len(total_ids))
+    ids = total_ids[start:end]
     for idx in ids:
+        idx = int(idx)
         res = {}
         # tar_filename = "{}.tar".format(part_index+idx)
         # tar_dataset = read_tar(os.path.join(input_path, tar_filename))
