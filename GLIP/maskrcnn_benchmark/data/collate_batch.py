@@ -98,10 +98,27 @@ class BatchGroundingCollator(object):
             batched_pos_map[cur_count: cur_count + len(cur_pos), : cur_pos.shape[1]] = cur_pos
             cur_count += len(cur_pos)
 
+        max_size = tuple(max(s) for s in zip(*[img.shape for img in images]))
+        if self.size_divisible > 0:
+            import math
+
+            stride = self.size_divisible
+            max_size = list(max_size)
+            max_size[1] = int(math.ceil(max_size[1] / stride) * stride)
+            max_size[2] = int(math.ceil(max_size[2] / stride) * stride)
+            max_size = tuple(max_size)
+
+        batch_shape = (len(images),) + max_size
+        batched_imgs = images[0].new(*batch_shape).zero_()
+        for img, pad_img in zip(images, batched_imgs):
+            pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].copy_(img)
+
+        image_sizes = [im.shape[-2:] for im in images]
+
         assert cur_count == len(batched_pos_map)
         positive_map = batched_pos_map.bool()
 
-        return images, captions, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list, origin_images, idx
+        return images, image_sizes, captions, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list, origin_images, idx
 
 
 class BBoxAugCollator(object):
