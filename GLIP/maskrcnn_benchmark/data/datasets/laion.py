@@ -101,29 +101,47 @@ class Laion(data.Dataset):
             and returns a transformed version. E.g, ``transforms.ToTensor``
     """
 
-    def __init__(self, index, root, nlp, tokenizer, transforms=None, rpn_architecture="VLDYHEAD"):
+    def __init__(self, index, root, nlp, tokenizer, transforms=None, rpn_architecture="VLDYHEAD", size_divisible=32):
         self.tokenizer = tokenizer
         self.root = root
         self.transform = transforms
         self.nlp = nlp
         self.rpn_architecture = rpn_architecture
+        self.size_divisible = size_divisible
 
         wds_ds = wds.WebDataset(os.path.join(root, "{}.tar".format(index)))
-        self.samples = [[d['id'].decode(), pil_loader(d['jpg']), d['txt'].decode()] for d in wds_ds]
+        self.ids = [d['id'].decode() for d in wds_ds]
+        self.captions = [d['txt'].decode() for d in wds_ds]
+
+        images = [pil_loader(d['jpg']) for d in wds_ds]
+        self.original_images = [np.array(image)[:, :, [2, 1, 0]] for image in images]
+        images = [self.preprocess_image(img) for img in images]
+
+        max_size = tuple(max(s) for s in zip(*[img.shape for img in images]))
+        print("max size:", max_size)
+        if self.size_divisible > 0:
+            import math
+            stride = self.size_divisible
+            max_size = list(max_size)
+            max_size[1] = int(math.ceil(max_size[1] / stride) * stride)
+            max_size[2] = int(math.ceil(max_size[2] / stride) * stride)
+            max_size = tuple(max_size)
+
+        batch_shape = (len(images),) + max_size
+        batched_imgs = images[0].new(*batch_shape).zero_()
+        for img, pad_img in zip(images, batched_imgs):
+            pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].copy_(img)
+        self.images = batched_imgs
+        self.image_sizes = [im.shape[-2:] for im in images]
 
     def __getitem__(self, index):
-        idx, image, caption = self.samples[index]
+        idx = self.ids[index]
+        image = self.images[index]
+        caption = self.captions[index]
         r = "[+=^*<>{}「」【】()（）/\[\]]"
         caption = re.sub(r, ' ', caption)
         origin_image = np.array(image)[:, :, [2, 1, 0]]
 
-        image_shape = image.size
-        image_resize_shape = compute_image_shape(image_shape)
-        image = image.resize(image_resize_shape)
-        image = np.array(image)[:, :, [2, 1, 0]]
-
-        if self.transform is not None:
-            image = self.transform(image)
         doc = self.nlp(caption)
         nouns = [t.text.lower() for t in doc.noun_chunks]
         empty_nouns = False
@@ -165,12 +183,17 @@ class Laion(data.Dataset):
         # process positive map
         positive_map = create_positive_map(tokenized, tokens_positive)
 
-        if self.rpn_architecture == "VLDYHEAD":
-            plus = 1
-        else:
-            plus = 0
-        # positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
         return image, caption, positive_map, new_entities, new_to_old_entity, new_entity_to_id, origin_image, idx
+
+    def preprocess_image(self, image):
+        image_shape = image.size
+        image_resize_shape = compute_image_shape(image_shape)
+        image = image.resize(image_resize_shape)
+        image = np.array(image)[:, :, [2, 1, 0]]
+
+        if self.transform is not None:
+            image = self.transform(image)
+        return image
 
     def __len__(self):
         return len(self.samples)
