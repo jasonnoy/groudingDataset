@@ -208,6 +208,7 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
                 groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
                 total_groundings.append(output_decorator(groundings, index))
         break
+    print(total_groundings)
     return total_groundings
 
 
@@ -266,7 +267,7 @@ if __name__ == "__main__":
         laion_dataset = Laion(str(part_index+idx), input_path, nlp, tokenizer, transforms=glip_demo.transforms)
         meta_filename = "{}.meta.jsonl".format(part_index+idx)
         print("processing {}".format(part_index+idx))
-        groundings = batch_parse_and_grounding_multi_class(laion_dataset, batch_size=batch_size, save_img=False, output_path=output_path)
+        groundings = batch_parse_and_grounding_multi_class(laion_dataset, batch_size=batch_size, save_img=True, output_path=output_path)
         output_meta_path = os.path.join(output_path, meta_filename)
         if os.path.exists(output_meta_path):
             os.remove(output_meta_path)
