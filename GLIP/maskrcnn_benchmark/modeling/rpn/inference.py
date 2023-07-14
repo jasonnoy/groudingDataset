@@ -777,7 +777,12 @@ def convert_grounding_to_od_logits(logits, box_cls, positive_map, score_agg=None
                 if label_j >= logits.shape[2]:
                     break
                 # print("torch.LongTensor(positive_map[label_j]):", torch.LongTensor(positive_map[label_j]))
-                scores[:, :, label_j] = logits[:, :, p_map].mean(-1)
+                try:
+                    scores[:, :, label_j] = logits[:, :, p_map].mean(-1)
+                except Exception as e:
+                    print("logits shape:", logits.shape)
+                    print("label_j:", label_j)
+                    print("p_map shape:", p_map.shape)
 
         elif score_agg == "MAX":
             # torch.max() returns (values, indices)
