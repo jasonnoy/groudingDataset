@@ -1,5 +1,5 @@
 import os
-
+import torch
 from PIL import Image
 import numpy as np
 from GLIP.maskrcnn_benchmark.config import cfg
@@ -14,6 +14,7 @@ cfg.merge_from_file(config_file)
 cfg.merge_from_list(["MODEL.WEIGHT", weight_file])
 cfg.merge_from_list(["MODEL.DEVICE", "cuda:1"])
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+torch.cuda.set_device(1)
 
 
 import requests
