@@ -12,9 +12,9 @@ cfg.local_rank = 0
 cfg.num_gpus = 2
 cfg.merge_from_file(config_file)
 cfg.merge_from_list(["MODEL.WEIGHT", weight_file])
-cfg.merge_from_list(["MODEL.DEVICE", "cuda:1"])
+cfg.merge_from_list(["MODEL.DEVICE", "cuda:2"])
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-torch.cuda.set_device(1)
+torch.cuda.set_device(2)
 
 
 import requests
