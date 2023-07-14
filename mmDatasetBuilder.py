@@ -1,5 +1,6 @@
 import argparse
 import torch.utils.data
+from GLIP import *
 from GLIP.maskrcnn_benchmark.data.datasets.laion import Laion
 from GLIP.maskrcnn_benchmark.data.collate_batch import BatchGroundingCollator
 from GLIP.maskrcnn_benchmark.config import cfg
@@ -19,7 +20,6 @@ from transformers import AutoTokenizer
 from functools import reduce
 from operator import add
 
-sys.path.append(os.path.join(os.getcwd(), "GLIP"))
 
 def get_label_names(predictions, model, new_entities):
     labels = predictions.get_field("labels").tolist()
