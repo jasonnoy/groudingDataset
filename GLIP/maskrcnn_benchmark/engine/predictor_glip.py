@@ -80,7 +80,6 @@ class GLIPDemo(object):
         transform = T.Compose(
             [
                 T.ToPILImage(),
-                T.Resize(self.min_image_size) if self.min_image_size is not None else lambda x: x,
                 T.ToTensor(),
                 to_bgr_transform,
                 normalize_transform,

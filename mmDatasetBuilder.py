@@ -207,6 +207,7 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
                 groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
                 total_groundings.append(output_decorator(groundings, index))
+        break
     return total_groundings
 
 
@@ -287,6 +288,9 @@ if __name__ == "__main__":
                     meta_data['grounding'] = None
                     loc_pos_list = None
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
+                if i == 9:
+                    break
         f1.close()
         f2.close()
+        break
     print("done")
