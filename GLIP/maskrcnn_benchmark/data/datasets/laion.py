@@ -15,7 +15,7 @@ RESOLUTIONS = {"240p": (320, 240), "480p": (720, 480), "720p": (1280, 720), "108
 TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
 FACTOR_DICT = {}
 mid = int(math.sqrt(TOTAL_PIXEL))
-for i_t in range(mid + 1)[1:]:
+for i_t in range(mid + 1)[320:]:  # starting from 320:1080
     if TOTAL_PIXEL % i_t == 0:
         FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
 vs = list(FACTOR_DICT.values())
@@ -81,7 +81,7 @@ def compute_image_shape(original_shape):
     edge = int(math.sqrt(TOTAL_PIXEL / ratio))
     if edge in FACTOR_DICT:
         return edge, FACTOR_DICT[edge]
-    prev = 1
+    prev = 320
     for cur in FACTOR_DICT.keys():
         if edge > cur:
             prev = cur
@@ -137,6 +137,7 @@ class Laion(data.Dataset):
     def __getitem__(self, index):
         idx = self.ids[index]
         image = self.images[index]
+        image_size = self.image_sizes[index]
         caption = self.captions[index]
         r = "[+=^*<>{}「」【】()（）/\[\]]"
         caption = re.sub(r, ' ', caption)
@@ -183,7 +184,7 @@ class Laion(data.Dataset):
         # process positive map
         positive_map = create_positive_map(tokenized, tokens_positive)
 
-        return image, caption, positive_map, new_entities, new_to_old_entity, new_entity_to_id, origin_image, idx
+        return image, image_size, caption, positive_map, new_entities, new_to_old_entity, new_entity_to_id, origin_image, idx
 
     def preprocess_image(self, image):
         image_shape = image.size
@@ -196,4 +197,4 @@ class Laion(data.Dataset):
         return image
 
     def __len__(self):
-        return len(self.samples)
+        return len(self.ids)

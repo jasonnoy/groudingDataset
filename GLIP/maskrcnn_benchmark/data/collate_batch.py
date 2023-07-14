@@ -81,13 +81,14 @@ class BatchGroundingCollator(object):
         transposed_batch = list(zip(*batch))
 
         images = transposed_batch[0]
-        captions = transposed_batch[1]
-        positive_maps = transposed_batch[2]
-        entities = transposed_batch[3]
-        new_to_old_entity_list = transposed_batch[4]
-        new_entity_to_id_list = transposed_batch[5]
-        origin_images = transposed_batch[6]
-        idx = transposed_batch[7]
+        image_sizes = transposed_batch[1]
+        captions = transposed_batch[2]
+        positive_maps = transposed_batch[3]
+        entities = transposed_batch[4]
+        new_to_old_entity_list = transposed_batch[5]
+        new_entity_to_id_list = transposed_batch[6]
+        origin_images = transposed_batch[7]
+        idx = transposed_batch[8]
 
         # compute batched positive map
         max_len = max([v.shape[1] for v in positive_maps])
@@ -102,7 +103,7 @@ class BatchGroundingCollator(object):
         assert cur_count == len(batched_pos_map)
         positive_map = batched_pos_map.bool()
 
-        return batched_imgs, image_sizes, captions, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list, origin_images, idx
+        return images, image_sizes, captions, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list, origin_images, idx
 
 
 class BBoxAugCollator(object):
