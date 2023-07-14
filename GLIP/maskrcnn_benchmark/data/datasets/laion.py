@@ -88,7 +88,8 @@ def compute_image_shape(original_shape):
             continue
         fit = prev if edge - prev < cur - edge else cur
         return fit, FACTOR_DICT[fit]
-    return FACTOR_DICT[1600]  # just in case
+    print("original shape:", original_shape)
+    return 1600, FACTOR_DICT[1600]  # just in case
 
 
 class Laion(data.Dataset):
