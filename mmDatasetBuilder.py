@@ -40,7 +40,7 @@ def get_label_names(predictions, model, new_entities):
 
 def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity):
     # res = defaultdict(list)
-    res = {"-1": {"-1": []}}
+    res = {}
     for idx, box in enumerate(pred.bbox):
         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
         if new_labels[idx] in new_to_old_entity:
@@ -50,8 +50,13 @@ def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entit
             entity = new_labels[idx]
             pos = -1
         # res[entity].append([top_left+bottom_right, pos])
-        res[entity][pos].append(top_left+bottom_right)
-    del res["-1"]
+        if entity not in res:
+            res[entity] = {pos: [top_left+bottom_right]}
+        elif pos in res[entity]:
+            res[entity][pos].append(top_left+bottom_right)
+        else:
+            res[entity][pos] = [top_left+bottom_right]
+        # res[entity][pos].append(top_left+bottom_right)
     return res
 
 
@@ -286,6 +291,7 @@ if __name__ == "__main__":
                     meta_data['annot_caption'] = build_training_text(record=meta_data)
                 else:
                     meta_data['grounding'] = None
+                    loc_pos_list = None
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
                 break
         f1.close()
