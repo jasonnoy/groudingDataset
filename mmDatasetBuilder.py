@@ -1,6 +1,9 @@
+import argparse
 import torch.utils.data
 from GLIP.maskrcnn_benchmark.data.datasets.laion import Laion
 from GLIP.maskrcnn_benchmark.data.collate_batch import BatchGroundingCollator
+from GLIP.maskrcnn_benchmark.config import cfg
+from GLIP.maskrcnn_benchmark.engine.predictor_glip import GLIPDemo
 from GLIP import *
 import numpy as np
 from PIL import Image
@@ -248,13 +251,39 @@ def build_training_text(record):
     return caption
 
 
+def get_id_list(path):
+    filenames = os.listdir(path)
+    id_list = [name[:-4] for name in filenames if name.endswith('.tar')]
+    return id_list
+
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--local_rank', type=int, default=0)
+    parser.add_argument('--world_size', type=int, default=1)
+    parser.add_argument('--rank', type=int, default=0)
+    parser.add_argument('--master_addr', type=str, default='')
+    parser.add_argument('--master_port', type=int, default=7878)
+    args = parser.parse_args()
+
+    config_file = "./GLIP/configs/pretrain/glip_Swin_L.yaml"
+    weight_file = "/gpfs/gpfs1/zphz/jjh/models/glip/MODEL/glip_large_model.pth"
+    cfg.local_rank = args.local_rank
+    cfg.num_gpus = 1
+    cfg.merge_from_file(config_file)
+    cfg.merge_from_list(["MODEL.WEIGHT", weight_file])
+    cfg.merge_from_list(["MODEL.DEVICE", "cuda:{}".format(args.local_rank)])
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    torch.cuda.set_device(args.local_rank)
+    rank = args.rank
+    world_size = args.world_size
+
     nlp = spacy.load("en_core_web_trf")
     input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00033"
     output_path = "/gpfs/gpfs1/zphz/jjh/test_dataset/part-00033"
     if not os.path.exists(output_path):
         os.mkdir(output_path)
-    ids = [0, 1, 2, 3, 4]
+    total_ids = get_id_list(input_path)
     part_index = 3300000
     for idx in ids:
         res = {}
