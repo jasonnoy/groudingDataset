@@ -4,7 +4,6 @@ from GLIP.maskrcnn_benchmark.data.datasets.laion import Laion
 from GLIP.maskrcnn_benchmark.data.collate_batch import BatchGroundingCollator
 from GLIP.maskrcnn_benchmark.config import cfg
 from GLIP.maskrcnn_benchmark.engine.predictor_glip import GLIPDemo
-from GLIP import *
 import numpy as np
 from PIL import Image
 import spacy
@@ -276,8 +275,17 @@ if __name__ == "__main__":
     cfg.merge_from_list(["MODEL.WEIGHT", weight_file])
     cfg.merge_from_list(["MODEL.DEVICE", "cuda:{}".format(args.local_rank)])
     torch.cuda.set_device(args.local_rank)
+    print("model device:",  cfg.MODEL.DEVICE)
+    print("cuda device:", torch.cuda.current_device())
     rank = args.rank
     world_size = args.world_size
+
+    glip_demo = GLIPDemo(
+        cfg,
+        confidence_threshold=0.7,
+        show_mask_heatmaps=False,
+        min_image_size=800
+    )
 
     nlp = spacy.load("en_core_web_trf")
     input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00032"
