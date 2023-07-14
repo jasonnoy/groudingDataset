@@ -73,6 +73,8 @@ __global__ void ml_nms_kernel(const int n_boxes, const float nms_overlap_thresh,
 
 // boxes is a N x 6 tensor
 at::Tensor ml_nms_cuda(const at::Tensor boxes, float nms_overlap_thresh) {
+  cudaError_t cudaSetDevice(1)
+  std::printf("C cuda device: %d", boxes.device().index())
   using scalar_t = float;
   AT_ASSERTM(boxes.device().is_cuda(), "boxes must be a CUDA tensor");
   auto scores = boxes.select(1, 4);
