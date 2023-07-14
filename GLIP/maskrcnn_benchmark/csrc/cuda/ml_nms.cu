@@ -87,6 +87,8 @@ at::Tensor ml_nms_cuda(const at::Tensor boxes, float nms_overlap_thresh) {
 
   THCState *state = at::globalContext().lazyInitCUDA(); // TODO replace with getTHCState
 
+
+
   unsigned long long* mask_dev = NULL;
   //THCudaCheck(THCudaMalloc(state, (void**) &mask_dev,
   //                      boxes_num * col_blocks * sizeof(unsigned long long)));

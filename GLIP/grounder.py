@@ -13,6 +13,7 @@ cfg.num_gpus = 2
 cfg.merge_from_file(config_file)
 cfg.merge_from_list(["MODEL.WEIGHT", weight_file])
 cfg.merge_from_list(["MODEL.DEVICE", "cuda:1"])
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 import requests
