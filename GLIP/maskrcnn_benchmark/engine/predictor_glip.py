@@ -11,7 +11,7 @@ import pdb
 from maskrcnn_benchmark.modeling.detector import build_detection_model
 from maskrcnn_benchmark.utils.checkpoint import DetectronCheckpointer
 from maskrcnn_benchmark.utils.dist import get_iou
-from maskrcnn_benchmark.structures.image_list import to_image_list
+from maskrcnn_benchmark.structures.image_list import to_image_list, ImageList
 from maskrcnn_benchmark.structures.boxlist_ops import boxlist_iou
 from maskrcnn_benchmark.structures.bounding_box import BoxList
 from maskrcnn_benchmark import layers as L
@@ -167,13 +167,14 @@ class GLIPDemo(object):
 
     def run_on_batched_images(self,
                               images,
+                              image_sizes,
                               captions,
                               positive_map_label_to_tokens,
                               entity_lists,
                               origin_images=None,
                               thresh=0.5,
                               save_img=False):
-        images = to_image_list(images)
+        images = ImageList(images, image_sizes)
         images = images.to(self.device)
         # print("captions:", captions)
         # print("positive_map_label_to_tokens:", positive_map_label_to_tokens)

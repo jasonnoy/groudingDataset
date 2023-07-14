@@ -183,13 +183,13 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
     dataloader = torch.utils.data.DataLoader(laion_dataset, shuffle=False, num_workers=4, batch_size=batch_size, collate_fn=BatchGroundingCollator())
     total_groundings = []
     for i, batch in tqdm(enumerate(dataloader)):
-        origin_images = batch[6]
-        results, preds = glip_demo.run_on_batched_images(*batch[:4], origin_images=origin_images, thresh=0.55, save_img=save_img)
-        captions = batch[1]
-        new_entities = batch[3]
-        new_to_old_entities = batch[4]
-        new_entity_to_ids = batch[5]
-        image_ids = batch[7]
+        origin_images = batch[7]
+        results, preds = glip_demo.run_on_batched_images(*batch[:5], origin_images=origin_images, thresh=0.55, save_img=save_img)
+        captions = batch[2]
+        new_entities = batch[4]
+        new_to_old_entities = batch[5]
+        new_entity_to_ids = batch[6]
+        image_ids = batch[8]
         entire_entities = reduce(add, new_entities)
         if results:
             for result, pred, caption, new_entity_to_id, new_to_old_entity, index in zip(results, preds, captions, new_entity_to_ids, new_to_old_entities, image_ids):
