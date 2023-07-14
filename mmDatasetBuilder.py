@@ -216,12 +216,12 @@ def read_tar(tar_path):
     return wds.WebDataset(tar_path)
 
 
-def get_relative_coords(coords, width, height):
+def get_relative_coords_str(coords, width, height):
     x_1 = round(coords[0] / width, 3)
     y_1 = round(coords[1] / height, 3)
     x_2 = round(coords[2] / width, 3)
     y_2 = round(coords[3] / height, 3)
-    return x_1, y_1, x_2, y_2
+    return "{},{},{},{}".format(x_1, y_1, x_2, y_2)
 
 
 # def sort_groundings(groundings: list):
@@ -241,10 +241,7 @@ def build_training_text(record):
     for grounding_pair in sorted_groundings:
         locs = grounding_pair[0]
         pos = grounding_pair[1]
-        loc_strs = []
-        for coords in locs:
-            loc_str = ",".join(get_relative_coords(coords, width, height))
-            loc_strs.append(loc_str)
+        loc_strs = [get_relative_coords_str(coords, width, height) for coords in locs]
         grouning_str = ";".join(loc_strs)
         grouning_str = "[{}]".format(grouning_str)
         caption.insert(pos, grouning_str)
