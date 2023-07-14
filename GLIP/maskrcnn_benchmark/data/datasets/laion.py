@@ -77,6 +77,7 @@ def create_positive_map_label_to_token_from_positive_map(positive_map, plus=0):
 
 
 def compute_image_shape(original_shape):
+    return [1800, 1800]
     ratio = original_shape[1] / original_shape[0]
     edge = int(math.sqrt(TOTAL_PIXEL / ratio))
     if edge in FACTOR_DICT:
