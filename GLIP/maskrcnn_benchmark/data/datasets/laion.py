@@ -15,7 +15,7 @@ RESOLUTIONS = {"240p": (320, 240), "480p": (720, 480), "720p": (1280, 720), "108
 TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
 FACTOR_DICT = {}
 mid = int(math.sqrt(TOTAL_PIXEL))
-for i_t in range(mid + 1)[1:]:
+for i_t in range(mid + 1)[576:]:
     if TOTAL_PIXEL % i_t == 0:
         FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
 vs = list(FACTOR_DICT.values())
@@ -88,7 +88,7 @@ def compute_image_shape(original_shape):
             continue
         fit = prev if edge - prev < cur - edge else cur
         return fit, FACTOR_DICT[fit]
-    return RESOLUTIONS[SOLUTION]  # just in case
+    return FACTOR_DICT[1600]  # just in case
 
 
 class Laion(data.Dataset):

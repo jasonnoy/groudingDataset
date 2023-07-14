@@ -183,7 +183,7 @@ def parse_and_grounding_multi_class(img, caption, idx, nlp, output_path, save_im
 
 
 def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path, save_img=False):
-    dataloader = torch.utils.data.DataLoader(laion_dataset, shuffle=False, num_workers=4, batch_size=batch_size, collate_fn=BatchGroundingCollator())
+    dataloader = torch.utils.data.DataLoader(laion_dataset, shuffle=False, num_workers=2, batch_size=batch_size, collate_fn=BatchGroundingCollator())
     total_groundings = []
     for i, batch in tqdm(enumerate(dataloader)):
         origin_images = batch[7]
@@ -280,12 +280,12 @@ if __name__ == "__main__":
     world_size = args.world_size
 
     nlp = spacy.load("en_core_web_trf")
-    input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00033"
-    output_path = "/gpfs/gpfs1/zphz/jjh/test_dataset/part-00033"
+    input_path = "/gpfs/gpfs1/zphz/img_datasets/laion115m/part-00032"
+    output_path = "/gpfs/gpfs1/zphz/jjh/test_dataset/part-00032"
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     total_ids = get_id_list(input_path)
-    part_index = 3300000
+    part_index = 3200000
     part_size = len(total_ids) // (world_size-1)
     start = rank*part_size
     end = min((rank+1)*part_size, len(total_ids))

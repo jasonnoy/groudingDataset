@@ -20,6 +20,7 @@ LOCAL_RANK=${SLURM_LOCALID:-0}
 
 echo "RUN on `hostname`, CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
 
-python pseudo_training.py --world_size $WORLD_SIZE --rank $RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT --local_rank $LOCAL_RANK
+# shellcheck disable=SC2046
+nohup python mmDatasetBuilder.py --world_size $WORLD_SIZE --rank $RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT --local_rank $LOCAL_RANK >"nohup$(RANK).output 2>&1 &"
 
 echo "DONE on `hostname`"
