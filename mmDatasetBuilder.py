@@ -207,8 +207,6 @@ def batch_parse_and_grounding_multi_class(laion_dataset, batch_size, output_path
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
                 groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity)
                 total_groundings.append(output_decorator(groundings, index))
-        if i == 1:
-            break
     return total_groundings
 
 
@@ -236,7 +234,7 @@ def build_training_text(record):
     for g in groundings:
         for pos, locs in g.items():
             loc_pos_list.append([locs, pos])
-    print("loc_pos_list:", loc_pos_list)
+    # print("loc_pos_list:", loc_pos_list)
     sorted_groundings = sorted(loc_pos_list, key=lambda x: x[1], reverse=True)
     for grounding_pair in sorted_groundings:
         locs = grounding_pair[0]
@@ -246,7 +244,7 @@ def build_training_text(record):
         grouning_str = "[{}]".format(grouning_str)
         caption.insert(pos, grouning_str)
     caption = "".join(caption)
-    print("caption:", caption)
+    # print("caption:", caption)
     return caption
 
 
@@ -277,7 +275,6 @@ if __name__ == "__main__":
                 meta_data = json.loads(line)
                 if meta_data['status'] == "success":
                     grounding = next(grounding_iter)
-                    print("grounding:", grounding)
                     # size = (int(meta_data['width']), int(meta_data['height']))
                     # index = data['id'].decode()
                     image_id = grounding['SAMPLE_ID']
@@ -290,8 +287,6 @@ if __name__ == "__main__":
                     meta_data['grounding'] = None
                     loc_pos_list = None
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
-                break
         f1.close()
         f2.close()
-        break
     print("done")
