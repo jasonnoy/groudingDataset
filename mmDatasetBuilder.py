@@ -8,9 +8,9 @@ import numpy as np
 from PIL import Image
 import spacy
 import json
+import sys
 import os
 import matplotlib.pyplot as plt
-from collections import defaultdict
 from tqdm import tqdm
 import io
 import webdataset as wds
@@ -19,6 +19,7 @@ from transformers import AutoTokenizer
 from functools import reduce
 from operator import add
 
+sys.path.append(os.path.join(os.getcwd(), "GLIP"))
 
 def get_label_names(predictions, model, new_entities):
     labels = predictions.get_field("labels").tolist()
