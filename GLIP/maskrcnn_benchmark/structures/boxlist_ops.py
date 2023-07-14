@@ -66,6 +66,10 @@ def boxlist_ml_nms(boxlist, nms_thresh, max_proposals=-1,
 
             keep += keep_j
     else:
+        print("box device:", boxes.device)
+        print("scores device:", scores.device)
+        print("labels device:", labels.device)
+
         keep = _box_ml_nms(boxes, scores, labels.float(), nms_thresh)
         
     if max_proposals > 0:
