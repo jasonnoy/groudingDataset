@@ -11,20 +11,13 @@ def read_tar(tar_path):
     return wds.WebDataset(tar_path)
 
 
-TOTAL_PIXEL = 345600
-FACTOR_DICT = {}
-mid = int(math.sqrt(TOTAL_PIXEL))
-for i_t in range(mid+1)[1:]:
-    if TOTAL_PIXEL % i_t == 0:
-        FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
-print(FACTOR_DICT)
-
-SOLUTION = "480p"
-RESOLUTIONS = {"240p": [240, 320], "480p": [480, 720], "720p": [720, 1280], "1080p": [1080, 1920], "2K": [1440, 2560], "4K": [2160, 4096]}
+SOLUTION = "720p"
+RESOLUTIONS = {"240p": (320, 240), "480p": (720, 480), "720p": (1280, 720), "1080p": (1920, 1080), "2K": (2560, 1440),
+               "4K": (4096, 2160)}
 TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
 FACTOR_DICT = {}
 mid = int(math.sqrt(TOTAL_PIXEL))
-for i_t in range(mid+1)[1:]:
+for i_t in range(mid + 1)[512:]:  # starting from 320:1080
     if TOTAL_PIXEL % i_t == 0:
         FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
 vs = list(FACTOR_DICT.values())
