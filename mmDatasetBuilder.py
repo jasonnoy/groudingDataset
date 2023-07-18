@@ -41,8 +41,7 @@ def get_label_names(predictions, model, new_entities):
     return new_labels
 
 
-def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity):
-    # res = defaultdict(list)
+def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=False):
     res = {}
     for idx, box in enumerate(pred.bbox):
         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
@@ -52,14 +51,19 @@ def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entit
         else:
             entity = new_labels[idx]
             pos = -1
-        # res[entity].append([top_left+bottom_right, pos])
+
+        loc = top_left+bottom_right
+
+        if percent:
+            width, height = pred.size
+            loc = [l/width if l % 2 == 0 else l/height for l in loc]
+
         if entity not in res:
-            res[entity] = {pos: [top_left+bottom_right]}
+            res[entity] = {pos: [loc]}
         elif pos in res[entity]:
-            res[entity][pos].append(top_left+bottom_right)
+            res[entity][pos].append(loc)
         else:
-            res[entity][pos] = [top_left+bottom_right]
-        # res[entity][pos].append(top_left+bottom_right)
+            res[entity][pos] = [loc]
     return res
 
 
@@ -328,6 +332,7 @@ if __name__ == "__main__":
                     meta_data['annot_caption'] = build_training_text(record=meta_data)
                 else:
                     meta_data['grounding'] = None
+                    meta_data['annot_caption'] = None
                     loc_pos_list = None
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
         f1.close()
