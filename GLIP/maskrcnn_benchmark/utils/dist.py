@@ -29,6 +29,29 @@ def _get_global_gloo_group():
     return dist.group.WORLD
 
 
+def get_iou(lt1, rb1, lt2, rb2):
+    """
+    Compute the Intersection over Union of two bounding boxes.
+    """
+    lt1_x = lt1[0]
+    lt1_y = lt1[1]
+    rb1_x = rb1[0]
+    rb1_y = rb1[1]
+    lt2_x = lt2[0]
+    lt2_y = lt2[1]
+    rb2_x = rb2[0]
+    rb2_y = rb2[1]
+
+    W = min(rb1_x, rb2_x) - max(lt1_x, lt2_x)
+    H = min(rb1_y, rb2_y) - max(lt1_y, lt2_y)
+    if W <= 0 or H <= 0:
+        return 0
+    SA = (rb1_x - lt1_x) * (rb1_y - lt1_y)
+    SB = (rb2_x - lt2_x) * (rb2_y - lt2_y)
+    cross = W * H
+    return cross/(SA + SB - cross)
+
+
 def all_gather(data):
     """
     Run all_gather on arbitrary picklable data (not necessarily tensors)

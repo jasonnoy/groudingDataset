@@ -636,7 +636,6 @@ class ATSSPostProcessor(torch.nn.Module):
 
         # put in the same format as anchors
         if box_cls is not None:
-            #print('Classification.')
             box_cls = permute_and_flatten(box_cls, N, A, C, H, W)
             box_cls = box_cls.sigmoid()
 
@@ -714,16 +713,14 @@ class ATSSPostProcessor(torch.nn.Module):
                 box_cls=None,
                 token_logits=None,
                 dot_product_logits=None,
-                positive_maps=None,
+                positive_map=None,
                 ):
         sampled_boxes = []
         anchors = list(zip(*anchors))
-        print("len box_regression: {}, len positive_maps: {}".format(len(box_regression), len(positive_maps)))
         for idx, (b, c, a) in enumerate(zip(box_regression, centerness, anchors)):
             o = None
             t = None
             d = None
-            positive_map = positive_maps[idx]
             if box_cls is not None:
                 o = box_cls[idx]
             if token_logits is not None:
@@ -773,11 +770,21 @@ class ATSSPostProcessor(torch.nn.Module):
 def convert_grounding_to_od_logits(logits, box_cls, positive_map, score_agg=None):
     scores = torch.zeros(logits.shape[0], logits.shape[1], box_cls.shape[2]).to(logits.device)
     # 256 -> 80, average for each class
+    hurdle = 80
     if positive_map is not None:
         # score aggregation method
         if score_agg == "MEAN":
-            for label_j in positive_map:
-                scores[:, :, label_j - 1] = logits[:, :, torch.LongTensor(positive_map[label_j])].mean(-1)
+            for label_j, p_map in enumerate(positive_map):
+                if label_j >= hurdle:
+                    break
+                # print("torch.LongTensor(positive_map[label_j]):", torch.LongTensor(positive_map[label_j]))
+                try:
+                    scores[:, :, label_j] = logits[:, :, p_map].mean(-1)
+                except Exception as e:
+                    print("logits shape:", logits.shape)
+                    print("label_j:", label_j)
+                    print("p_map shape:", p_map.shape)
+
         elif score_agg == "MAX":
             # torch.max() returns (values, indices)
             for label_j in positive_map:

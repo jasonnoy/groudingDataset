@@ -67,6 +67,60 @@ class BatchCollator(object):
         return images, targets, img_ids, positive_map, positive_map_eval, greenlight_map
 
 
+class BatchGroundingCollator(object):
+    """
+    From a list of samples from the dataset,
+    returns the batched images and targets.
+    This should be passed to the DataLoader
+    """
+
+    def __init__(self, size_divisible=0):
+        self.size_divisible = size_divisible
+
+    def __call__(self, batch):
+        transposed_batch = list(zip(*batch))
+
+        images = transposed_batch[0]
+        captions = transposed_batch[1]
+        positive_maps = transposed_batch[2]
+        entities = transposed_batch[3]
+        new_to_old_entity_list = transposed_batch[4]
+        new_entity_to_id_list = transposed_batch[5]
+        origin_images = transposed_batch[6]
+        idx = transposed_batch[7]
+
+        # compute batched positive map
+        max_len = max([v.shape[1] for v in positive_maps])
+        nb_boxes = sum([v.shape[0] for v in positive_maps])
+        batched_pos_map = torch.zeros((nb_boxes, max_len), dtype=torch.bool)
+        cur_count = 0
+        for cur_pos in positive_maps:
+            batched_pos_map[cur_count: cur_count + len(cur_pos), : cur_pos.shape[1]] = cur_pos
+            cur_count += len(cur_pos)
+
+        max_size = tuple(max(s) for s in zip(*[img.shape for img in images]))
+        if self.size_divisible > 0:
+            import math
+
+            stride = self.size_divisible
+            max_size = list(max_size)
+            max_size[1] = int(math.ceil(max_size[1] / stride) * stride)
+            max_size[2] = int(math.ceil(max_size[2] / stride) * stride)
+            max_size = tuple(max_size)
+
+        batch_shape = (len(images),) + max_size
+        batched_imgs = images[0].new(*batch_shape).zero_()
+        for img, pad_img in zip(images, batched_imgs):
+            pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].copy_(img)
+
+        image_sizes = [im.shape[-2:] for im in images]
+
+        assert cur_count == len(batched_pos_map)
+        positive_map = batched_pos_map.bool()
+
+        return batched_imgs, image_sizes, captions, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list, origin_images, idx
+
+
 class BBoxAugCollator(object):
     """
     From a list of samples from the dataset,

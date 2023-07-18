@@ -15,9 +15,9 @@ class BertEncoder(nn.Module):
         print("LANGUAGE BACKBONE USE GRADIENT CHECKPOINTING: ", self.cfg.MODEL.LANGUAGE_BACKBONE.USE_CHECKPOINT)
 
         if self.bert_name == "bert-base-uncased":
-            config = BertConfig.from_pretrained("/zphz/official_pretrains/hugging_face/bert-base-uncased")
+            config = BertConfig.from_pretrained(cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH)
             config.gradient_checkpointing = self.cfg.MODEL.LANGUAGE_BACKBONE.USE_CHECKPOINT
-            self.model = BertModel.from_pretrained("/zphz/official_pretrains/hugging_face/bert-base-uncased", add_pooling_layer=False, config=config)
+            self.model = BertModel.from_pretrained(cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH, add_pooling_layer=False, config=config)
             self.language_dim = 768
         elif self.bert_name == "roberta-base":
             config = RobertaConfig.from_pretrained(self.bert_name)

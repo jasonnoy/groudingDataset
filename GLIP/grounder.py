@@ -1,5 +1,5 @@
 import os
-
+import torch
 from PIL import Image
 import numpy as np
 from GLIP.maskrcnn_benchmark.config import cfg
@@ -7,12 +7,14 @@ from GLIP.maskrcnn_benchmark.engine.predictor_glip import GLIPDemo
 
 
 config_file = "./GLIP/configs/pretrain/glip_Swin_L.yaml"
-weight_file = "/zphz/jjh/models/glip/MODEL/glip_large_model.pth"
+weight_file = "/gpfs/gpfs1/zphz/jjh/models/glip/MODEL/glip_large_model.pth"
 cfg.local_rank = 0
 cfg.num_gpus = 2
 cfg.merge_from_file(config_file)
 cfg.merge_from_list(["MODEL.WEIGHT", weight_file])
 cfg.merge_from_list(["MODEL.DEVICE", "cuda:1"])
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+torch.cuda.set_device(1)
 
 
 import requests
@@ -31,9 +33,9 @@ def load(url):
 
 glip_demo = GLIPDemo(
     cfg,
-    min_image_size=800,
     confidence_threshold=0.7,
-    show_mask_heatmaps=False
+    show_mask_heatmaps=False,
+    min_image_size=800
 )
 
 

@@ -89,7 +89,7 @@ class GeneralizedVLRCNN(nn.Module):
                 self.tokenizer = CLIPTokenizerFast.from_pretrained("openai/clip-vit-base-patch32",
                                                                             from_slow=True)
         else:
-            self.tokenizer = AutoTokenizer.from_pretrained("/zphz/official_pretrains/hugging_face/bert-base-uncased")
+            self.tokenizer = AutoTokenizer.from_pretrained(cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH)
         self.tokenizer_vocab = self.tokenizer.get_vocab()
         self.tokenizer_vocab_ids = [item for key, item in self.tokenizer_vocab.items()]
 
@@ -173,10 +173,10 @@ class GeneralizedVLRCNN(nn.Module):
                 p.requires_grad = False
 
     def forward(self, 
-        images, 
-        targets=None, 
+        images,
         captions=None, 
         positive_map=None,
+        targets=None,
         greenlight_map=None):
         """
         Arguments:
@@ -194,11 +194,9 @@ class GeneralizedVLRCNN(nn.Module):
         """
         if self.training and targets is None:
             raise ValueError("In training mode, targets should be passed")
-        
-        images = to_image_list(images)
+
         # batch_size = images.tensors.shape[0]
         device = images.tensors.device
-
 
         if self.cfg.GLIPKNOW.PARALLEL_LANGUAGE_INPUT:
             language_dict_features, positive_map = self._forward_language_parallel(
@@ -219,7 +217,7 @@ class GeneralizedVLRCNN(nn.Module):
                     if not self.mlm_loss_for_only_positives:
                         greenlight_map = None
                     input_ids, mlm_labels = random_word(
-                        input_ids=tokenized.input_ids, 
+                        input_ids=tokenized.input_ids,
                         mask_token_id=self.tokenizer.mask_token_id,
                         vocabs=self.tokenizer_vocab_ids,
                         padding_token_id=self.tokenizer.pad_token_id,
@@ -250,7 +248,6 @@ class GeneralizedVLRCNN(nn.Module):
                     language_dict_features["masks"] = 1 - tokenized.special_tokens_mask
                 
                 language_dict_features["mlm_labels"] = mlm_labels
-
         # visual embedding
         swint_feature_c4 = None
         if 'vl' in self.cfg.MODEL.SWINT.VERSION:
@@ -259,7 +256,6 @@ class GeneralizedVLRCNN(nn.Module):
             visual_features, language_dict_features, swint_feature_c4 = self.backbone(inputs)
         else:
             visual_features = self.backbone(images.tensors)
-
         # rpn force boxes
         if targets:
             targets = [target.to(device)
@@ -283,6 +279,7 @@ class GeneralizedVLRCNN(nn.Module):
         else:
             proposals, proposal_losses, fused_visual_features = self.rpn(images, visual_features, targets, language_dict_features, positive_map,
                                               captions, swint_feature_c4)
+        # print("proposals:", proposals)
         if self.roi_heads:
             if self.cfg.MODEL.ROI_MASK_HEAD.PREDICTOR.startswith("VL"):
                 if self.training:

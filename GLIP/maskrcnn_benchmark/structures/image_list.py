@@ -46,9 +46,6 @@ def to_image_list(tensors, size_divisible=0):
         return ImageList(tensors, image_sizes)
     elif isinstance(tensors, (tuple, list)):
         max_size = tuple(max(s) for s in zip(*[img.shape for img in tensors]))
-
-        # TODO Ideally, just remove this and let me model handle arbitrary
-        # input sizs
         if size_divisible > 0:
             import math
 
@@ -64,7 +61,6 @@ def to_image_list(tensors, size_divisible=0):
             pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].copy_(img)
 
         image_sizes = [im.shape[-2:] for im in tensors]
-
         return ImageList(batched_imgs, image_sizes)
     else:
         raise TypeError("Unsupported type for to_image_list: {}".format(type(tensors)))

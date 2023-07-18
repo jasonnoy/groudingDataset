@@ -10,7 +10,8 @@ from torchvision import transforms as T
 import pdb
 from maskrcnn_benchmark.modeling.detector import build_detection_model
 from maskrcnn_benchmark.utils.checkpoint import DetectronCheckpointer
-from maskrcnn_benchmark.structures.image_list import to_image_list
+from maskrcnn_benchmark.utils.dist import get_iou
+from maskrcnn_benchmark.structures.image_list import to_image_list, ImageList
 from maskrcnn_benchmark.structures.boxlist_ops import boxlist_iou
 from maskrcnn_benchmark.structures.bounding_box import BoxList
 from maskrcnn_benchmark import layers as L
@@ -79,7 +80,6 @@ class GLIPDemo(object):
         transform = T.Compose(
             [
                 T.ToPILImage(),
-                T.Resize(self.min_image_size) if self.min_image_size is not None else lambda x: x,
                 T.ToTensor(),
                 to_bgr_transform,
                 normalize_transform,
@@ -101,7 +101,7 @@ class GLIPDemo(object):
                 tokenizer = CLIPTokenizerFast.from_pretrained("openai/clip-vit-base-patch32",
                                                               from_slow=True)
         else:
-            tokenizer = AutoTokenizer.from_pretrained("/zphz/official_pretrains/hugging_face/bert-base-uncased")
+            tokenizer = AutoTokenizer.from_pretrained(cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH)
         return tokenizer
 
     def run_ner(self, caption):
@@ -131,13 +131,13 @@ class GLIPDemo(object):
         top_predictions = self._post_process_fixed_thresh(predictions)
         return top_predictions
 
-    def run_on_web_image(self, 
-            original_image, 
-            original_caption, 
-            thresh=0.5,
-            custom_entity = None,
-            alpha = 0.0,
-            color = 255):
+    def run_on_web_image(self,
+                         original_image,
+                         original_caption,
+                         thresh=0.5,
+                         custom_entity=None,
+                         alpha=0.0,
+                         color=255):
         self.color = color
         predictions = self.compute_prediction(original_image, original_caption, custom_entity)
         top_predictions = self._post_process(predictions, thresh)
@@ -150,30 +150,65 @@ class GLIPDemo(object):
             result = self.overlay_mask(result, top_predictions)
         return result, top_predictions
 
-
     def run_on_image(self,
-            original_image,
-            original_caption,
-            thresh=0.5,
-            custom_entity = None,
-            alpha = 0.0):
+                     original_image,
+                     original_caption,
+                     thresh=0.5,
+                     custom_entity=None,
+                     alpha=0.0,
+                     save_img=False):
         predictions = self.compute_prediction(original_image, original_caption, custom_entity)
         top_predictions = self._post_process(predictions, thresh)
-        result = original_image.copy()
-        result = self.overlay_boxes(result, top_predictions)
+        result = None
+        if save_img:
+            result = original_image.copy()
+            result = self.overlay_boxes(result, top_predictions)
         return result, top_predictions
 
+    def run_on_batched_images(self,
+                              images,
+                              image_sizes,
+                              captions,
+                              positive_map_label_to_tokens,
+                              entity_lists,
+                              origin_images=None,
+                              thresh=0.5,
+                              save_img=False):
+        images = ImageList(images, image_sizes)
+        images = images.to(self.device)
+        # print("captions:", captions)
+        # print("positive_map_label_to_tokens:", positive_map_label_to_tokens)
+        with torch.no_grad():
+            predictions = self.model(images, captions, positive_map_label_to_tokens)
+            predictions = [p.to("cpu") for p in predictions]
+        # for origin_image, prediction in zip(origin_images, predictions):
+        #     height, width = origin_image.shape[:-1]
+        #     prediction = prediction.resize((width, height))
+        predictions = [prediction.resize((origin_image.shape[1], origin_image.shape[0])) for prediction, origin_image in
+                       zip(predictions, origin_images)]
+        list_locations = get_entity_list_locs(entity_lists)
+        top_predictions = [self._post_process(prediction, list_loc, thresh) for
+                           prediction, entity_list, list_loc in zip(predictions, entity_lists, list_locations)]
+        results = None
+        if save_img:
+            results = [image.copy() for image in origin_images]
+            results = [self.overlay_boxes(result, top_prediction) for result, top_prediction in
+                       zip(results, top_predictions)]
+        images.to("cpu")
+        del images
+        torch.cuda.empty_cache()
+        return results, top_predictions
 
-    def visualize_with_predictions(self, 
-            original_image, 
-            predictions, 
-            thresh=0.5,
-            alpha=0.0,
-            box_pixel=3,
-            text_size = 1,
-            text_pixel = 2,
-            text_offset = 10,
-            text_offset_original = 4):
+    def visualize_with_predictions(self,
+                                   original_image,
+                                   predictions,
+                                   thresh=0.5,
+                                   alpha=0.0,
+                                   box_pixel=3,
+                                   text_size=1,
+                                   text_pixel=2,
+                                   text_offset=10,
+                                   text_offset_original=4):
         height, width = original_image.shape[:-1]
         predictions = predictions.resize((width, height))
         top_predictions = self._post_process(predictions, thresh)
@@ -182,75 +217,11 @@ class GLIPDemo(object):
         if self.show_mask_heatmaps:
             return self.create_mask_montage(result, top_predictions)
         result = self.overlay_boxes(result, top_predictions, alpha=alpha, box_pixel=box_pixel)
-        result = self.overlay_entity_names(result, top_predictions, text_size=text_size, text_pixel=text_pixel, text_offset = text_offset, text_offset_original = text_offset_original)
+        result = self.overlay_entity_names(result, top_predictions, text_size=text_size, text_pixel=text_pixel,
+                                           text_offset=text_offset, text_offset_original=text_offset_original)
         if self.cfg.MODEL.MASK_ON:
             result = self.overlay_mask(result, top_predictions)
         return result, top_predictions
-
-    def compute_prediction(self, original_images, original_captions, custom_entity=None):
-        # image
-        if not isinstance(original_images, list):
-            original_images = [original_images]
-        images = [self.transforms(img) for img in original_images]
-        image_list = to_image_list(images, self.cfg.DATALOADER.SIZE_DIVISIBILITY)
-        image_list = image_list.to(self.device)
-        positive_maps = []
-        # caption
-        for original_caption in original_captions:
-            if isinstance(original_caption, list):
-                # we directly provided a list of category names
-                caption_string = ""
-                tokens_positive = []
-                seperation_tokens = " . "
-                for word in original_caption:
-
-                    tokens_positive.append([len(caption_string), len(caption_string) + len(word)])
-                    caption_string += word
-                    caption_string += seperation_tokens
-
-                tokenized = self.tokenizer([caption_string], return_tensors="pt")
-                tokens_positive = [tokens_positive]
-            else:
-                tokenized = self.tokenizer([original_caption], return_tensors="pt")
-                if custom_entity is None:
-                    tokens_positive = self.run_ner(original_caption)
-            # process positive map
-            positive_map = create_positive_map(tokenized, tokens_positive)
-
-            if self.cfg.MODEL.RPN_ARCHITECTURE == "VLDYHEAD":
-                plus = 1
-            else:
-                plus = 0
-
-            positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
-            self.plus = plus
-            # self.positive_map_label_to_token = positive_map_label_to_token
-            positive_maps.append(positive_map_label_to_token)
-        tic = timeit.time.perf_counter()
-
-        # compute predictions
-        with torch.no_grad():
-            predictions = self.model(image_list, captions=original_captions, positive_map=positive_maps)
-            predictions = [o.to(self.cpu_device) for o in predictions]
-        print("inference time per image: {}".format(timeit.time.perf_counter() - tic))
-
-        # # always single image is passed at a time
-        # prediction = predictions[0]
-
-        # reshape prediction (a BoxList) into the original image size
-        for i in range(len(predictions)):
-            height, width = original_images[i].shape[:-1]
-            predictions[i] = predictions[i].resize((width, height))
-
-            # if predictions[i].has_field("mask"):
-            #     # if we have masks, paste the masks in the right position
-            #     # in the image, as defined by the bounding boxes
-            #     masks = predictions[i].get_field("mask")
-            #     # always single image is passed at a time
-            #     masks = self.masker([masks], [predictions[i]])[0]
-            #     predictions[i].add_field("mask", masks)
-
-        return predictions
 
     def _post_process_fixed_thresh(self, predictions):
         scores = predictions.get_field("scores")
@@ -270,26 +241,148 @@ class GLIPDemo(object):
         _, idx = scores.sort(0, descending=True)
         return predictions[idx]
 
-    def _post_process(self, predictions, threshold=0.5):
-        res = []
-        for prediction in predictions:
-            scores = prediction.get_field("scores")
-            labels = prediction.get_field("labels").tolist()
-            thresh = scores.clone()
-            for i, lb in enumerate(labels):
-                if isinstance(self.confidence_threshold, float):
-                    thresh[i] = threshold
-                elif len(self.confidence_threshold) == 1:
-                    thresh[i] = threshold
-                else:
-                    thresh[i] = self.confidence_threshold[lb - 1]
-            keep = torch.nonzero(scores > thresh).squeeze(1)
-            prediction = prediction[keep]
+    def filter_iou(self, prediction, threshold=0.95):
+        # predictions in descending order
+        qualified = {}
+        labels = prediction.get_field("labels").tolist()
+        scores = prediction.get_field("scores").tolist()
+        for idx, bbox in enumerate(prediction.bbox):
+            top_left, bottom_right = bbox[:2].tolist(), bbox[2:].tolist()
+            top_left = (top_left[0], top_left[1])
+            bottom_right = (bottom_right[0], bottom_right[1])
+            if len(qualified) == 0:
+                qualified[(top_left, bottom_right)] = idx
+                continue
+            add = True
+            for tl, rb in *qualified.keys(),:
+                iou = get_iou(top_left, bottom_right, tl, rb)
+                if get_iou(top_left, bottom_right, tl, rb) > threshold:
+                    add = False
+                    break
+            if add:
+                qualified[(top_left, bottom_right)] = idx
+        ids = list(qualified.values())
+        return prediction[ids]
 
-            scores = prediction.get_field("scores")
-            _, idx = scores.sort(0, descending=True)
-            res.append(prediction[idx])
-        return res
+    def compute_prediction(self, original_image, original_caption, custom_entities=None):
+        # image
+        image = self.transforms(original_image)
+        image_list = to_image_list(image, self.cfg.DATALOADER.SIZE_DIVISIBILITY)
+        image_list = image_list.to(self.device)
+        if custom_entities:
+            self.entities = custom_entities
+            tokenized = self.tokenizer([original_caption], return_tensors="pt")
+            tokens_positive = []
+            for entity in custom_entities:
+                try:
+                    # want no overlays
+                    found = {(0, 0)}
+                    for m in re.finditer(entity, original_caption.lower()):
+                        if (m.start(), m.end()) not in found:
+                            tokens_positive.append([[m.start(), m.end()]])
+                            found.add((m.start(), m.end()))
+                except:
+                    print("noun entities:", custom_entities)
+                    print("entity:", entity)
+                    print("caption:", original_caption.lower())
+        else:
+            # caption
+            print("Empty entities")
+            if isinstance(original_caption, list):
+                # we directly provided a list of category names
+                self.entities = original_caption
+                caption_string = ""
+                tokens_positive = []
+                seperation_tokens = " . "
+                for word in original_caption:
+                    tokens_positive.append([len(caption_string), len(caption_string) + len(word)])
+                    caption_string += word
+                    caption_string += seperation_tokens
+                original_caption = caption_string
+                tokenized = self.tokenizer([caption_string], return_tensors="pt")
+                tokens_positive = [tokens_positive]
+            else:
+                tokenized = self.tokenizer([original_caption], return_tensors="pt")
+                tokens_positive = self.run_ner(original_caption)
+        # process positive map
+        positive_map = create_positive_map(tokenized, tokens_positive)
+
+        if self.cfg.MODEL.RPN_ARCHITECTURE == "VLDYHEAD":
+            plus = 1
+        else:
+            plus = 0
+
+        positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
+        self.plus = plus
+        self.positive_map_label_to_token = positive_map_label_to_token
+        # positive_maps.append(positive_map_label_to_token)
+        # tic = timeit.time.perf_counter()
+
+        # compute predictions
+        with torch.no_grad():
+            predictions = self.model(image_list, captions=[original_caption], positive_map=positive_map_label_to_token)
+            predictions = [o.to(self.cpu_device) for o in predictions]
+        # print("inference time per image: {}".format(timeit.time.perf_counter() - tic))
+
+        # # always single image is passed at a time
+        prediction = predictions[0]
+
+        # reshape prediction (a BoxList) into the original image size
+        height, width = original_image.shape[:-1]
+        prediction = prediction.resize((width, height))
+
+        # if predictions[i].has_field("mask"):
+        #     # if we have masks, paste the masks in the right position
+        #     # in the image, as defined by the bounding boxes
+        #     masks = predictions[i].get_field("mask")
+        #     # always single image is passed at a time
+        #     masks = self.masker([masks], [predictions[i]])[0]
+        #     predictions[i].add_field("mask", masks)
+
+        return prediction
+
+    def filter_object(self, prediction, list_loc):
+        ids = []
+        labels = prediction.get_field("labels").tolist()
+        for idx, l in enumerate(labels):
+            if l > list_loc[1] or l <= list_loc[0]:
+                continue
+            else:
+                ids.append(idx)
+        return prediction[ids]
+
+    def _post_process(self, prediction, list_loc, threshold=0.5):
+        scores = prediction.get_field("scores")
+        # print("before post process")
+        # print("scores:", scores)
+        labels = prediction.get_field("labels").tolist()
+        # print("labels:", labels)
+        # print("scores:", scores)
+        thresh = scores.clone()
+        for i, lb in enumerate(labels):
+            if isinstance(self.confidence_threshold, float):
+                thresh[i] = threshold
+            elif len(self.confidence_threshold) == 1:
+                thresh[i] = threshold
+            else:
+                thresh[i] = self.confidence_threshold[lb - 1]
+        keep = torch.nonzero(scores > thresh).squeeze(1)
+        prediction = prediction[keep]
+        scores = prediction.get_field("scores")
+        _, idx = scores.sort(0, descending=True)
+        prediction = prediction[idx]
+        # print("after score filter:")
+        # print("scores:", prediction.get_field("scores"))
+        # print("labels:", prediction.get_field("labels"))
+        prediction = self.filter_object(prediction, list_loc)
+        # print("after object filter:")
+        # print("scores:", prediction.get_field("scores"))
+        # print("labels:", prediction.get_field("labels"))
+        prediction = self.filter_iou(prediction)
+        # print("final:")
+        # print("scores:", prediction.get_field("scores"))
+        # print("labels:", prediction.get_field("labels"))
+        return prediction
 
     def compute_colors_for_labels(self, labels):
         """
@@ -303,7 +396,7 @@ class GLIPDemo(object):
             pass
         return colors
 
-    def overlay_boxes(self, image, predictions, alpha=0.5, box_pixel = 3):
+    def overlay_boxes(self, image, predictions, alpha=0.5, box_pixel=3):
         labels = predictions.get_field("labels")
         boxes = predictions.bbox
 
@@ -332,7 +425,8 @@ class GLIPDemo(object):
 
         return image
 
-    def overlay_entity_names(self, image, predictions, names=None, text_size=1.0, text_pixel=2, text_offset = 10, text_offset_original = 4, custom_labels=None):
+    def overlay_entity_names(self, image, predictions, entities, text_size=1.0, text_pixel=2, text_offset=10,
+                             text_offset_original=4, custom_labels=None):
         scores = predictions.get_field("scores").tolist()
         labels = predictions.get_field("labels").tolist()
         colors = self.compute_colors_for_labels(predictions.get_field("labels")).tolist()
@@ -340,20 +434,11 @@ class GLIPDemo(object):
             new_labels = custom_labels
         else:
             new_labels = []
-            if self.cfg.MODEL.RPN_ARCHITECTURE == "VLDYHEAD":
-                plus = 1
-            else:
-                plus = 0
-            self.plus = plus
-            if self.entities and self.plus:
-                for i in labels:
-                    if i <= len(self.entities):
-                        new_labels.append(self.entities[i - self.plus])
-                    else:
-                        new_labels.append('object')
-                # labels = [self.entities[i - self.plus] for i in labels ]
-            else:
-                new_labels = ['object' for i in labels]
+            for i in labels:
+                if i <= len(entities):
+                    new_labels.append(entities[i])
+                else:
+                    new_labels.append('object')
         boxes = predictions.bbox
 
         template = "{}:{:.2f}"
@@ -364,9 +449,9 @@ class GLIPDemo(object):
             for x_prev, y_prev in previous_locations:
                 if abs(x - x_prev) < abs(text_offset) and abs(y - y_prev) < abs(text_offset):
                     y -= text_offset
-            print("color:", color)
             cv2.putText(
-                image, s, (int(x), int(y)-text_offset_original), cv2.FONT_HERSHEY_SIMPLEX, text_size, color, text_pixel, cv2.LINE_AA
+                image, s, (int(x), int(y) - text_offset_original), cv2.FONT_HERSHEY_SIMPLEX, text_size, color,
+                text_pixel, cv2.LINE_AA
             )
             previous_locations.append((int(x), int(y)))
         return image
@@ -438,8 +523,6 @@ def create_positive_map(tokenized, tokens_positive):
                 beg_pos = tokenized.char_to_token(beg)
                 end_pos = tokenized.char_to_token(end - 1)
             except Exception as e:
-                print("beg:", beg, "end:", end)
-                print("token_positive:", tokens_positive)
                 # print("beg_pos:", beg_pos, "end_pos:", end_pos)
                 raise e
             if beg_pos is None:
@@ -488,3 +571,14 @@ def remove_punctuation(text: str) -> str:
     for p in punct:
         text = text.replace(p, '')
     return text.strip()
+
+
+def get_entity_list_locs(entity_lists):
+    cur_beg = 0
+    res = []
+    for entity_list in entity_lists:
+        beg = cur_beg
+        end = cur_beg + len(entity_list)
+        res.append((beg, end))
+        cur_beg = end
+    return res
