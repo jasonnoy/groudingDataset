@@ -93,7 +93,7 @@ def compute_image_shape(original_shape):
 
 
 def remove_puncs(caption):
-    r = "[+=^*<>{}「」【】()（）/\[\],.?，。？！@¥%!@#$%&]"
+    r = "[+=^*<>{}「」【】()（）/\[\],.?，。？！:：@¥%!@#$%&]"
     caption = re.sub(r, ' ', caption)
     return caption
 
