@@ -1,7 +1,10 @@
 import sys
 import os
 print("adding", os.getcwd())
+print("adding", os.path.join(os.getcwd(), "GLIP"))
 sys.path.append(os.getcwd())
+sys.path.append(os.path.join(os.getcwd(), "GLIP"))
+
 
 import argparse
 import torch
