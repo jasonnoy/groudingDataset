@@ -166,5 +166,5 @@ def build_training_text(record):
 def get_id_list(path):
     filenames = os.listdir(path)
     id_list = [name for name in filenames if name.endswith('.tar')]
+    id_list.sort()
     return id_list
-
