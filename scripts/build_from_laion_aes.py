@@ -5,8 +5,6 @@ import spacy
 from transformers import AutoTokenizer
 from GLIP import *
 from dataset_builder import *
-print("adding", os.path.join(os.getcwd(), ".."))
-sys.path.append(os.path.join(os.getcwd(), ".."))
 
 
 if __name__ == "__main__":
