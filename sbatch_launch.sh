@@ -9,7 +9,7 @@
 #SBATCH --cpus-per-task=3
 #SBATCH --partition=dev
 #SBATCH --export=ALL
-#SBATCH --exclude=1hlo8k81jmmul-0,1m5qco0g209qm-0,2fpm7g8mhc7m7-0
+#SBATCH --exclude=1hlo8k81jmmul-0,1m5qco0g209qm-0,2fpm7g8mhc7m7-0,c89rgca402ma5-0
 
 srun experiments/build_from_laion_aes_jinan.sh
 echo "Done with job $SLURM_JOB_ID"
