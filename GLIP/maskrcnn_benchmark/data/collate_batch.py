@@ -91,7 +91,7 @@ class BatchGroundingCollator(object):
         return image
 
     def process_caption(self, caption):
-        caption = remove_puncs(caption)
+        caption = remove_punctuation(caption)
         doc = self.nlp(caption)
         nouns = [t.text.lower() for t in doc.noun_chunks]
         empty_nouns = False
