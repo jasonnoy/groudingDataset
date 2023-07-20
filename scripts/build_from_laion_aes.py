@@ -61,7 +61,7 @@ if __name__ == "__main__":
     for filename in files:
         tar_path = os.path.join(input_path, filename)
         res = {}
-        batch_size = 10
+        batch_size = 5
         laion_dataset = Laion(filename, input_path, nlp, tokenizer, transforms=glip_demo.transforms)
         meta_filename = "{}.meta.jsonl".format(filename)
         print("processing {}".format(filename))
