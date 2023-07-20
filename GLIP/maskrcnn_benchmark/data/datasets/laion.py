@@ -93,7 +93,7 @@ def compute_image_shape(original_shape):
 
 
 def remove_punctuation(text: str) -> str:
-    punct = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^',
+    punct = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
              '\'', '\"', '’', '`', '?', '$', '%', '#', '!', '&', '*', '+', ',', '.'
              ]
     for p in punct:
