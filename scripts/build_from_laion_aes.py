@@ -41,7 +41,7 @@ if __name__ == "__main__":
     rank = args.rank
     world_size = args.world_size
 
-    spacy.prefer_gpu()
+    # spacy.prefer_gpu()
     nlp = spacy.load("en_core_web_trf")
 
     glip_demo = GLIPDemo(
