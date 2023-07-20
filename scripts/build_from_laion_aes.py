@@ -1,3 +1,8 @@
+import sys
+import os
+print("adding", os.path.join(os.getcwd(), ".."))
+sys.path.append(os.path.join(os.getcwd(), ".."))
+
 import argparse
 import torch
 import json

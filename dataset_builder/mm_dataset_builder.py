@@ -1,5 +1,4 @@
 import torch.utils.data
-from GLIP import *
 from GLIP.maskrcnn_benchmark.data.collate_batch import BatchGroundingCollator
 import numpy as np
 from PIL import Image
@@ -7,9 +6,7 @@ import sys
 import os
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import io
 import webdataset as wds
-import time
 from functools import reduce
 from operator import add
 
