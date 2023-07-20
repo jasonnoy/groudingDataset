@@ -184,6 +184,8 @@ class GLIPDemo(object):
                               thresh=0.5,
                               save_img=False):
         images = ImageList(images, image_sizes)
+        print("model device:", self.device)
+        print("torch device:", torch.cuda.current_device())
         images = images.to(self.device)
         # print("captions:", captions)
         # print("positive_map_label_to_tokens:", positive_map_label_to_tokens)
