@@ -721,7 +721,7 @@ class VLDyHead(torch.nn.Module):
         
         if self.cfg.MODEL.DYHEAD.FUSE_CONFIG.MLM_LOSS:
             if cfg.MODEL.LANGUAGE_BACKBONE.MODEL_TYPE == "clip":
-                lang_cfg = BertConfig.from_pretrained("bert-base-uncased")
+                lang_cfg = BertConfig.from_pretrained(cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH)
                 lang_cfg.hidden_size = cfg.MODEL.CLIP.WIDTH
                 lang_cfg.vocab_size = cfg.MODEL.CLIP.VOCAB_SIZE
             self.mlm_head = BertLMPredictionHead(

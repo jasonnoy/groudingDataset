@@ -36,9 +36,10 @@ def read_tar(tar_path):
 # print(FACTOR_DICT)
 
 if __name__ == '__main__':
+
     text = ["[ disc, entity:the reign of ragnarok [ disc 1 of 2 ]"]
-    # r = "[+=^*<>{}「」【】()（）/\[\]]"
-    # text = re.sub(r, ' ', text)
+    r = "[+=^*<>{}「」【】()（）/\[\]]"
+    text = re.sub(r, ' ', text)
 
     print(",".join(text))
 #

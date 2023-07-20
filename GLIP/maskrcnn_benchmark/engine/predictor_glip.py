@@ -91,7 +91,7 @@ class GLIPDemo(object):
         cfg = self.cfg
         tokenizer = None
         if cfg.MODEL.LANGUAGE_BACKBONE.TOKENIZER_TYPE == "bert-base-uncased":
-            tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+            tokenizer = AutoTokenizer.from_pretrained(cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH)
         elif cfg.MODEL.LANGUAGE_BACKBONE.TOKENIZER_TYPE == "clip":
             from transformers import CLIPTokenizerFast
             if cfg.MODEL.DYHEAD.FUSE_CONFIG.MLM_LOSS:

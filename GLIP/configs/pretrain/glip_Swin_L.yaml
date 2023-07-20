@@ -20,7 +20,7 @@ MODEL:
     FREEZE: True
     MODEL_TYPE: "bert-base-uncased" # "roberta-base", "clip"
     MASK_SPECIAL: False
-    LOCAL_PATH: "/gpfs/gpfs1/zphz/official_pretrains/hugging_face/bert-base-uncased"
+    LOCAL_PATH: "/zhangpai21/huggingface_models/bert-base-uncased"
 
   RPN:
     USE_FPN: True

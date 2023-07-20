@@ -97,19 +97,18 @@ class Laion(data.Dataset):
 
     Args:
         root (string): part directory where tar and meta files are at.
-        index (string): index to tar and meta file.
+        path (string): tar file name.
         transform (callable, optional): A function/transform that  takes in an PIL image
             and returns a transformed version. E.g, ``transforms.ToTensor``
     """
 
-    def __init__(self, index, root, nlp, tokenizer, transforms=None, rpn_architecture="VLDYHEAD"):
+    def __init__(self, path, root, nlp, tokenizer, transforms=None, rpn_architecture="VLDYHEAD"):
         self.tokenizer = tokenizer
-        self.root = root
         self.transform = transforms
         self.nlp = nlp
         self.rpn_architecture = rpn_architecture
 
-        wds_ds = wds.WebDataset(os.path.join(root, "{}.tar".format(index)))
+        wds_ds = wds.WebDataset(os.path.join(root, path))
         self.samples = [[d['id'].decode(), pil_loader(d['jpg']), d['txt'].decode()] for d in wds_ds]
 
     def __getitem__(self, index):
