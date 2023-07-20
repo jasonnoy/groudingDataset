@@ -13,6 +13,8 @@ import time
 from functools import reduce
 from operator import add
 
+sys.path.append(os.path.join(os.getcwd(), ".."))
+
 
 def get_label_names(predictions, model, new_entities):
     labels = predictions.get_field("labels").tolist()
