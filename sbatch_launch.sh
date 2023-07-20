@@ -3,7 +3,6 @@
 #SBATCH --output=./logs/build_bounding_dataset_laion_aes_%j.out
 #SBATCH --error=./logs/build_bounding_dataset_laion_aes_%j.err
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:8
 #SBATCH --ntasks-per-node=8
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=dev
