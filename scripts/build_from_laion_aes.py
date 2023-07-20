@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
 
-    config_file = "/zhangpai21/checkpoints/GLIP-L/glip_Swin_L.yaml"
+    config_file = "/zhangpai21/jjh/projects/groundingDataset/GLIP/configs/pretrain/glip_Swin_L.yaml"
     weight_file = "/zhangpai21/checkpoints/GLIP-L/glip_large_model.pth"
     cfg.local_rank = args.local_rank
     cfg.num_gpus = 1
