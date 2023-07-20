@@ -92,6 +92,11 @@ def compute_image_shape(original_shape):
     return 1600, FACTOR_DICT[1600]  # just in case
 
 
+def remove_puncs(caption):
+    r = "[+=^*<>{}「」【】()（）/\[\]]"
+    return re.sub(r, ' ', caption)
+
+
 class Laion(data.Dataset):
     """ Laion dataset.
 
@@ -115,6 +120,7 @@ class Laion(data.Dataset):
         idx, image, caption = self.samples[index]
         r = "[+=^*<>{}「」【】()（）/\[\]]"
         caption = re.sub(r, ' ', caption)
+
         origin_image = np.array(image)[:, :, [2, 1, 0]]
 
         image_shape = image.size
@@ -165,11 +171,6 @@ class Laion(data.Dataset):
         # process positive map
         positive_map = create_positive_map(tokenized, tokens_positive)
 
-        if self.rpn_architecture == "VLDYHEAD":
-            plus = 1
-        else:
-            plus = 0
-        # positive_map_label_to_token = create_positive_map_label_to_token_from_positive_map(positive_map, plus=plus)
         return image, caption, positive_map, new_entities, new_to_old_entity, new_entity_to_id, origin_image, idx
 
     def __len__(self):

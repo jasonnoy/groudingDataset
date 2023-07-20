@@ -1,6 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import torch
 from maskrcnn_benchmark.structures.image_list import to_image_list
+from GLIP.maskrcnn_benchmark.data.datasets.laion import *
 
 import pdb
 class BatchCollator(object):
@@ -74,20 +75,88 @@ class BatchGroundingCollator(object):
     This should be passed to the DataLoader
     """
 
-    def __init__(self, size_divisible=0):
+    def __init__(self, nlp, tokenizer, transforms=None, size_divisible=0):
+        self.tokenizer = tokenizer
+        self.transform = transforms
+        self.nlp = nlp
         self.size_divisible = size_divisible
 
-    def __call__(self, batch):
-        transposed_batch = list(zip(*batch))
+    def process_iamge(self, image):
+        image_shape = image.size
+        image_resize_shape = compute_image_shape(image_shape)
+        image = image.resize(image_resize_shape)
+        image = np.array(image)[:, :, [2, 1, 0]]
+        if self.transform is not None:
+            image = self.transform(image)
+        return image
 
-        images = transposed_batch[0]
-        captions = transposed_batch[1]
-        positive_maps = transposed_batch[2]
-        entities = transposed_batch[3]
-        new_to_old_entity_list = transposed_batch[4]
-        new_entity_to_id_list = transposed_batch[5]
-        origin_images = transposed_batch[6]
-        idx = transposed_batch[7]
+    def process_caption(self, caption):
+        doc = self.nlp(caption)
+        nouns = [t.text.lower() for t in doc.noun_chunks]
+        empty_nouns = False
+        if len(nouns) == 0:
+            print("No entities found, using caption as entity, caption: {}".format(caption))
+            nouns = [caption.lower()]
+            empty_nouns = True
+        entity_dict = {}
+        new_entities = []
+        # to handle duplicates in entities
+        for chunk in nouns:
+            if chunk not in entity_dict:
+                new_entities.append(chunk)
+                entity_dict[chunk] = 0
+            else:
+                entity_dict[chunk] += 1
+                new_entities.append("{}-{}".format(chunk, entity_dict[chunk]))
+        new_to_old_entity = dict(zip(new_entities, nouns))
+        if not empty_nouns:
+            new_entity_to_id = dict(zip(new_entities, [noun_chunk[0].idx for noun_chunk in
+                                                       doc.noun_chunks]))  # starting position of the first token
+        else:
+            # use caption as only entity
+            new_entity_to_id = {new_entities[0]: 0}
+
+        tokenized = self.tokenizer([caption], return_tensors="pt")
+        tokens_positive = []
+        for entity in nouns:
+            # want no overlays
+            found = {(0, 0)}
+            try:
+                for m in re.finditer(entity, caption.lower()):
+                    if (m.start(), m.end()) not in found:
+                        tokens_positive.append([[m.start(), m.end()]])
+                        found.add((m.start(), m.end()))
+            except Exception as e:
+                raise ValueError("caption:{}, entity:{}".format(entity, caption.lower()))
+
+        # process positive map
+        positive_map = create_positive_map(tokenized, tokens_positive)
+        return positive_map, new_entities, new_to_old_entity, new_entity_to_id
+
+    def __call__(self, batch):
+        images = []
+        captions = []
+        ids = []
+        for d in batch:
+            images.append(pil_loader(d['jpg']))
+            captions.append(d['txt'].decode())
+            ids.append(d['id'].decode())
+
+        origin_images = [np.array(image)[:, :, [2, 1, 0]] for image in images]
+
+        images = [self.process_iamge(img) for img in images]
+
+        positive_maps = []
+        entities = []
+        new_to_old_entity_list = []
+        new_entity_to_id_list = []
+
+        for cap in captions:
+            positive_map, new_entities, new_to_old_entity, new_entity_to_id = self.process_caption(cap)
+            positive_maps.append(positive_map)
+            entities.append(new_entities)
+            new_to_old_entity_list.append(new_to_old_entity)
+            new_entity_to_id_list.append(new_entity_to_id)
 
         # compute batched positive map
         max_len = max([v.shape[1] for v in positive_maps])
@@ -118,7 +187,7 @@ class BatchGroundingCollator(object):
         assert cur_count == len(batched_pos_map)
         positive_map = batched_pos_map.bool()
 
-        return batched_imgs, image_sizes, captions, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list, origin_images, idx
+        return batched_imgs, image_sizes, captions, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list, origin_images, ids
 
 
 class BBoxAugCollator(object):

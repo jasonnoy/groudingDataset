@@ -30,7 +30,8 @@ class GLIPDemo(object):
                  min_image_size=None,
                  show_mask_heatmaps=False,
                  masks_per_dim=5,
-                 load_model=True
+                 load_model=True,
+                 nlp=None
                  ):
         self.cfg = cfg.clone()
         if load_model:
@@ -41,6 +42,7 @@ class GLIPDemo(object):
         self.min_image_size = min_image_size
         self.show_mask_heatmaps = show_mask_heatmaps
         self.masks_per_dim = masks_per_dim
+        self.nlp = nlp
 
         save_dir = cfg.OUTPUT_DIR
         if load_model:

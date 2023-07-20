@@ -1,5 +1,8 @@
 import sys
 import os
+
+import webdataset
+
 print("adding", os.getcwd())
 print("adding", os.path.join(os.getcwd(), "GLIP"))
 sys.path.append(os.getcwd())
@@ -39,15 +42,16 @@ if __name__ == "__main__":
     rank = args.rank
     world_size = args.world_size
 
+    spacy.prefer_gpu()
+    nlp = spacy.load("en_core_web_trf")
+
     glip_demo = GLIPDemo(
         cfg,
         confidence_threshold=0.7,
         show_mask_heatmaps=False,
-        min_image_size=800
+        min_image_size=800,
+        nlp = nlp
     )
-
-    spacy.prefer_gpu()
-    nlp = spacy.load("en_core_web_trf")
     input_path = "/zhangpai21/webdataset/laion-aes/train"
     output_path = "/zhangpai21/webdataset/laion-aes/train/meta"
     if not os.path.exists(output_path):
@@ -57,15 +61,18 @@ if __name__ == "__main__":
     start = rank*part_size
     end = min((rank+1)*part_size, len(total_files))
     files = total_files[start:end]
-    tokenizer = AutoTokenizer.from_pretrained(cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH)
+    # tokenizer = AutoTokenizer.from_pretrained(cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH)
     for filename in files:
         tar_path = os.path.join(input_path, filename)
         res = {}
         batch_size = 7
-        laion_dataset = Laion(filename, input_path, nlp, tokenizer, transforms=glip_demo.transforms)
-        meta_filename = "{}.meta.jsonl".format(filename)
+        # laion_dataset = Laion(filename, input_path, nlp, tokenizer, transforms=glip_demo.transforms)
+        laion_dataset = webdataset.WebDataset(os.path.join(input_path, filename))
         print("processing {}".format(filename))
+
         groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, save_img=False, output_path=output_path)
+
+        meta_filename = "{}.meta.jsonl".format(filename)
         output_meta_path = os.path.join(output_path, meta_filename)
         if os.path.exists(output_meta_path):
             os.remove(output_meta_path)
