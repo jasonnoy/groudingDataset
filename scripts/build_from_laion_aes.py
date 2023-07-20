@@ -1,7 +1,7 @@
 import sys
 import os
-print("adding", os.path.join(os.getcwd(), ".."))
-sys.path.append(os.path.join(os.getcwd(), ".."))
+print("adding", os.getcwd())
+sys.path.append(os.getcwd())
 
 import argparse
 import torch
