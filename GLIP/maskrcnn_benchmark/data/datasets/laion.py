@@ -93,8 +93,9 @@ def compute_image_shape(original_shape):
 
 
 def remove_puncs(caption):
-    r = "[+=^*<>{}「」【】()（）/\[\]]"
-    return re.sub(r, ' ', caption)
+    r = "[+=^*<>{}「」【】()（）/\[\],.?，。？！@¥%!@#$%&]"
+    caption = re.sub(r, ' ', caption)
+    return caption
 
 
 class Laion(data.Dataset):
