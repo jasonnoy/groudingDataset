@@ -22,6 +22,17 @@ engine = inflect.engine()
 
 import timeit
 
+class to_bgr_transform(object):
+    def __init__(self, to_bgr255):
+        self.to_bgr255 = to_bgr255
+
+    def __call__(self, image):
+        if self.to_bgr255:
+            image = image * 255
+        else:
+            image = image[[2, 1, 0]]
+        return image
+
 
 class GLIPDemo(object):
     def __init__(self,
@@ -70,10 +81,6 @@ class GLIPDemo(object):
         # to BGR, they are already! So all we need to do is to normalize
         # by 255 if we want to convert to BGR255 format, or flip the channels
         # if we want it to be in RGB in [0-1] range.
-        if cfg.INPUT.TO_BGR255:
-            to_bgr_transform = T.Lambda(lambda x: x * 255)
-        else:
-            to_bgr_transform = T.Lambda(lambda x: x[[2, 1, 0]])
 
         normalize_transform = T.Normalize(
             mean=cfg.INPUT.PIXEL_MEAN, std=cfg.INPUT.PIXEL_STD
@@ -83,7 +90,7 @@ class GLIPDemo(object):
             [
                 T.ToPILImage(),
                 T.ToTensor(),
-                to_bgr_transform,
+                to_bgr_transform(cfg.INPUT.TO_BGR255),
                 normalize_transform,
             ]
         )
