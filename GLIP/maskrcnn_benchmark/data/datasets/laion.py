@@ -92,10 +92,13 @@ def compute_image_shape(original_shape):
     return 1600, FACTOR_DICT[1600]  # just in case
 
 
-def remove_puncs(caption):
-    r = "[\+=\^\*<>\{\|}「」【】\()（）/\[\-\]\\,\[].\?，。？！:：@¥%!@#\$%&']"
-    caption = re.sub(r, ' ', caption)
-    return caption
+def remove_punctuation(text: str) -> str:
+    punct = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^',
+             '\'', '\"', '’', '`', '?', '$', '%', '#', '!', '&', '*', '+', ',', '.'
+             ]
+    for p in punct:
+        text = text.replace(p, '')
+    return text.strip()
 
 
 class Laion(data.Dataset):
