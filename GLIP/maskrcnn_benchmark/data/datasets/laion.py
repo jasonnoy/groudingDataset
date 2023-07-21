@@ -81,7 +81,7 @@ def compute_image_shape(original_shape):
     edge = int(math.sqrt(TOTAL_PIXEL / ratio))
     if edge in FACTOR_DICT:
         return edge, FACTOR_DICT[edge]
-    prev = 1
+    prev = 576
     for cur in FACTOR_DICT.keys():
         if edge > cur:
             prev = cur
