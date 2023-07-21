@@ -6,6 +6,8 @@ import sys
 import spacy
 from tqdm import tqdm
 import webdataset
+import warnings
+warnings.filterwarnings("ignore")
 
 sys.path.append(os.getcwd())
 sys.path.append(os.path.join(os.getcwd(), "GLIP"))
@@ -58,8 +60,9 @@ if __name__ == "__main__":
     dirs = data[map_key]
     dir_size = len(dirs) // max((world_size//8-1), 1)
     dir_start = rank*dir_size
-    dir_end = (rank+1)*dir_start
+    dir_end = min((rank+1)*dir_start, len(dirs)-1)
     select_dirs = dirs[dir_start:dir_end]
+    print("start: {}, end:{}".format(dir_start, dir_end))
     print("selected dirs:", select_dirs)
     for cur_dir in select_dirs:
         output_dir_path = os.path.join(output_path, str(cur_dir))
