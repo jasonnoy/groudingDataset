@@ -21,6 +21,6 @@ LOCAL_RANK=${SLURM_LOCALID:-0}
 echo "RUN on `hostname`, CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES, RANK=$RANK, LOCAL_RANK=$LOCAL_RANK, WORLD_SIZE=$WORLD_SIZE"
 
 # shellcheck disable=SC2046
-python scripts/build_from_laion_aes.py --world_size $WORLD_SIZE --rank $RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT --local_rank $LOCAL_RANK
+python scripts/build_from_laion_115m.py --world_size $WORLD_SIZE --rank $RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT --local_rank $LOCAL_RANK
 
 echo "DONE on `hostname`"
