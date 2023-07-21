@@ -65,7 +65,8 @@ if __name__ == "__main__":
     f.close()
     dirs = data[map_key]
     print("dirs:", dirs)
-    dir_size = len(dirs) // max((world_size//8-1), 1)
+    node_num = world_size//8
+    dir_size = len(dirs) // max((node_num), 1) if len(dirs) % node_num == 0 else len(dirs) // max((node_num-1), 1)
     print("dir size:", dir_size)
     node_rank = rank // 8
     dir_start = node_rank*dir_size
@@ -80,7 +81,7 @@ if __name__ == "__main__":
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
         tar_files = get_id_list(input_dir_path)
-        part_size = len(tar_files) // 7
+        part_size = len(tar_files) // 8 if len(tar_files) % 8 == 0 else len(tar_files) // 7
         part_start = local_rank * part_size
         part_end = min((local_rank+1)*part_size, len(tar_files)-1)
         select_tar_files = tar_files[part_start:part_end]
