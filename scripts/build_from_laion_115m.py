@@ -86,7 +86,7 @@ if __name__ == "__main__":
         tar_files = get_id_list(input_dir_path)
         divided_tars = split_list_by_n(tar_files, 8)
         select_tar_files = divided_tars[local_rank]
-        print("rank {}, selected_tar_files:".format(rank), select_tar_files)
+        # print("rank {}, selected_tar_files:".format(rank), select_tar_files)
         for tar_file in select_tar_files:
             idx = int(tar_file[:-4])
             res = {}
