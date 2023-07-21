@@ -41,14 +41,17 @@ if __name__ == "__main__":
     rank = args.rank
     world_size = args.world_size
 
+    spacy.prefer_gpu()
+    nlp = spacy.load("en_core_web_trf")
+
     glip_demo = GLIPDemo(
         cfg,
         confidence_threshold=0.7,
         show_mask_heatmaps=False,
-        min_image_size=800
+        min_image_size=800,
+        nlp=nlp
     )
 
-    nlp = spacy.load("en_core_web_trf")
     input_path = "/nxchinamobile2/shared/img_datasets/laion115m"
     output_path = "/nxchinamobile2/shared/jjh/laion115m"
     map_name = "file_map_laion_synthetic_filtered_large.json"
