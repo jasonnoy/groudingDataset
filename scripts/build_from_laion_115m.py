@@ -81,7 +81,7 @@ if __name__ == "__main__":
         for tar_file in tar_files:
             idx = int(tar_file[:-4])
             res = {}
-            batch_size = 20
+            batch_size = 10
             laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
             meta_filename = "{}.meta.jsonl".format(idx)
             print("processing {}".format(idx))
