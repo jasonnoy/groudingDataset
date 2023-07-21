@@ -62,7 +62,7 @@ if __name__ == "__main__":
     dir_size = len(dirs) // max((world_size//8-1), 1)
     print("dir size:", dir_size)
     dir_start = rank*dir_size
-    dir_end = min((rank+1)*dir_start, len(dirs)-1)
+    dir_end = min((rank+1)*dir_size, len(dirs)-1)
     select_dirs = dirs[dir_start:dir_end]
     print("start: {}, end:{}".format(dir_start, dir_end))
     print("selected dirs:", select_dirs)
