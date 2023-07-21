@@ -16,6 +16,14 @@ from GLIP import *
 from dataset_builder import *
 
 
+def split_list_by_n(origin_list, n):
+    if len(origin_list) % n == 0:
+        cnt = len(origin_list) // n
+    else:
+        cnt = len(origin_list) // n + 1
+    return [origin_list[i*n:(i+1)*n] for i in range(cnt)]
+
+
 if __name__ == "__main__":
     torch.multiprocessing.set_start_method('spawn', force=True)
 
@@ -64,16 +72,10 @@ if __name__ == "__main__":
         data = json.loads(data)
     f.close()
     dirs = data[map_key]
-    # print("dirs:", dirs)
-    node_num = world_size//8
-    dir_size = len(dirs) // max((node_num), 1) if len(dirs) % node_num == 0 else len(dirs) // max((node_num-1), 1)
-    # print("dir size:", dir_size)
+    node_num = world_size // 8
     node_rank = rank // 8
-    dir_start = node_rank*dir_size
-    dir_end = min((node_rank+1)*dir_size, len(dirs)-1)
-    select_dirs = dirs[dir_start:dir_end]
-    # print("start: {}, end:{}".format(dir_start, dir_end))
-    # print("selected dirs:", select_dirs)
+    divided_dirs = split_list_by_n(dirs, node_num)
+    select_dirs = divided_dirs[node_rank]
     for cur_dir in select_dirs:
         output_dir_path = os.path.join(output_path, str(cur_dir))
         input_dir_path = os.path.join(input_path, str(cur_dir))
@@ -81,13 +83,9 @@ if __name__ == "__main__":
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
         tar_files = get_id_list(input_dir_path)
-        # print("tar files:", tar_files)
-        part_size = len(tar_files) // 8
-        # print("part size:", part_size)
-        part_start = local_rank * part_size
-        part_end = max((local_rank+1)*part_size, len(tar_files)-1)
-        # print("part start: {}, part end:{}".format(part_start, part_end))
-        select_tar_files = tar_files[part_start:part_end]
+        divided_tars = split_list_by_n(tar_files, 8)
+        select_tar_files = divided_tars[local_rank]
+        print("rank {}, selected_tar_files:".format(rank), select_tar_files)
         for tar_file in select_tar_files:
             idx = int(tar_file[:-4])
             res = {}
