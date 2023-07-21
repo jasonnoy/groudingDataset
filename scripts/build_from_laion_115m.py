@@ -6,8 +6,6 @@ import sys
 import spacy
 from tqdm import tqdm
 import webdataset
-import warnings
-warnings.filterwarnings("ignore")
 
 sys.path.append(os.getcwd())
 sys.path.append(os.path.join(os.getcwd(), "GLIP"))
