@@ -60,6 +60,7 @@ if __name__ == "__main__":
     dir_start = rank*dir_size
     dir_end = (rank+1)*dir_start
     select_dirs = dirs[dir_start:dir_end]
+    print("selected dirs:", select_dirs)
     for cur_dir in select_dirs:
         output_dir_path = os.path.join(output_path, str(cur_dir))
         input_dir_path = os.path.join(input_path, str(cur_dir))
@@ -97,4 +98,4 @@ if __name__ == "__main__":
                     f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
             f1.close()
             f2.close()
-        print("done")
+        print("done for part", cur_dir)
