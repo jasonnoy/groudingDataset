@@ -81,9 +81,12 @@ if __name__ == "__main__":
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
         tar_files = get_id_list(input_dir_path)
+        print("tar files:", tar_files)
         part_size = len(tar_files) // 8 if len(tar_files) % 8 == 0 else len(tar_files) // 7
+        print("part size:", part_size)
         part_start = local_rank * part_size
         part_end = min((local_rank+1)*part_size, len(tar_files)-1)
+        print("part start: {}, part end:{}".format(part_start, part_end))
         select_tar_files = tar_files[part_start:part_end]
         for tar_file in select_tar_files:
             idx = int(tar_file[:-4])
