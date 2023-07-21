@@ -58,7 +58,9 @@ if __name__ == "__main__":
         data = json.loads(data)
     f.close()
     dirs = data[map_key]
+    print("dirs:", dirs)
     dir_size = len(dirs) // max((world_size//8-1), 1)
+    print("dir size:", dir_size)
     dir_start = rank*dir_size
     dir_end = min((rank+1)*dir_start, len(dirs)-1)
     select_dirs = dirs[dir_start:dir_end]
