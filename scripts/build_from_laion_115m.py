@@ -6,8 +6,8 @@ import sys
 import spacy
 from tqdm import tqdm
 import webdataset
-# import warnings
-# warnings.filterwarnings("ignore")
+import warnings
+warnings.filterwarnings("ignore")
 
 sys.path.append(os.getcwd())
 sys.path.append(os.path.join(os.getcwd(), "GLIP"))
@@ -64,16 +64,16 @@ if __name__ == "__main__":
         data = json.loads(data)
     f.close()
     dirs = data[map_key]
-    print("dirs:", dirs)
+    # print("dirs:", dirs)
     node_num = world_size//8
     dir_size = len(dirs) // max((node_num), 1) if len(dirs) % node_num == 0 else len(dirs) // max((node_num-1), 1)
-    print("dir size:", dir_size)
+    # print("dir size:", dir_size)
     node_rank = rank // 8
     dir_start = node_rank*dir_size
     dir_end = min((node_rank+1)*dir_size, len(dirs)-1)
     select_dirs = dirs[dir_start:dir_end]
-    print("start: {}, end:{}".format(dir_start, dir_end))
-    print("selected dirs:", select_dirs)
+    # print("start: {}, end:{}".format(dir_start, dir_end))
+    # print("selected dirs:", select_dirs)
     for cur_dir in select_dirs:
         output_dir_path = os.path.join(output_path, str(cur_dir))
         input_dir_path = os.path.join(input_path, str(cur_dir))
@@ -81,12 +81,12 @@ if __name__ == "__main__":
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
         tar_files = get_id_list(input_dir_path)
-        print("tar files:", tar_files)
+        # print("tar files:", tar_files)
         part_size = len(tar_files) // 8
-        print("part size:", part_size)
+        # print("part size:", part_size)
         part_start = local_rank * part_size
         part_end = max((local_rank+1)*part_size, len(tar_files)-1)
-        print("part start: {}, part end:{}".format(part_start, part_end))
+        # print("part start: {}, part end:{}".format(part_start, part_end))
         select_tar_files = tar_files[part_start:part_end]
         for tar_file in select_tar_files:
             idx = int(tar_file[:-4])
@@ -94,7 +94,7 @@ if __name__ == "__main__":
             batch_size = 10
             laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
             meta_filename = "{}.meta.jsonl".format(idx)
-            print("processing {}".format(idx))
+            print("rank {}, processing {}".format(rank, idx))
             groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, save_img=False, output_path=output_dir_path)
             output_meta_path = os.path.join(output_dir_path, meta_filename)
             if os.path.exists(output_meta_path):
