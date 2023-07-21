@@ -52,11 +52,12 @@ if __name__ == "__main__":
     input_path = "/nxchinamobile2/shared/img_datasets/laion115m"
     output_path = "/nxchinamobile2/shared/jjh/laion115m"
     map_name = "file_map_laion_synthetic_filtered_large.json"
+    map_key = "laion_synthetic_filtered_large.json"
     with open(os.path.join(input_path, map_name), 'r', encoding='utf-8') as f:
         data = f.read()
         data = json.loads(data)
     f.close()
-    dirs = data[map_name]
+    dirs = data[map_key]
     dir_size = len(dirs) // max((world_size//8-1), 1)
     dir_start = rank*dir_size
     dir_end = (rank+1)*dir_start
