@@ -7,6 +7,7 @@ import spacy
 from tqdm import tqdm
 import webdataset
 import warnings
+import math
 warnings.filterwarnings("ignore")
 
 sys.path.append(os.getcwd())
@@ -17,8 +18,9 @@ from dataset_builder import *
 
 
 def split_list_by_n(origin_list, n):
+    step = math.ceil(len(origin_list) / n)
     res = []
-    for i in range(0, len(origin_list), n):
+    for i in range(0, len(origin_list), step):
         res.append(origin_list[i:i + n])
     return res
 
