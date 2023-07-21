@@ -17,11 +17,10 @@ from dataset_builder import *
 
 
 def split_list_by_n(origin_list, n):
-    if len(origin_list) % n == 0:
-        cnt = len(origin_list) // n
-    else:
-        cnt = len(origin_list) // n + 1
-    return [origin_list[i*n:(i+1)*n] for i in range(cnt)]
+    res = []
+    for i in range(0, len(origin_list), n):
+        res.append(origin_list[i:i + n])
+    return res
 
 
 if __name__ == "__main__":
