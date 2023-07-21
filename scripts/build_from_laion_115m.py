@@ -17,7 +17,7 @@ from dataset_builder import *
 
 
 if __name__ == "__main__":
-    torch.multiprocessing.set_start_method('spawn')
+    torch.multiprocessing.set_start_method('spawn', force=True)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--local_rank', type=int, default=0)
