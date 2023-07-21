@@ -21,7 +21,7 @@ def split_list_by_n(origin_list, n):
     step = math.ceil(len(origin_list) / n)
     res = []
     for i in range(0, len(origin_list), step):
-        res.append(origin_list[i:i + n])
+        res.append(origin_list[i:i + step])
     return res
 
 
