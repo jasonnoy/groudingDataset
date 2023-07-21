@@ -41,6 +41,7 @@ if __name__ == "__main__":
     print("model device:",  cfg.MODEL.DEVICE)
     print("cuda device:", torch.cuda.current_device())
     rank = args.rank
+    local_rank = args.local_rank
     world_size = args.world_size
 
     spacy.prefer_gpu()
@@ -66,8 +67,9 @@ if __name__ == "__main__":
     print("dirs:", dirs)
     dir_size = len(dirs) // max((world_size//8-1), 1)
     print("dir size:", dir_size)
-    dir_start = rank*dir_size
-    dir_end = min((rank+1)*dir_size, len(dirs)-1)
+    node_rank = rank // 8
+    dir_start = node_rank*dir_size
+    dir_end = min((node_rank+1)*dir_size, len(dirs)-1)
     select_dirs = dirs[dir_start:dir_end]
     print("start: {}, end:{}".format(dir_start, dir_end))
     print("selected dirs:", select_dirs)
@@ -78,7 +80,11 @@ if __name__ == "__main__":
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
         tar_files = get_id_list(input_dir_path)
-        for tar_file in tar_files:
+        part_size = len(tar_files) // 7
+        part_start = local_rank * part_size
+        part_end = min((local_rank+1)*part_size, len(tar_files)-1)
+        select_tar_files = tar_files[part_start:part_end]
+        for tar_file in select_tar_files:
             idx = int(tar_file[:-4])
             res = {}
             batch_size = 10
