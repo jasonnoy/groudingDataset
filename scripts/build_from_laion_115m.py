@@ -53,7 +53,7 @@ if __name__ == "__main__":
     local_rank = args.local_rank
     world_size = args.world_size
 
-    spacy.prefer_gpu(args.local_rank)
+    # spacy.prefer_gpu(args.local_rank)
     nlp = spacy.load("en_core_web_trf")
 
     glip_demo = GLIPDemo(
@@ -81,6 +81,10 @@ if __name__ == "__main__":
         output_dir_path = os.path.join(output_path, str(cur_dir))
         input_dir_path = os.path.join(input_path, str(cur_dir))
 
+        skip_ids = os.listdir(output_dir_path)
+        skip_ids = [skip_id.split(sep='.')[0] for skip_id in skip_ids]
+        # print("rank {}, skip_ids:".format(rank), skip_ids)]
+
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
         tar_files = get_id_list(input_dir_path)
@@ -89,6 +93,9 @@ if __name__ == "__main__":
         # print("rank {}, selected_tar_files:".format(rank), select_tar_files)
         for tar_file in select_tar_files:
             idx = int(tar_file[:-4])
+            if idx in skip_ids:
+                print("skipping finished id", idx)
+                continue
             res = {}
             batch_size = 10
             laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
