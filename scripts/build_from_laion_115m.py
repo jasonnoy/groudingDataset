@@ -98,7 +98,7 @@ if __name__ == "__main__":
             output_meta_path = os.path.join(output_dir_path, meta_filename)
             if os.path.exists(output_meta_path):
                 os.remove(output_meta_path)
-            with open(os.path.join(input_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'a', encoding='utf-8') as f2:
+            with open(os.path.join(input_dir_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'a', encoding='utf-8') as f2:
                 grounding_iter = iter(groundings)
                 for i, line in tqdm(enumerate(f1)):
                     meta_data = json.loads(line)
