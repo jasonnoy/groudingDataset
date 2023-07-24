@@ -73,7 +73,7 @@ if __name__ == "__main__":
         data = json.loads(data)
     f.close()
     dirs = data[map_key]
-    node_num = world_size // 8
+    node_num = 15
     node_rank = rank // 8
     divided_dirs = split_list_by_n(dirs, node_num)
     select_dirs = divided_dirs[node_rank]
@@ -89,6 +89,8 @@ if __name__ == "__main__":
         # print("rank {}, selected_tar_files:".format(rank), select_tar_files)
         for tar_file in select_tar_files:
             idx = int(tar_file[:-4])
+            if idx in [3200000, 3200088, 3200176, 3200264, 3200352, 3200440, 3200528, 3200616]:
+                continue
             res = {}
             batch_size = 10
             laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
