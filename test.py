@@ -37,14 +37,16 @@ def read_tar(tar_path):
 
 if __name__ == '__main__':
 
-    text = "[ disc, entity:the reign of ragnarok [ disc 1 of 2 ]"
-
-    def remove_puncs(caption):
-        r = "[+=^*<>{}「」【】()（）/\[\],.?，。？！:@¥%!@#$%&]"
-        caption = re.sub(r, ' ', caption)
-        return caption
-
-    print(remove_puncs(text))
+    # text = "[ disc, entity:the reign of ragnarok [ disc 1 of 2 ]"
+    #
+    # def remove_puncs(caption):
+    #     r = "[+=^*<>{}「」【】()（）/\[\],.?，。？！:@¥%!@#$%&]"
+    #     caption = re.sub(r, ' ', caption)
+    #     return caption
+    #
+    # print(remove_puncs(text))
+    test = ['1', '2']
+    print(1 in test)
 #
 # if __name__ == "__main__":
 #     # nlp = spacy.load("en_core_web_trf")
