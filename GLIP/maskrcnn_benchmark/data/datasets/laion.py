@@ -87,8 +87,7 @@ def compute_image_shape(original_shape):
             continue
         fit = prev if edge - prev < cur - edge else cur
         return fit, FACTOR_DICT[fit]
-    print("original shape:", original_shape)
-    return 432, FACTOR_DICT[432]  # just in case
+    return 800, FACTOR_DICT[800]
 
 
 def remove_punctuation(text: str) -> str:
