@@ -76,6 +76,7 @@ if __name__ == "__main__":
     id_list = []
     for dir in dirs:
         id_list.extend([file[:-4] for file in os.listdir(os.path.join(input_path, dir)) if file.endswith(".tar")])
+    id_list.sort()
     divided_ids = split_list_by_n(id_list, world_size)
     select_ids = divided_ids[rank]
     print("node", rank, "select_ids:", select_ids)
