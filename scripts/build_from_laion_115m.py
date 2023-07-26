@@ -73,55 +73,56 @@ if __name__ == "__main__":
         data = json.loads(data)
     f.close()
     dirs = data[map_key]
-    node_num = world_size // 8
-    node_rank = rank // 8
-    divided_dirs = split_list_by_n(dirs, node_num)
-    select_dirs = divided_dirs[node_rank]
-    for cur_dir in select_dirs:
+    id_list = []
+    for dir in dirs:
+        id_list.extend([file[:-4] for file in os.listdir(os.path.join(input_path, dir)) if file.endswith(".tar")])
+    divided_ids = split_list_by_n(dirs, world_size)
+    select_ids = divided_ids[rank]
+    print("node", rank, "select_ids:", select_ids)
+    for cur_id in select_ids:
+        cur_dir = "part-000{}".format(cur_id[:2])
         output_dir_path = os.path.join(output_path, str(cur_dir))
         input_dir_path = os.path.join(input_path, str(cur_dir))
 
-        skip_ids = os.listdir(output_dir_path)
-        skip_ids = [int(skip_id.split(sep='.')[0]) for skip_id in skip_ids]
+        # skip_ids = os.listdir(output_dir_path)
+        # skip_ids = [int(skip_id.split(sep='.')[0]) for skip_id in skip_ids]
         # print("rank {}, skip_ids:".format(rank), skip_ids)]
 
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
-        tar_files = get_id_list(input_dir_path)
-        divided_tars = split_list_by_n(tar_files, 8)
-        select_tar_files = divided_tars[local_rank]
+
         # print("rank {}, selected_tar_files:".format(rank), select_tar_files)
-        for tar_file in select_tar_files:
-            idx = int(tar_file[:-4])
-            if idx in skip_ids:
-                print("skipping finished id", idx)
-                continue
-            res = {}
-            batch_size = 10
-            laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
-            meta_filename = "{}.meta.jsonl".format(idx)
-            print("rank {}, processing {}".format(rank, idx))
-            groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, save_img=False, output_path=output_dir_path)
-            output_meta_path = os.path.join(output_dir_path, meta_filename)
-            if os.path.exists(output_meta_path):
-                os.remove(output_meta_path)
-            with open(os.path.join(input_dir_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'a', encoding='utf-8') as f2:
-                grounding_iter = iter(groundings)
-                for i, line in tqdm(enumerate(f1)):
-                    meta_data = json.loads(line)
-                    if meta_data['status'] == "success":
-                        grounding = next(grounding_iter)
-                        image_id = grounding['SAMPLE_ID']
-                        sample_id = meta_data['SAMPLE_ID']
-                        if str(image_id) != str(sample_id):
-                            print("index:{}\n sample_id:{}".format(str(image_id), str(sample_id)))
-                        meta_data.update(grounding)
-                        meta_data['annot_caption'] = build_training_text(record=meta_data)
-                    else:
-                        meta_data['grounding'] = None
-                        meta_data['annot_caption'] = None
-                        loc_pos_list = None
-                    f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
-            f1.close()
-            f2.close()
-        print("done for part", cur_dir)
+        tar_file = "{}.tar".format(cur_id)
+        # if idx in skip_ids:
+        #     print("skipping finished id", idx)
+        #     continue
+        res = {}
+        batch_size = 20
+        laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
+        meta_filename = "{}.meta.jsonl".format(cur_id)
+        print("rank {}, processing {}".format(rank, cur_id))
+        groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, save_img=False, output_path=output_dir_path)
+        output_meta_path = os.path.join(output_dir_path, meta_filename)
+        if os.path.exists(output_meta_path):
+            os.remove(output_meta_path)
+        with open(os.path.join(input_dir_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'a', encoding='utf-8') as f2:
+            grounding_iter = iter(groundings)
+            for i, line in tqdm(enumerate(f1)):
+                meta_data = json.loads(line)
+                if meta_data['status'] == "success":
+                    grounding = next(grounding_iter)
+                    image_id = grounding['SAMPLE_ID']
+                    sample_id = meta_data['SAMPLE_ID']
+                    if str(image_id) != str(sample_id):
+                        print("index:{}\n sample_id:{}".format(str(image_id), str(sample_id)))
+                    meta_data.update(grounding)
+                    # meta_data['annot_caption'] = build_training_text(record=meta_data)
+                else:
+                    meta_data['groundings'] = None
+                    meta_data['original_groundings'] = None
+                    # meta_data['annot_caption'] = None
+                    loc_pos_list = None
+                f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
+        f1.close()
+        f2.close()
+    print("done for node", rank)

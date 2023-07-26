@@ -33,6 +33,7 @@ def get_label_names(predictions, model, new_entities):
 
 def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=False):
     res = {}
+    origin = {}
     for idx, box in enumerate(pred.bbox):
         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
         if new_labels[idx] in new_to_old_entity:
@@ -42,19 +43,23 @@ def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entit
             entity = new_labels[idx]
             pos = -1
 
-        loc = top_left+bottom_right
+        origin_loc = top_left+bottom_right
+        loc = origin_loc
 
         if percent:
             width, height = pred.size
-            loc = [l/width if l % 2 == 0 else l/height for l in loc]
+            loc = [l/width if i % 2 == 0 else l/height for i, l in enumerate(loc)]
 
         if entity not in res:
             res[entity] = {pos: [loc]}
+            origin[entity] = {pos: [origin_loc]}
         elif pos in res[entity]:
             res[entity][pos].append(loc)
+            origin[entity][pos].append(origin_loc)
         else:
             res[entity][pos] = [loc]
-    return res
+            origin[entity][pos] = [origin_loc]
+    return res, origin
 
 
 # def output_decorator(id, caption, groundings, image_size):
@@ -62,8 +67,8 @@ def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entit
 #     return res
 
 
-def output_decorator(groundings, idx):
-    res = {"groundings": groundings, "SAMPLE_ID": idx}
+def output_decorator(groundings, idx, original_groundings=None):
+    res = {"groundings": groundings, "SAMPLE_ID": idx, "original_groundings": original_groundings}
     return res
 
 
@@ -94,7 +99,7 @@ def imsave(img, caption, save_dir):
 
 
 def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, output_path, save_img=False):
-    dataloader = torch.utils.data.DataLoader(laion_dataset, shuffle=False, num_workers=2, batch_size=batch_size,
+    dataloader = torch.utils.data.DataLoader(laion_dataset, shuffle=False, num_workers=4, batch_size=batch_size,
                                              collate_fn=BatchGroundingCollator(glip_demo.nlp, glip_demo.tokenizer, glip_demo.transforms))
     total_groundings = []
     for i, batch in tqdm(enumerate(dataloader)):
@@ -121,13 +126,13 @@ def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, 
                                                             text_offset=-25,
                                                             text_offset_original=-40, text_pixel=2)
                     imsave(result, caption, output_path)
-                groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=True)
-                total_groundings.append(output_decorator(groundings, index))
+                groundings, origin_groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=True)
+                total_groundings.append(output_decorator(groundings, index, origin_groundings))
         else:
             for pred, new_entity_to_id, new_to_old_entity, index in zip(preds, new_entity_to_ids, new_to_old_entities, image_ids):
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
-                groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=True)
-                total_groundings.append(output_decorator(groundings, index))
+                groundings, origin_groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=True)
+                total_groundings.append(output_decorator(groundings, index, origin_groundings))
     return total_groundings
 
 

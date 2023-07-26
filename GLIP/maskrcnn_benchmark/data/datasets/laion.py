@@ -9,13 +9,13 @@ import math
 import torch
 from GLIP.maskrcnn_benchmark.structures.image_list import to_image_list
 
-SOLUTION = "720p"
+SOLUTION = "480p"
 RESOLUTIONS = {"240p": (320, 240), "480p": (720, 480), "720p": (1280, 720), "1080p": (1920, 1080), "2K": (2560, 1440),
                "4K": (4096, 2160)}
 TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
 FACTOR_DICT = {}
 mid = int(math.sqrt(TOTAL_PIXEL))
-for i_t in range(mid + 1)[576:]:
+for i_t in range(mid + 1)[432:]:
     if TOTAL_PIXEL % i_t == 0:
         FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
 vs = list(FACTOR_DICT.values())
@@ -29,7 +29,6 @@ FACTOR_DICT.update(update_dict)
 def pil_loader(image_b):
     pil_image = Image.open(io.BytesIO(image_b)).convert('RGB')
     # pil_image = pil_image.resize((800))
-    # convert to BGR format
     return pil_image
 
 
@@ -81,7 +80,7 @@ def compute_image_shape(original_shape):
     edge = int(math.sqrt(TOTAL_PIXEL / ratio))
     if edge in FACTOR_DICT:
         return edge, FACTOR_DICT[edge]
-    prev = 576
+    prev = 432
     for cur in FACTOR_DICT.keys():
         if edge > cur:
             prev = cur
@@ -89,7 +88,7 @@ def compute_image_shape(original_shape):
         fit = prev if edge - prev < cur - edge else cur
         return fit, FACTOR_DICT[fit]
     print("original shape:", original_shape)
-    return 1600, FACTOR_DICT[1600]  # just in case
+    return 432, FACTOR_DICT[432]  # just in case
 
 
 def remove_punctuation(text: str) -> str:

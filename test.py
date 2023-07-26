@@ -19,23 +19,24 @@ def read_tar(tar_path):
 #         FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
 # print(FACTOR_DICT)
 
-# SOLUTION = "480p"
-# RESOLUTIONS = {"240p": [240, 320], "480p": [480, 720], "720p": [720, 1280], "1080p": [1080, 1920], "2K": [1440, 2560], "4K": [2160, 4096]}
-# TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
-# FACTOR_DICT = {}
-# mid = int(math.sqrt(TOTAL_PIXEL))
-# for i_t in range(mid+1)[1:]:
-#     if TOTAL_PIXEL % i_t == 0:
-#         FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
-# vs = list(FACTOR_DICT.values())
-# vs.reverse()
-# ks = list(FACTOR_DICT.keys())
-# ks.reverse()
-# update_dict = dict(zip(vs, ks))
-# FACTOR_DICT.update(update_dict)
-# print(FACTOR_DICT)
+SOLUTION = "480p"
+RESOLUTIONS = {"240p": (320, 240), "480p": (720, 480), "720p": (1280, 720), "1080p": (1920, 1080), "2K": (2560, 1440),
+               "4K": (4096, 2160)}
+TOTAL_PIXEL = RESOLUTIONS[SOLUTION][0] * RESOLUTIONS[SOLUTION][1]  # 480P resolution
+FACTOR_DICT = {}
+mid = int(math.sqrt(TOTAL_PIXEL))
+for i_t in range(mid + 1)[432:]:
+    if TOTAL_PIXEL % i_t == 0:
+        FACTOR_DICT[i_t] = int(TOTAL_PIXEL / i_t)
+vs = list(FACTOR_DICT.values())
+vs.reverse()
+ks = list(FACTOR_DICT.keys())
+ks.reverse()
+update_dict = dict(zip(vs, ks))
+FACTOR_DICT.update(update_dict)
+print(FACTOR_DICT)
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
     # text = "[ disc, entity:the reign of ragnarok [ disc 1 of 2 ]"
     #
@@ -45,8 +46,10 @@ if __name__ == '__main__':
     #     return caption
     #
     # print(remove_puncs(text))
-    test = ['1', '2']
-    print(1 in test)
+    # width, height = [600, 800]
+    # loc = [100, 100]
+    # loc = [l / width if i % 2 == 0 else l / height for i, l in enumerate(loc)]
+    # print(loc)
 #
 # if __name__ == "__main__":
 #     # nlp = spacy.load("en_core_web_trf")
