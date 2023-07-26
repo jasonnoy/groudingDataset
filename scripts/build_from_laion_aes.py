@@ -27,6 +27,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
+    os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
     config_file = "/zhangpai21/jjh/projects/groundingDataset/GLIP/configs/pretrain/glip_Swin_L.yaml"
     weight_file = "/zhangpai21/checkpoints/GLIP-L/glip_large_model.pth"
@@ -48,7 +49,6 @@ if __name__ == "__main__":
         cfg,
         confidence_threshold=0.7,
         show_mask_heatmaps=False,
-        min_image_size=800,
         nlp = nlp
     )
     input_path = "/zhangpai21/webdataset/laion-aes/train"
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         batch_size = 7
         # laion_dataset = Laion(filename, input_path, nlp, tokenizer, transforms=glip_demo.transforms)
         laion_dataset = webdataset.WebDataset(os.path.join(input_path, filename))
-        print("processing {}".format(filename))
+        print("randk {} processing {}".format(rank, filename))
 
         groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, save_img=False, output_path=output_path)
 
@@ -79,4 +79,4 @@ if __name__ == "__main__":
             for i, grounding in enumerate(groundings):
                 f2.write(json.dumps(grounding, ensure_ascii=False) + '\n')
         f2.close()
-    print("done")
+    print("done for rank", rank)
