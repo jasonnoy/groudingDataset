@@ -89,7 +89,7 @@ if __name__ == "__main__":
         skip_ids = os.listdir(output_dir_path)
         skip_ids = [skip_id.split(sep='.')[0] for skip_id in skip_ids]
         if cur_id in skip_ids:
-            print("rank {}, skip_ids:".format(rank), skip_ids)
+            print("rank {}, skip_id:".format(rank), cur_id)
             continue
 
         if not os.path.exists(output_dir_path):
