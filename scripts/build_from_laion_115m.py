@@ -102,14 +102,19 @@ if __name__ == "__main__":
         #     continue
         res = {}
         batch_size = 20
-        try:
-            laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
-        except Exception as e:
-            print("failed to load dataset for {}, skipping...".format(os.path.join(input_dir_path, tar_file)))
+        if os.path.getsize(os.path.join(input_dir_path, tar_file)) == 0:
+            print("rank {}, empty file:".format(rank), os.path.join(input_dir_path, tar_file))
             continue
+
+        laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
+
         meta_filename = "{}.meta.jsonl".format(cur_id)
         print("rank {}, processing {}".format(rank, cur_id))
-        groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, save_img=False, output_path=output_dir_path)
+        try:
+            groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, save_img=False, output_path=output_dir_path)
+        except Exception as e:
+            print("failed batch_parse_and_grounding_multi_class for {}, skipping...".format(os.path.join(input_dir_path, tar_file)))
+            continue
         output_meta_path = os.path.join(output_dir_path, meta_filename)
         if os.path.exists(output_meta_path):
             os.remove(output_meta_path)
