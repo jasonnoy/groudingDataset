@@ -7,7 +7,8 @@ import torch.utils.data as data
 import re
 import math
 import torch
-from GLIP.maskrcnn_benchmark.structures.image_list import to_image_list
+Image.MAX_IMAGE_PIXELS = None
+
 
 SOLUTION = "480p"
 RESOLUTIONS = {"240p": (320, 240), "480p": (720, 480), "720p": (1280, 720), "1080p": (1920, 1080), "2K": (2560, 1440),

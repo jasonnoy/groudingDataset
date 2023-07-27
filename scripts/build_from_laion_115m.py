@@ -86,9 +86,11 @@ if __name__ == "__main__":
         output_dir_path = os.path.join(output_path, str(cur_dir))
         input_dir_path = os.path.join(input_path, str(cur_dir))
 
-        # skip_ids = os.listdir(output_dir_path)
-        # skip_ids = [int(skip_id.split(sep='.')[0]) for skip_id in skip_ids]
-        # print("rank {}, skip_ids:".format(rank), skip_ids)]
+        skip_ids = os.listdir(output_dir_path)
+        skip_ids = [int(skip_id.split(sep='.')[0]) for skip_id in skip_ids]
+        if cur_id in skip_ids:
+            print("rank {}, skip_ids:".format(rank), skip_ids)
+            continue
 
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
@@ -100,7 +102,11 @@ if __name__ == "__main__":
         #     continue
         res = {}
         batch_size = 20
-        laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
+        try:
+            laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
+        except Exception as e:
+            print("failed to load dataset for {}, skipping...".format(os.path.join(input_dir_path, tar_file)))
+            continue
         meta_filename = "{}.meta.jsonl".format(cur_id)
         print("rank {}, processing {}".format(rank, cur_id))
         groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, save_img=False, output_path=output_dir_path)
