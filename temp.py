@@ -111,8 +111,9 @@ def revise_and_write(output_dir_path, file):
 
 
 def compare_and_update(tar_id, tar_path, ouput_path):
-    with open(os.path.join(ouput_path, tar_id + ".meta.jsonl.update"), 'r', encoding='utf-8') as f1, open(
-            os.path.join(ouput_path, tar_id + ".meta.jsonl.update2"), 'a', encoding='utf-8') as f2:
+    # with open(os.path.join(ouput_path, tar_id + ".meta.jsonl.update"), 'r', encoding='utf-8') as f1, open(
+    #         os.path.join(ouput_path, tar_id + ".meta.jsonl.update2"), 'a', encoding='utf-8') as f2:
+    with open(os.path.join(ouput_path, tar_id + ".meta.jsonl.update"), 'r', encoding='utf-8') as f1:
         tar_file_path = os.path.join(tar_path, tar_id + ".tar")
         dataset = wds.WebDataset(tar_file_path)
         ds_iter = iter(dataset)
@@ -130,8 +131,8 @@ def compare_and_update(tar_id, tar_path, ouput_path):
                 print("tar_caption:", ds_caption)
                 print("meta_caption:", data['caption'])
 
-            f2.write(json.dumps(data) + '\n')
-        f2.close()
+            # f2.write(json.dumps(data) + '\n')
+        # f2.close()
         f1.close()
 
 
