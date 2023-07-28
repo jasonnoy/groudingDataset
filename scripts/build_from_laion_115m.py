@@ -84,11 +84,7 @@ if __name__ == "__main__":
     id_list = list(set(id_list).difference(set(finish_ids)))
     id_list.sort()
     divided_ids = split_list_by_n(id_list, world_size)
-    print("divided_ids:", divided_ids)
-    if rank == 0:
-        print("id_list:", id_list)
     select_ids = divided_ids[rank]
-    print("node", rank, "select_ids:", select_ids)
     for cur_id in select_ids:
         cur_dir = "part-000{}".format(cur_id[:2])
         output_dir_path = os.path.join(output_path, str(cur_dir))
@@ -103,11 +99,7 @@ if __name__ == "__main__":
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
 
-        # print("rank {}, selected_tar_files:".format(rank), select_tar_files)
         tar_file = "{}.tar".format(cur_id)
-        # if idx in skip_ids:
-        #     print("skipping finished id", idx)
-        #     continue
         res = {}
         batch_size = 20
         if os.path.getsize(os.path.join(input_dir_path, tar_file)) == 0:
