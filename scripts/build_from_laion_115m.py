@@ -82,6 +82,7 @@ if __name__ == "__main__":
     for dir in os.listdir(output_path):
         finish_ids.extend([file.split(sep='.')[0] for file in os.listdir(os.path.join(output_path, dir))])
     id_list = list(set(id_list).difference(set(finish_ids)))
+    id_list.sort()
     divided_ids = split_list_by_n(id_list, world_size)
     print("divided_ids:", divided_ids)
     if rank == 0:
