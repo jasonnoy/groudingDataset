@@ -8,9 +8,9 @@ import io
 import math
 import re
 
-puncts = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
-         '\'', '\"', '’', '`', '?', '$', '%', '#', '!', '&', '*', '+', ',', '.'
-         ]
+puncts = ["|", ":", ";", "@", "(", ")", "[", "]", "{", "}", "^", "\\", "/",
+          "\"", "\"", "’", "`", "?", "$", "%", "#", "!", "&", "*", "+", ",", "."
+          ]
 
 
 def findall(text, pattern):
@@ -33,7 +33,8 @@ if __name__ == "__main__":
         output_dir_path = os.path.join(output_path, dir)
         files = os.listdir(output_dir_path)
         for file in tqdm(files):
-            with open(os.path.join(output_dir_path, file), "r", encoding='utf-8') as f1, open(os.path.join(output_dir_path, file+".update"), "a", encoding='utf-8') as f2:
+            with open(os.path.join(output_dir_path, file), "r", encoding='utf-8') as f1, open(
+                    os.path.join(output_dir_path, file + ".update"), "a", encoding='utf-8') as f2:
                 for line in f1:
                     punct_pos_list = []
                     pos_add_map = {}
@@ -46,7 +47,7 @@ if __name__ == "__main__":
                     cur_punct_num = 0
                     for i in range(len(caption)):
                         if i in punct_pos_list:
-                            pos_add_map[i-cur_punct_num] = cur_punct_num+1
+                            pos_add_map[i - cur_punct_num] = cur_punct_num + 1
                             cur_punct_num += 1
                     data['groundings'] = process_dict(data['groundings'], pos_add_map)
                     data['original_groundings'] = process_dict(data['original_groundings'], pos_add_map)
@@ -85,18 +86,18 @@ if __name__ == "__main__":
 
 # if __name__ == '__main__':
 
-    # text = "[ disc, entity:the reign of ragnarok [ disc 1 of 2 ]"
-    #
-    # def remove_puncs(caption):
-    #     r = "[+=^*<>{}「」【】()（）/\[\],.?，。？！:@¥%!@#$%&]"
-    #     caption = re.sub(r, ' ', caption)
-    #     return caption
-    #
-    # print(remove_puncs(text))
-    # width, height = [600, 800]
-    # loc = [100, 100]
-    # loc = [l / width if i % 2 == 0 else l / height for i, l in enumerate(loc)]
-    # print(loc)
+# text = "[ disc, entity:the reign of ragnarok [ disc 1 of 2 ]"
+#
+# def remove_puncs(caption):
+#     r = "[+=^*<>{}「」【】()（）/\[\],.?，。？！:@¥%!@#$%&]"
+#     caption = re.sub(r, ' ', caption)
+#     return caption
+#
+# print(remove_puncs(text))
+# width, height = [600, 800]
+# loc = [100, 100]
+# loc = [l / width if i % 2 == 0 else l / height for i, l in enumerate(loc)]
+# print(loc)
 #
 # if __name__ == "__main__":
 #     # nlp = spacy.load("en_core_web_trf")
