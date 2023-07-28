@@ -162,7 +162,7 @@ if __name__ == "__main__":
             p = Process(target=compare_and_update, args=(tar_id, tar_path, output_dir_path))
             p.start()
             process_list.append(p)
-            if len(process_list) >= 2:
+            if len(process_list) >= 400:
                 for p in process_list:
                     p.join()
                 process_list = []
