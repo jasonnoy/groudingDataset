@@ -111,8 +111,8 @@ def revise_and_write(output_dir_path, file):
 
 
 def compare_and_update(tar_id, tar_path, ouput_path):
-    with open(os.path.join(ouput_path, tar_id + ".meta.json.update"), 'r', encoding='utf-8') as f1, open(
-            os.path.join(ouput_path, tar_id + ".meta.json.update2"), 'a', encoding='utf-8') as f2:
+    with open(os.path.join(ouput_path, tar_id + ".meta.jsonl.update"), 'r', encoding='utf-8') as f1, open(
+            os.path.join(ouput_path, tar_id + ".meta.jsonl.update2"), 'a', encoding='utf-8') as f2:
         tar_file_path = os.path.join(tar_path, tar_id + ".tar")
         dataset = wds.WebDataset(tar_file_path)
         ds_iter = iter(dataset)
@@ -155,7 +155,7 @@ if __name__ == "__main__":
             p = Process(target=compare_and_update, args=(tar_id, tar_path, output_dir_path))
             p.start()
             process_list.append(p)
-            if len(process_list) >= 256:
+            if len(process_list) >= 2:
                 for p in process_list:
                     p.join()
                 process_list = []
