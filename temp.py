@@ -33,7 +33,7 @@ if __name__ == "__main__":
         output_dir_path = os.path.join(output_path, dir)
         files = os.listdir(output_dir_path)
         for file in tqdm(files):
-            with open(os.path.join(output_dir_path, file), "r", encoding='utf-8') as f1, open(os.path.join(output_dir_path+".update", file), "a", encoding='utf-8') as f2:
+            with open(os.path.join(output_dir_path, file), "r", encoding='utf-8') as f1, open(os.path.join(output_dir_path, file+".update"), "a", encoding='utf-8') as f2:
                 for line in f1:
                     punct_pos_list = []
                     pos_add_map = {}
