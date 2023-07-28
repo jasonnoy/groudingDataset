@@ -121,9 +121,9 @@ def compare_and_update(tar_id, tar_path, ouput_path):
             if data['status'] != "success":
                 continue
             ds = next(ds_iter)
-            ds_caption = ds['txt']
+            ds_caption = ds['txt'].decode()
             data['tar_caption'] = ds_caption
-            assert(ds['id'] == data['SAMPLEID'])
+            assert(ds['id'].decode() == data['SAMPLE_ID'])
             try:
                 assert (ds_caption == data['caption'])
             except Exception as e:
