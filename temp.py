@@ -22,7 +22,7 @@ def process_dict(g_dict, add_map):
     new_dict = {}
     for obj in g_dict:
         for pos in g_dict[obj]:
-            new_pos = pos + add_map[pos]
+            new_pos = pos + add_map[int(pos)]
             new_dict[obj][new_pos] = g_dict[obj][pos]
     return new_dict
 
@@ -46,6 +46,7 @@ if __name__ == "__main__":
                     print("caption:", caption)
                     for punct in puncts:
                         # print(punct)
+                        print(findall(caption, punct))
                         punct_pos_list.extend(findall(caption, punct))
                     cur_punct_num = 0
                     for i in range(len(caption)):
