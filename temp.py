@@ -109,15 +109,17 @@ if __name__ == "__main__":
     output_path = "/nxchinamobile2/shared/jjh/laion115m"
     process_list = []
     for dir_i, dir in enumerate(os.listdir(output_path)):
-        print("processing dir {}/{}...".format(dir_i, len(os.listdir(output_path))))
+        print("processing dir {} {}/{}...".format(os.listdir(output_path), dir_i, len(os.listdir(output_path))))
         output_dir_path = os.path.join(output_path, dir)
         files = os.listdir(output_dir_path)
         for file in tqdm(files):
             p = Process(target=revise_and_write, args=(output_dir_path, file))
             p.start()
             process_list.append(p)
-    for p in process_list:
-        p.join()
+            if len(process_list) >= 256:
+                for p in process_list:
+                    p.join()
+                process_list = []
 
 # def read_tar(tar_path):
 #     return wds.WebDataset(tar_path)
