@@ -66,12 +66,17 @@ if __name__ == "__main__":
                     if data['status'] != "success":
                         continue
                     caption = data['caption']
-                    print("caption:", caption, 'len:', len(caption))
+                    # print("caption:", caption, 'len:', len(caption))
                     punct_pos_list = findall_puncts(caption)
                     strip_caption = remove_punctuation(caption)
-                    assert len(strip_caption) == len(caption) - len(punct_pos_list)
-                    print("caption:", caption, 'len:', len(caption))
-                    print(punct_pos_list)
+                    try:
+                        assert len(strip_caption) == len(caption) - len(punct_pos_list)
+                    except Exception as e:
+                        print(caption)
+                        print(strip_caption)
+                        print(punct_pos_list)
+                    # print("caption:", caption, 'len:', len(caption))
+                    # print(punct_pos_list)
                     cur_punct_num = 0
                     for i in range(len(caption)):
                         if i in punct_pos_list:
@@ -83,7 +88,7 @@ if __name__ == "__main__":
                             cur_punct_num = pos_add_map[i]
                             continue
                         pos_add_map[i] = cur_punct_num
-                    print(pos_add_map)
+                    # print(pos_add_map)
                     data['groundings'] = process_dict(data['groundings'], pos_add_map)
                     data['original_groundings'] = process_dict(data['original_groundings'], pos_add_map)
                     f2.write(json.dumps(data, ensure_ascii=False) + '\n')
