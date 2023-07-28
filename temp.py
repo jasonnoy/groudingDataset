@@ -1,6 +1,7 @@
 import json
 import os
 from tqdm import tqdm
+from collections import defaultdict
 import re
 import webdataset as wds
 from PIL import Image
@@ -28,7 +29,7 @@ def findall_puncts(text):
 
 def process_dict(g_dict, add_map):
     print(g_dict)
-    new_dict = {}
+    new_dict = defaultdict(dict)
     for obj in g_dict:
         for pos in g_dict[obj]:
             new_pos = int(pos) + add_map[int(pos)]
