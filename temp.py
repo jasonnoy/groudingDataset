@@ -123,7 +123,7 @@ def compare_and_update(tar_id, tar_path, ouput_path):
             ds = next(ds_iter)
             ds_caption = ds['txt']
             data['tar_caption'] = ds_caption
-            assert(ds['id'] == data['SAMPLE_ID'])
+            assert(ds['id'] == data['SAMPLEID'])
             try:
                 assert (ds_caption == data['caption'])
             except Exception as e:
