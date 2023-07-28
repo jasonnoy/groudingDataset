@@ -9,7 +9,6 @@ import io
 import math
 import re
 
-
 puncts = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
           '\'', '\"', '’', '`', '?', '$', '%', '#', '!', '&', '*', '+', ',', '.'
           ]
@@ -53,7 +52,8 @@ def remove_punctuation(text: str) -> str:
         text = text.replace(p, '')
     return text.lstrip()
 
-from multiprocessing import  Process
+
+from multiprocessing import Process
 
 
 def revise_and_write(output_dir_path, file):
@@ -83,7 +83,7 @@ def revise_and_write(output_dir_path, file):
             for i in range(len(caption)):
                 if i in punct_pos_list:
                     if i == 0:
-                        pos_add_map[0] = 0 if 0 not in pos_add_map else pos_add_map[0]+1
+                        pos_add_map[0] = 0 if 0 not in pos_add_map else pos_add_map[0] + 1
                     else:
                         pos_add_map[i - cur_punct_num] = cur_punct_num + 1
                     cur_punct_num += 1
@@ -109,6 +109,26 @@ def revise_and_write(output_dir_path, file):
         f2.close()
         f1.close()
 
+
+def compare_and_update(tar_id, tar_path, ouput_path):
+    with open(os.path.join(ouput_path, tar_id + ".meta.json.update"), 'r', encoding='utf-8') as f1, open(
+            os.path.join(ouput_path, tar_id + ".meta.json.update2"), 'a', encoding='utf-8') as f2:
+        tar_file_path = os.path.join(tar_path, tar_id + ".tar")
+        dataset = wds.WebDataset(tar_file_path)
+        ds_iter = iter(dataset)
+        for line in f1:
+            data = json.loads(line)
+            if data['status'] != "success":
+                continue
+            ds = next(ds_iter)
+            ds_caption = ds['txt']
+            data['tar_caption'] = ds_caption
+            assert (ds_caption == data['caption'])
+            f2.write(json.dumps(data) + '\n')
+        f2.close()
+        f1.close()
+
+
 # if __name__ == '__main__':
 #     grounding_path = '/nxchinamobile2/shared/jjh/laion115m'
 #     process_list = []
@@ -124,13 +144,15 @@ def revise_and_write(output_dir_path, file):
 
 if __name__ == "__main__":
     output_path = "/nxchinamobile2/shared/jjh/laion115m"
+    tar_path = "/nxchinamobile2/shared/img_datasets/laion115m"
     process_list = []
     for dir_i, dir in enumerate(os.listdir(output_path)):
         print("processing dir {} {}/{}...".format(os.listdir(output_path), dir_i, len(os.listdir(output_path))))
         output_dir_path = os.path.join(output_path, dir)
         files = os.listdir(output_dir_path)
         for file in tqdm(files):
-            p = Process(target=revise_and_write, args=(output_dir_path, file))
+            tar_id = file.split('.')[0]
+            p = Process(target=compare_and_update, args=(tar_id, tar_path, output_dir_path))
             p.start()
             process_list.append(p)
             if len(process_list) >= 256:
