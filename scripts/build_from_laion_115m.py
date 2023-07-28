@@ -66,7 +66,7 @@ if __name__ == "__main__":
     )
 
     input_path = "/nxchinamobile2/shared/img_datasets/laion115m"
-    output_path = "/nxchinamobile2/shared/jjh/laion115m"
+    output_path = "/nxchinamobile2/shared/jjh/laion115m-new"
     map_name = "file_map_laion_synthetic_filtered_large.json"
     map_key = "laion_synthetic_filtered_large.json"
     with open(os.path.join(input_path, map_name), 'r', encoding='utf-8') as f:
