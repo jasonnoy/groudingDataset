@@ -45,7 +45,7 @@ if __name__ == "__main__":
                     caption = data['caption']
                     print("caption:", caption)
                     for punct in puncts:
-                        # print(punct)
+                        print(punct)
                         print(findall(caption, punct))
                         punct_pos_list.extend(findall(caption, punct))
                     cur_punct_num = 0
