@@ -90,6 +90,9 @@ if __name__ == "__main__":
         output_dir_path = os.path.join(output_path, str(cur_dir))
         input_dir_path = os.path.join(input_path, str(cur_dir))
 
+        if not os.path.exists(output_dir_path):
+            os.mkdir(output_dir_path)
+
         skip_ids = os.listdir(output_dir_path)
         skip_ids = [skip_id.split(sep='.')[0] for skip_id in skip_ids]
         if cur_id in skip_ids:
