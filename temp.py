@@ -8,13 +8,22 @@ import io
 import math
 import re
 
-puncts = ["\|", ":", ";", "@", "\(", "\)", "\[", "\]", "\{", "\}", "\^", '\\\\', "/",
-          '"', "’", "`", "\?", "\$", "%", "#", "!", "&", "\*", "\+", "\,", "\."
+
+puncts = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
+          '\'', '\"', '’', '`', '?', '$', '%', '#', '!', '&', '*', '+', ',', '.'
           ]
 
 
-def findall(text, pattern):
-    return [sub.start() for sub in re.finditer(pattern, text)]
+def findall_puncts(text):
+    res = []
+    for punct in puncts:
+        beg = 0
+        while text.find(punct, beg) != -1:
+            pos = text.find(punct, beg)
+            res.append(pos)
+            beg = pos + 1
+    return res
+    # return [sub.start() for sub in re.finditer(pattern, text)]
 
 
 def process_dict(g_dict, add_map):
@@ -22,8 +31,8 @@ def process_dict(g_dict, add_map):
     new_dict = {}
     for obj in g_dict:
         for pos in g_dict[obj]:
-            new_pos = pos + add_map[int(pos)]
-            new_dict[obj][new_pos] = g_dict[obj][pos]
+            new_pos = int(pos) + add_map[int(pos)]
+            new_dict[obj][str(new_pos)] = g_dict[obj][pos]
     return new_dict
 
 
@@ -37,17 +46,14 @@ if __name__ == "__main__":
             with open(os.path.join(output_dir_path, file), "r", encoding='utf-8') as f1, open(
                     os.path.join(output_dir_path, file + ".update"), "a", encoding='utf-8') as f2:
                 for line in f1:
-                    punct_pos_list = []
                     pos_add_map = {}
                     data = json.loads(line)
                     if data['status'] != "success":
                         continue
                     caption = data['caption']
                     print("caption:", caption)
-                    for punct in puncts:
-                        print(punct)
-                        print(findall(caption, punct))
-                        punct_pos_list.extend(findall(caption, punct))
+                    punct_pos_list = findall_puncts(caption)
+                    print(punct_pos_list)
                     cur_punct_num = 0
                     for i in range(len(caption)):
                         if i in punct_pos_list:
