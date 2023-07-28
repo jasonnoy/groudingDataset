@@ -33,7 +33,6 @@ def findall_puncts(text):
 
 
 def process_dict(g_dict, add_map):
-    print(g_dict)
     new_dict = defaultdict(dict)
     for obj in g_dict:
         for pos in g_dict[obj]:
@@ -50,50 +49,73 @@ def remove_punctuation(text: str) -> str:
         text = text.replace(p, '')
     return text.lstrip()
 
+from multiprocessing import  Process
+
+
+def revise_and_write(output_dir_path, file):
+    with open(os.path.join(output_dir_path, file), "r", encoding='utf-8') as f1, open(
+            os.path.join(output_dir_path, file + ".update"), "a", encoding='utf-8') as f2:
+        for line in f1:
+            pos_add_map = {}
+            data = json.loads(line)
+            if data['status'] != "success":
+                continue
+            caption = data['caption']
+            # print("caption:", caption, 'len:', len(caption))
+            punct_pos_list = findall_puncts(caption)
+            strip_caption = remove_punctuation(caption)
+            try:
+                assert len(strip_caption) == len(caption) - len(punct_pos_list)
+            except Exception as e:
+                print(caption)
+                print(strip_caption)
+                print(punct_pos_list)
+            # print("caption:", caption, 'len:', len(caption))
+            # print(punct_pos_list)
+            cur_punct_num = 0
+            for i in range(len(caption)):
+                if i in punct_pos_list:
+                    pos_add_map[i - cur_punct_num] = cur_punct_num + 1
+                    cur_punct_num += 1
+            cur_punct_num = 0
+            for i in range(len(caption)):
+                if i in pos_add_map:
+                    cur_punct_num = pos_add_map[i]
+                    continue
+                pos_add_map[i] = cur_punct_num
+            # print(pos_add_map)
+            data['groundings'] = process_dict(data['groundings'], pos_add_map)
+            data['original_groundings'] = process_dict(data['original_groundings'], pos_add_map)
+            f2.write(json.dumps(data, ensure_ascii=False) + '\n')
+        f2.close()
+        f1.close()
+
+# if __name__ == '__main__':
+#     grounding_path = '/nxchinamobile2/shared/jjh/laion115m'
+#     process_list = []
+#     for part in os.listdir(grounding_path):
+#         for file in os.listdir(os.path.join(grounding_path, part)):
+#             ground_file = os.path.join(grounding_path, part, file_id+'.meta.jsonl')
+#             p = Process(target=YOUR_FUNC,args=(ground_file,))
+#             p.start()
+#             process_list.append(p)
+#     for p in process_list:
+#         p.join()
+
 
 if __name__ == "__main__":
     output_path = "/nxchinamobile2/shared/jjh/laion115m"
+    process_list = []
     for dir_i, dir in enumerate(os.listdir(output_path)):
         print("processing dir {}/{}...".format(dir_i, len(os.listdir(output_path))))
         output_dir_path = os.path.join(output_path, dir)
         files = os.listdir(output_dir_path)
         for file in tqdm(files):
-            with open(os.path.join(output_dir_path, file), "r", encoding='utf-8') as f1, open(
-                    os.path.join(output_dir_path, file + ".update"), "a", encoding='utf-8') as f2:
-                for line in f1:
-                    pos_add_map = {}
-                    data = json.loads(line)
-                    if data['status'] != "success":
-                        continue
-                    caption = data['caption']
-                    # print("caption:", caption, 'len:', len(caption))
-                    punct_pos_list = findall_puncts(caption)
-                    strip_caption = remove_punctuation(caption)
-                    try:
-                        assert len(strip_caption) == len(caption) - len(punct_pos_list)
-                    except Exception as e:
-                        print(caption)
-                        print(strip_caption)
-                        print(punct_pos_list)
-                    # print("caption:", caption, 'len:', len(caption))
-                    # print(punct_pos_list)
-                    cur_punct_num = 0
-                    for i in range(len(caption)):
-                        if i in punct_pos_list:
-                            pos_add_map[i - cur_punct_num] = cur_punct_num + 1
-                            cur_punct_num += 1
-                    cur_punct_num = 0
-                    for i in range(len(caption)):
-                        if i in pos_add_map:
-                            cur_punct_num = pos_add_map[i]
-                            continue
-                        pos_add_map[i] = cur_punct_num
-                    # print(pos_add_map)
-                    data['groundings'] = process_dict(data['groundings'], pos_add_map)
-                    data['original_groundings'] = process_dict(data['original_groundings'], pos_add_map)
-                    f2.write(json.dumps(data, ensure_ascii=False) + '\n')
-                f2.close()
-                f1.close()
+            p = Process(target=revise_and_write, args=(output_dir_path, file))
+            p.start()
+            process_list.append(p)
+    for p in process_list:
+        p.join()
 
 # def read_tar(tar_path):
 #     return wds.WebDataset(tar_path)
