@@ -97,8 +97,8 @@ def revise_and_write(output_dir_path, file):
                     continue
                 pos_add_map[i] = cur_punct_num
             # print(pos_add_map)
-            data['groundings'] = process_dict(data['groundings'], pos_add_map)
-            data['original_groundings'] = process_dict(data['original_groundings'], pos_add_map)
+            data['groundings'] = process_dict(data['groundings'], pos_add_map, caption)
+            data['original_groundings'] = process_dict(data['original_groundings'], pos_add_map, caption)
             f2.write(json.dumps(data, ensure_ascii=False) + '\n')
         f2.close()
         f1.close()
