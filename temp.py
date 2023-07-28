@@ -144,12 +144,13 @@ def compare_and_update(tar_id, tar_path, ouput_path):
 
 if __name__ == "__main__":
     output_path = "/nxchinamobile2/shared/jjh/laion115m"
-    tar_path = "/nxchinamobile2/shared/img_datasets/laion115m"
+    input_path = "/nxchinamobile2/shared/img_datasets/laion115m"
     process_list = []
     for dir_i, dir in enumerate(os.listdir(output_path)):
         print("processing dir {} {}/{}...".format(os.listdir(output_path), dir_i, len(os.listdir(output_path))))
         output_dir_path = os.path.join(output_path, dir)
         files = os.listdir(output_dir_path)
+        tar_path = os.path.join(input_path, dir)
         for file in tqdm(files):
             tar_id = file.split('.')[0]
             p = Process(target=compare_and_update, args=(tar_id, tar_path, output_dir_path))
