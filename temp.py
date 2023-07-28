@@ -39,7 +39,7 @@ def process_dict(g_dict, add_map, caption):
     for obj in g_dict:
         for pos in g_dict[obj]:
             if int(pos) >= len(caption):
-                print("pos:", pos, "caption:", caption, 'len:', len(caption))
+                continue
             new_pos = int(pos) + add_map[int(pos)]
             new_dict[obj][str(new_pos)] = g_dict[obj][pos]
     return new_dict
