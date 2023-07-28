@@ -21,9 +21,7 @@ def process_dict(g_dict, add_map):
     print(g_dict)
     new_dict = {}
     for obj in g_dict:
-        print(obj)
-        for pos in obj:
-            print(pos)
+        for pos in g_dict[obj]:
             new_pos = pos + add_map[pos]
             new_dict[obj][new_pos] = g_dict[obj][pos]
     return new_dict
