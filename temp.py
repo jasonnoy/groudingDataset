@@ -66,12 +66,9 @@ def revise_and_write(output_dir_path, file):
                 continue
             caption = data['caption']
             # print("caption:", caption, 'len:', len(caption))
-            try:
-                punct_pos_list = findall_puncts(caption)
-            except Exception as e:
-                print(caption)
-                print(strip_caption)
-                print(punct_pos_list)
+
+            punct_pos_list = findall_puncts(caption)
+
             caption_tmp = caption
             strip_caption = remove_punctuation(caption_tmp)
             try:
@@ -97,8 +94,17 @@ def revise_and_write(output_dir_path, file):
                     continue
                 pos_add_map[i] = cur_punct_num
             # print(pos_add_map)
-            data['groundings'] = process_dict(data['groundings'], pos_add_map, caption)
-            data['original_groundings'] = process_dict(data['original_groundings'], pos_add_map, caption)
+            try:
+                data['groundings'] = process_dict(data['groundings'], pos_add_map, caption)
+                data['original_groundings'] = process_dict(data['original_groundings'], pos_add_map, caption)
+            except Exception as e:
+                print("groundings:", data['groundings'])
+                print("original_groundings:", data['original_groundings'])
+                data['groundings'] = []
+                data['original_groundings'] = []
+                print(caption)
+                print(strip_caption)
+                print(punct_pos_list)
             f2.write(json.dumps(data, ensure_ascii=False) + '\n')
         f2.close()
         f1.close()
