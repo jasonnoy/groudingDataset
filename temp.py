@@ -34,10 +34,12 @@ def findall_puncts(text):
     # return [sub.start() for sub in re.finditer(pattern, text)]
 
 
-def process_dict(g_dict, add_map):
+def process_dict(g_dict, add_map, caption):
     new_dict = defaultdict(dict)
     for obj in g_dict:
         for pos in g_dict[obj]:
+            if int(pos) >= len(caption):
+                print("pos:", pos, "caption:", caption, 'len:', len(caption))
             new_pos = int(pos) + add_map[int(pos)]
             new_dict[obj][str(new_pos)] = g_dict[obj][pos]
     return new_dict
