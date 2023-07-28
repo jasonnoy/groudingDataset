@@ -123,7 +123,13 @@ def compare_and_update(tar_id, tar_path, ouput_path):
             ds = next(ds_iter)
             ds_caption = ds['txt']
             data['tar_caption'] = ds_caption
-            assert (ds_caption == data['caption'])
+            assert(ds['id'] == data['SAMPLE_ID'])
+            try:
+                assert (ds_caption == data['caption'])
+            except Exception as e:
+                print("tar_caption:", ds_caption)
+                print("meta_caption:", data['caption'])
+
             f2.write(json.dumps(data) + '\n')
         f2.close()
         f1.close()
