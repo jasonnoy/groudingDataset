@@ -51,6 +51,12 @@ if __name__ == "__main__":
                         if i in punct_pos_list:
                             pos_add_map[i - cur_punct_num] = cur_punct_num + 1
                             cur_punct_num += 1
+                    cur_punct_num = 0
+                    for i in range(len(caption)):
+                        if i in pos_add_map:
+                            cur_punct_num = pos_add_map[i]
+                            continue
+                        pos_add_map[i] = cur_punct_num
                     data['groundings'] = process_dict(data['groundings'], pos_add_map)
                     data['original_groundings'] = process_dict(data['original_groundings'], pos_add_map)
                     f2.write(json.dumps(data, ensure_ascii=False) + '\n')
