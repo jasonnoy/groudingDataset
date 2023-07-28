@@ -16,6 +16,7 @@ puncts = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
 
 
 def findall_puncts(text):
+    caption = text
     res = []
     for punct in puncts:
         beg = 0
@@ -23,13 +24,12 @@ def findall_puncts(text):
             pos = text.find(punct, beg)
             res.append(pos)
             beg = pos + 1
-    caption = text
     for p in puncts:
         caption = caption.replace(p, '')
     for i, c in enumerate(caption):
         if c != ' ':
             break
-        res.append(i)
+        res.append(0)
     return res
     # return [sub.start() for sub in re.finditer(pattern, text)]
 
@@ -77,7 +77,10 @@ def revise_and_write(output_dir_path, file):
             cur_punct_num = 0
             for i in range(len(caption)):
                 if i in punct_pos_list:
-                    pos_add_map[i - cur_punct_num] = cur_punct_num + 1
+                    if i == 0:
+                        pos_add_map[0] += 1
+                    else:
+                        pos_add_map[i - cur_punct_num] = cur_punct_num + 1
                     cur_punct_num += 1
             cur_punct_num = 0
             for i in range(len(caption)):
@@ -116,7 +119,7 @@ if __name__ == "__main__":
             p = Process(target=revise_and_write, args=(output_dir_path, file))
             p.start()
             process_list.append(p)
-            if len(process_list) >= 256:
+            if len(process_list) >= 5:
                 for p in process_list:
                     p.join()
                 process_list = []
