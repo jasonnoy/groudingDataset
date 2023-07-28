@@ -18,6 +18,7 @@ def findall(text, pattern):
 
 
 def process_dict(g_dict, add_map):
+    print(g_dict)
     new_dict = {}
     for obj in g_dict:
         for pos in obj:
@@ -43,7 +44,7 @@ if __name__ == "__main__":
                         continue
                     caption = data['caption']
                     for punct in puncts:
-                        print(punct)
+                        # print(punct)
                         punct_pos_list.extend(findall(caption, punct))
                     cur_punct_num = 0
                     for i in range(len(caption)):
