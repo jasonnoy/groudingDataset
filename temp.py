@@ -43,6 +43,7 @@ if __name__ == "__main__":
                     if data['status'] != "success":
                         continue
                     caption = data['caption']
+                    print("caption:", caption)
                     for punct in puncts:
                         # print(punct)
                         punct_pos_list.extend(findall(caption, punct))
