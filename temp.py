@@ -70,7 +70,8 @@ def revise_and_write(output_dir_path, file):
                 print(caption)
                 print(strip_caption)
                 print(punct_pos_list)
-            strip_caption = remove_punctuation(caption)
+            caption_tmp = caption
+            strip_caption = remove_punctuation(caption_tmp)
             try:
                 assert len(strip_caption) == len(caption) - len(punct_pos_list)
             except Exception as e:
