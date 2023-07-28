@@ -64,7 +64,12 @@ def revise_and_write(output_dir_path, file):
                 continue
             caption = data['caption']
             # print("caption:", caption, 'len:', len(caption))
-            punct_pos_list = findall_puncts(caption)
+            try:
+                punct_pos_list = findall_puncts(caption)
+            except Exception as e:
+                print(caption)
+                print(strip_caption)
+                print(punct_pos_list)
             strip_caption = remove_punctuation(caption)
             try:
                 assert len(strip_caption) == len(caption) - len(punct_pos_list)
@@ -78,7 +83,7 @@ def revise_and_write(output_dir_path, file):
             for i in range(len(caption)):
                 if i in punct_pos_list:
                     if i == 0:
-                        pos_add_map[0] += 1
+                        pos_add_map[0] = 0 if 0 not in pos_add_map else pos_add_map[0]+1
                     else:
                         pos_add_map[i - cur_punct_num] = cur_punct_num + 1
                     cur_punct_num += 1
