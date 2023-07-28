@@ -17,17 +17,19 @@ puncts = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
 
 def findall_puncts(text):
     res = []
-    for i, c in enumerate(text):
-        if c != ' ':
-            break
-        res.append(i)
-
     for punct in puncts:
         beg = 0
         while text.find(punct, beg) != -1:
             pos = text.find(punct, beg)
             res.append(pos)
             beg = pos + 1
+    caption = text
+    for p in puncts:
+        caption = caption.replace(p, '')
+    for i, c in enumerate(caption):
+        if c != ' ':
+            break
+        res.append(i)
     return res
     # return [sub.start() for sub in re.finditer(pattern, text)]
 
