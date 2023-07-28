@@ -17,6 +17,11 @@ puncts = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
 
 def findall_puncts(text):
     res = []
+    for i, c in enumerate(text):
+        if c != ' ':
+            break
+        res.append(i)
+
     for punct in puncts:
         beg = 0
         while text.find(punct, beg) != -1:
@@ -37,6 +42,15 @@ def process_dict(g_dict, add_map):
     return new_dict
 
 
+def remove_punctuation(text: str) -> str:
+    punct = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
+             '\'', '\"', '’', '`', '?', '$', '%', '#', '!', '&', '*', '+', ',', '.'
+             ]
+    for p in punct:
+        text = text.replace(p, '')
+    return text.lstrip()
+
+
 if __name__ == "__main__":
     output_path = "/nxchinamobile2/shared/jjh/laion115m"
     for dir_i, dir in enumerate(os.listdir(output_path)):
@@ -52,8 +66,11 @@ if __name__ == "__main__":
                     if data['status'] != "success":
                         continue
                     caption = data['caption']
-                    print("caption:", caption)
+                    print("caption:", caption, 'len:', len(caption))
                     punct_pos_list = findall_puncts(caption)
+                    strip_caption = remove_punctuation(caption)
+                    assert len(strip_caption) == len(caption) - len(punct_pos_list)
+                    print("caption:", caption, 'len:', len(caption))
                     print(punct_pos_list)
                     cur_punct_num = 0
                     for i in range(len(caption)):
