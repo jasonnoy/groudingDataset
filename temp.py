@@ -58,6 +58,7 @@ if __name__ == "__main__":
                             cur_punct_num = pos_add_map[i]
                             continue
                         pos_add_map[i] = cur_punct_num
+                    print(pos_add_map)
                     data['groundings'] = process_dict(data['groundings'], pos_add_map)
                     data['original_groundings'] = process_dict(data['original_groundings'], pos_add_map)
                     f2.write(json.dumps(data, ensure_ascii=False) + '\n')
