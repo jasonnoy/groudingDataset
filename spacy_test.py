@@ -38,7 +38,7 @@ def get_entity_offset(caption, entities):
 
 def get_entities(text):
     doc = nlp(text)
-    return doc.noun_chunks
+    return (t.text for t in doc.noun_chunks)
 
 
 def get_all_entity_map(entity_lists):
