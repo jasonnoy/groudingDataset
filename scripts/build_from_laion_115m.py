@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
         tar_file = "{}.tar".format(cur_id)
         res = {}
-        batch_size = 6
+        batch_size = 4
         if os.path.getsize(os.path.join(input_dir_path, tar_file)) == 0:
             print("rank {}, empty file:".format(rank), os.path.join(input_dir_path, tar_file))
             continue
