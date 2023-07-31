@@ -198,7 +198,7 @@ class GLIPDemo(object):
         predictions = [prediction.resize((origin_image.shape[1], origin_image.shape[0])) for prediction, origin_image in
                        zip(predictions, origin_images)]
         list_locations = get_entity_list_locs(entity_lists)
-        top_predictions = [self._post_process(prediction, list_loc, thresh) for
+        top_predictions = [self._post_process(prediction, list_loc, thresh, save_img) for
                            prediction, entity_list, list_loc in zip(predictions, entity_lists, list_locations)]
         results = None
         if save_img:
@@ -362,13 +362,13 @@ class GLIPDemo(object):
                 ids.append(idx)
         return prediction[ids]
 
-    def _post_process(self, prediction, list_loc, threshold=0.5):
+    def _post_process(self, prediction, list_loc, threshold=0.5, debug=False):
         scores = prediction.get_field("scores")
-        # print("before post process")
-        # print("scores:", scores)
         labels = prediction.get_field("labels").tolist()
-        # print("labels:", labels)
-        # print("scores:", scores)
+        if debug:
+            print("before post process")
+            print("labels:", labels)
+            print("scores:", scores)
         thresh = scores.clone()
         for i, lb in enumerate(labels):
             if isinstance(self.confidence_threshold, float):
@@ -382,17 +382,20 @@ class GLIPDemo(object):
         scores = prediction.get_field("scores")
         _, idx = scores.sort(0, descending=True)
         prediction = prediction[idx]
-        # print("after score filter:")
-        # print("scores:", prediction.get_field("scores"))
-        # print("labels:", prediction.get_field("labels"))
+        if debug:
+            print("after score filter:")
+            print("scores:", prediction.get_field("scores"))
+            print("labels:", prediction.get_field("labels"))
         prediction = self.filter_object(prediction, list_loc)
-        # print("after object filter:")
-        # print("scores:", prediction.get_field("scores"))
-        # print("labels:", prediction.get_field("labels"))
+        if debug:
+            print("after object filter:")
+            print("scores:", prediction.get_field("scores"))
+            print("labels:", prediction.get_field("labels"))
         prediction = self.filter_iou(prediction)
-        # print("final:")
-        # print("scores:", prediction.get_field("scores"))
-        # print("labels:", prediction.get_field("labels"))
+        if debug:
+            print("final:")
+            print("scores:", prediction.get_field("scores"))
+            print("labels:", prediction.get_field("labels"))
         return prediction
 
     def compute_colors_for_labels(self, labels):
