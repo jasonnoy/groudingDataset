@@ -89,6 +89,10 @@ if __name__ == "__main__":
             if count == 20:
                 entity_lists = [get_entities(caption) for caption in captions]
                 entity_offsets = [get_entity_offset(cap, entities) for cap, entities in zip(captions, entity_lists)]
+                for i in range(len(entity_offsets)):
+                    if i == 0:
+                        continue
+                    entity_offsets[i] = [offset+entity_offsets[i-1][-1] for offset in entity_offsets[i]]
                 all_entities = get_all_entity_map(entity_lists)
                 assert len(entity_lists) == len(entity_offsets)
                 all_idx = 0
