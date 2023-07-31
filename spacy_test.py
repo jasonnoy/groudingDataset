@@ -109,14 +109,12 @@ def analysis_data_file(in_path, out_path, err_path):
                         f2.write(json.dumps(datas[i]) + '\n')
                     else:
                         f3.write(json.dumps(datas[i]) + '\n')
-                # if idx == 19:
-                #     print("entity_offset_cont:", entity_offset_cont)
                 count = 0
                 captions = []
                 datas = []
-        f2.close()
-        f3.close()
-        f.close()
+    f2.close()
+    f3.close()
+    f.close()
 
 
 if __name__ == "__main__":
