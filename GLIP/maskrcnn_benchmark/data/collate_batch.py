@@ -105,13 +105,16 @@ class BatchGroundingCollator(object):
 
     def process_caption(self, origin_caption):
         caption = remove_punctuation(origin_caption)
+        # print("process_caption| caption: ", caption)
         offset_map = compute_offset_map(caption, origin_caption)
         doc = self.nlp(caption)
-        nouns = [t.text.lower() for t in doc.noun_chunks]
+        nouns = [t.text for t in doc.noun_chunks]
+        tokens_positive = [(t[0].idx + offset_map[t[0].idx], t[0].idx + offset_map[t[0].idx] + len(t.text)) for t in doc.noun_chunks]
+
         empty_nouns = False
         if len(nouns) == 0:
             print("No entities found, using caption as entity, caption: {}".format(caption))
-            nouns = [caption.lower()]
+            nouns = [caption]
             empty_nouns = True
         entity_dict = {}
         new_entities = []
@@ -132,20 +135,20 @@ class BatchGroundingCollator(object):
             new_entity_to_id = {new_entities[0]: offset_map[0]}
 
         tokenized = self.tokenizer([caption], return_tensors="pt")
-        tokens_positive = []
-        for entity in nouns:
-            # want no overlays
-            found = {(0, 0)}
-            try:
-                for m in re.finditer(entity, caption.lower()):
-                    if (m.start(), m.end()) not in found:
-                        tokens_positive.append([[m.start(), m.end()]])
-                        found.add((m.start(), m.end()))
-            except Exception as e:
-                raise ValueError("caption:{}, entity:{}".format(caption.lower(), entity))
+        # tokens_positive = []
+        # for entity in nouns:
+        #     # want no overlays
+        #     print("process_caption| entity:", entity)
+        #     found = {(0, 0)}
+        #     try:
+        #         for m in re.finditer(entity, caption):
+        #             if (m.start(), m.end()) not in found:
+        #                 tokens_positive.append([[m.start(), m.end()]])
+        #                 found.add((m.start(), m.end()))
+        #     except Exception as e:
+        #         raise ValueError("caption:{}, entity:{}".format(caption, entity))
 
         # process positive map
-        print("caption:", caption)
         positive_map = create_positive_map(tokenized, tokens_positive)
         return positive_map, new_entities, new_to_old_entity, new_entity_to_id, caption
 
@@ -204,8 +207,8 @@ class BatchGroundingCollator(object):
 
         assert cur_count == len(batched_pos_map)
         positive_map = batched_pos_map.bool()
-        print("positive map shape:", positive_map.shape)
-        print("positive map:", positive_map)
+        # print("positive map shape:", positive_map.shape)
+        # print("positive map:", positive_map)
 
         return batched_imgs, image_sizes, new_caps, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list, origin_images, ids, captions
 
