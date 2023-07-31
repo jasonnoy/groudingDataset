@@ -371,10 +371,12 @@ class GLIPDemo(object):
         labels = prediction.get_field("labels").tolist()
         if debug:
             print("before post process")
-            entity_names = [all_entities[l] for l in labels if l < len(all_entities)]
-            score_list = scores.tolist()
-            print("score_list:", score_list)
-            print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
+            score_dict = dict(zip(prediction.get_field("labels").tolist(), prediction.get_field("scores").tolist()))
+            valid_scores = {}
+            for k, v in score_dict.items():
+                if k < len(all_entities):
+                    valid_scores[all_entities[k]] = v
+            print("scores:", valid_scores)
         thresh = scores.clone()
         for i, lb in enumerate(labels):
             if isinstance(self.confidence_threshold, float):
@@ -390,21 +392,30 @@ class GLIPDemo(object):
         prediction = prediction[idx]
         if debug:
             print("after score filter:")
-            entity_names = [all_entities[l] for l in prediction.get_field("labels").tolist() if l < len(all_entities)]
-            score_list = prediction.get_field("scores").tolist()
-            print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
+            score_dict = dict(zip(prediction.get_field("labels").tolist(), prediction.get_field("scores").tolist()))
+            valid_scores = {}
+            for k, v in score_dict.items():
+                if k < len(all_entities):
+                    valid_scores[all_entities[k]] = v
+            print("scores:", valid_scores)
         prediction = self.filter_object(prediction, list_loc)
         if debug:
             print("after object filter:")
-            entity_names = [all_entities[l] for l in prediction.get_field("labels").tolist() if l < len(all_entities)]
-            score_list = prediction.get_field("scores").tolist()
-            print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
+            score_dict = dict(zip(prediction.get_field("labels").tolist(), prediction.get_field("scores").tolist()))
+            valid_scores = {}
+            for k, v in score_dict.items():
+                if k < len(all_entities):
+                    valid_scores[all_entities[k]] = v
+            print("scores:", valid_scores)
         prediction = self.filter_iou(prediction)
         if debug:
             print("final:")
-            entity_names = [all_entities[l] for l in prediction.get_field("labels").tolist() if l < len(all_entities)]
-            score_list = prediction.get_field("scores").tolist()
-            print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
+            score_dict = dict(zip(prediction.get_field("labels").tolist(), prediction.get_field("scores").tolist()))
+            valid_scores = {}
+            for k, v in score_dict.items():
+                if k < len(all_entities):
+                    valid_scores[all_entities[k]] = v
+            print("scores:", valid_scores)
         return prediction
 
     def compute_colors_for_labels(self, labels):
