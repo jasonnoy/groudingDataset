@@ -61,7 +61,6 @@ def analysis_data_file(in_path, out_path, err_path):
         captions = []
         datas = []
         for idx, line in enumerate(f):
-            print("processing{}...\r".format(idx))
             data = json.loads(line)
             if data['status'] == 'success':
                 caption = data["caption"]
@@ -69,11 +68,8 @@ def analysis_data_file(in_path, out_path, err_path):
             datas.append(data)
             count += 1
             if count == 20:
-                print("enter 20")
                 entity_lists = [get_entities(caption, nlp) for caption in captions]
-                print("entity_lists:", entity_lists)
                 entity_offsets = [get_entity_offset(cap, entities) for cap, entities in zip(captions, entity_lists)]
-                print("74")
                 entity_offset_cont = []
                 cur_offset = 0
                 for offset_list in entity_offsets:
@@ -83,7 +79,6 @@ def analysis_data_file(in_path, out_path, err_path):
                         offsets.append(cur_offset)
                     entity_offset_cont.append(offsets)
                 all_entities = get_all_entity_map(entity_lists)
-                print("before assert")
                 assert len(entity_lists) == len(entity_offset_cont)
                 all_idx = 0
                 for i in range(len(entity_lists)):
@@ -102,7 +97,6 @@ def analysis_data_file(in_path, out_path, err_path):
                             groundings[new_entity] = datas[i]['groundings'][old_entity]
                             original_groundings[new_entity] = datas[i]['original_groundings'][old_entity]
                         all_idx += 1
-                    print("before write")
                     if normal:
                         datas[i]['groundings'] = groundings
                         datas[i]['original_groundings'] = original_groundings
@@ -112,7 +106,6 @@ def analysis_data_file(in_path, out_path, err_path):
                 count = 0
                 captions = []
                 datas = []
-                print("end")
     f2.close()
     f3.close()
     f.close()
@@ -148,7 +141,7 @@ if __name__ == "__main__":
             p = Process(target=analysis_data_file, args=(in_file_path, out_file_path, err_file_path))
             p.start()
             process_list.append(p)
-            if len(process_list) >= 1:
+            if len(process_list) >= 256:
                 for p in process_list:
                     p.join()
                 process_list = []
