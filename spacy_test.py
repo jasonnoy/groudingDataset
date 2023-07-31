@@ -149,7 +149,7 @@ if __name__ == "__main__":
             p = Process(target=analysis_data_file, args=(in_file_path, out_file_path, err_file_path))
             p.start()
             process_list.append(p)
-            if len(process_list) >= 256:
+            if len(process_list) >= 56:
                 for p in process_list:
                     p.join()
                 process_list = []
