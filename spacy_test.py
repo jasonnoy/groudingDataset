@@ -80,7 +80,7 @@ if __name__ == "__main__":
         count = 0
         captions = []
         datas = []
-        for line in f:
+        for idx, line in enumerate(f):
             data = json.loads(line)
             if data['status'] == 'success':
                 caption = data["caption"]
@@ -109,6 +109,11 @@ if __name__ == "__main__":
                             groundings[new_entity] = data['groundings'][old_entity]
                             original_groundings[new_entity] = data['original_groundings'][old_entity]
                         all_idx += 1
+                    if idx == 19:
+                        print("entity_lists: ", entity_lists)
+                        print("entity_offsets: ", entity_offsets)
+                        print("all_entities: ", all_entities)
+                        print("groundings:", groundings)
                     if normal:
                         datas[i]['groundings'] = groundings
                         datas[i]['original_groundings'] = original_groundings
