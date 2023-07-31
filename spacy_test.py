@@ -150,7 +150,7 @@ if __name__ == "__main__":
             p = Process(target=analysis_data_file, args=(in_file_path, out_file_path, err_file_path))
             p.start()
             process_list.append(p)
-            if len(process_list) >= 5:
+            if len(process_list) >= 1:
                 for p in process_list:
                     p.join()
                 process_list = []
