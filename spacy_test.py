@@ -127,6 +127,8 @@ if __name__ == "__main__":
                         f2.write(json.dumps(datas[i]) + '\n')
                     else:
                         f3.write(json.dumps(datas[i]) + '\n')
+                if idx == 19:
+                    print("entity_offset_cont:", entity_offset_cont)
                 count = 0
                 captions = []
                 datas = []
