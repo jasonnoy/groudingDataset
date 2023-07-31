@@ -75,7 +75,8 @@ if __name__ == "__main__":
     nlp = spacy.load("en_core_web_trf")
     path = "/nxchinamobile2/shared/jjh/laion115m_grounding/part-00032/3200467.meta.jsonl"
     out_path = "/nxchinamobile2/shared/jjh/laion115m-debug/part-00032/3200467.meta.jsonl"
-    with open(path, "r", encoding='utf-8') as f, open(out_path, 'a', encoding='utf-8') as f2:
+    err_path = "/nxchinamobile2/shared/jjh/laion115m-debug/part-00032/err_3200467.meta.jsonl"
+    with open(path, "r", encoding='utf-8') as f, open(out_path, 'a', encoding='utf-8') as f2, open(err_path, 'a', encoding='utf-8') as f3:
         count = 0
         captions = []
         datas = []
@@ -94,19 +95,26 @@ if __name__ == "__main__":
                 all_idx = 0
                 for i in range(len(entity_lists)):
                     groundings = {}
+                    normal = True
                     original_groundings = {}
                     for j in range(len(entity_lists[i])):
                         old_entity = entity_lists[i][j]
                         offset = entity_offsets[i][j]
                         if old_entity in data['groundings']:
+                            if all_idx-offset < 0:
+                                normal = False
+                                all_idx += 1
+                                continue
                             new_entity = all_entities[all_idx - offset]
                             groundings[new_entity] = data['groundings'][old_entity]
                             original_groundings[new_entity] = data['original_groundings'][old_entity]
                         all_idx += 1
-                    datas[i]['groundings'] = groundings
-                    datas[i]['original_groundings'] = original_groundings
-
-                    f2.write(json.dumps(datas[i]) + '\n')
+                    if normal:
+                        datas[i]['groundings'] = groundings
+                        datas[i]['original_groundings'] = original_groundings
+                        f2.write(json.dumps(datas[i]) + '\n')
+                    else:
+                        f3.write(json.dumps(datas[i]) + '\n')
                 count = 0
                 captions = []
                 datas = []
