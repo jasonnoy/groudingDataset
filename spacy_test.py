@@ -43,7 +43,6 @@ def get_entity_offset(caption, entities):
 
 
 def get_entities(text):
-    text = remove_punctuation(text)
     doc = nlp(text)
     return [t.text for t in doc.noun_chunks]
 
@@ -84,7 +83,7 @@ if __name__ == "__main__":
             data = json.loads(line)
             if data['status'] == 'success':
                 caption = data["caption"]
-                captions.append(caption)
+                captions.append(remove_punctuation(caption))
             datas.append(data)
             count += 1
             if count == 20:
