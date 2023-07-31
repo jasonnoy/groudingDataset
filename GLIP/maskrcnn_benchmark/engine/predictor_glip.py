@@ -371,7 +371,9 @@ class GLIPDemo(object):
         if debug:
             print("before post process")
             entity_names = [all_entities[l] for l in labels]
+            print("entity names:", entity_names)
             score_list = scores.tolist()
+            print("score_list:", score_list)
             print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
         thresh = scores.clone()
         for i, lb in enumerate(labels):
