@@ -109,11 +109,7 @@ class BatchGroundingCollator(object):
         offset_map = compute_offset_map(caption, origin_caption)
         doc = self.nlp(caption)
         nouns = [t.text for t in doc.noun_chunks]
-        for t in doc.noun_chunks:
-            print(t.text, len(t.text))
-            print(t[0].text)
-            print(t[0].idx)
-        # tokens_positive = [(t[0].idx + offset_map[t[0].idx], t[0].idx + offset_map[t[0].idx] + len(t.text)) for t in doc.noun_chunks]
+        tokens_positive = [(t[0].idx + offset_map[t[0].idx], t[0].idx + offset_map[t[0].idx] + len(t.text)) for t in doc.noun_chunks]
 
         empty_nouns = False
         if len(nouns) == 0:
