@@ -363,7 +363,7 @@ class GLIPDemo(object):
         return prediction[ids]
 
     def _post_process(self, prediction, list_loc, entity_lists, threshold=0.5, debug=False):
-        all_entities = []
+        all_entities = ["0"]
         for entities in entity_lists:
             all_entities.extend(entities)
         print("all entities:", all_entities)
