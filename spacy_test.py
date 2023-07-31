@@ -9,6 +9,14 @@ from multiprocessing import Process
 import math
 
 
+def split_list_by_n(origin_list, n):
+    step = math.ceil(len(origin_list) / n)
+    res = []
+    for i in range(0, len(origin_list), step):
+        res.append(origin_list[i:i + step])
+    return res
+
+
 def remove_punctuation(text: str) -> str:
     punct = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
              '\'', '\"', '’', '`', '?', '$', '%', '#', '!', '&', '*', '+', ',', '.'
@@ -54,14 +62,13 @@ def get_all_entity_map(entity_lists):
     return res
 
 
-def analysis_data_file(in_path, out_path, err_path):
-    nlp = spacy.load("en_core_web_trf")
+def analysis_data_file(in_path, out_path, err_path, nlp):
     with open(in_path, "r", encoding='utf-8') as f, open(out_path, 'a', encoding='utf-8') as f2, open(err_path, 'a', encoding='utf-8') as f3:
         count = 0
         captions = []
         datas = []
         for idx, line in enumerate(f):
-            print(idx)
+            # print(idx)
             data = json.loads(line)
             if data['status'] == 'success':
                 caption = data["caption"]
@@ -124,26 +131,32 @@ if __name__ == "__main__":
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
     torch.cuda.set_device(args.local_rank)
 
-    # spacy.prefer_gpu(args.local_rank)
+    spacy.prefer_gpu(args.local_rank)
     input_path = "/nxchinamobile2/shared/jjh/laion115m_grounding"
     output_path = "/nxchinamobile2/shared/jjh/laion115m-debug"
+    ids = []
+    for dir in os.listdir(input_path):
+        ids.extend(os.listdir(os.path.join(input_path, dir)))
+    select_ids = split_list_by_n(ids, args.world_size)[args.rank]
     process_list = []
-    for dir_i, dir in enumerate(os.listdir(input_path)):
-        print("processing dir {} {}/{}...".format(os.listdir(input_path), dir_i, len(os.listdir(input_path))))
-        output_dir_path = os.path.join(output_path, dir)
+    nlps = [spacy.load("en_core_web_trf") for _ in range(8)]
+    nlp_id = 0
+    for id_filename in select_ids:
+        dir_name = id_filename[:2]
+        output_dir_path = os.path.join(output_path, dir_name)
         if not os.path.exists(output_dir_path):
             os.makedirs(output_dir_path)
-        meta_dir_path = os.path.join(input_path, dir)
-        files = os.listdir(meta_dir_path)
-        for filename in tqdm(files):
-            in_file_path = os.path.join(meta_dir_path, filename)
-            out_file_path = os.path.join(output_dir_path, filename)
-            err_file_path = os.path.join(output_dir_path, "error_"+filename)
-            p = Process(target=analysis_data_file, args=(in_file_path, out_file_path, err_file_path))
-            p.start()
-            process_list.append(p)
-            if len(process_list) >= 2:
-                for p in process_list:
-                    p.join()
-                process_list = []
+        meta_dir_path = os.path.join(input_path, dir_name)
+        in_file_path = os.path.join(meta_dir_path, id_filename)
+        out_file_path = os.path.join(output_dir_path, id_filename)
+        err_file_path = os.path.join(output_dir_path, "error_"+id_filename)
+        p = Process(target=analysis_data_file, args=(in_file_path, out_file_path, err_file_path, nlps[nlp_id]))
+        nlp_id += 1
+        p.start()
+        process_list.append(p)
+        if len(process_list) >= 8:
+            for p in process_list:
+                p.join()
+            process_list = []
+            nlp_id = 0
 
