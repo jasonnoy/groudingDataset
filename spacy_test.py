@@ -68,7 +68,7 @@ def analysis_data_file(in_path, out_path, err_path, nlp):
         captions = []
         datas = []
         for idx, line in enumerate(f):
-            # print(idx)
+            print(idx)
             data = json.loads(line)
             if data['status'] == 'success':
                 caption = data["caption"]
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     nlps = [spacy.load("en_core_web_trf") for _ in range(8)]
     nlp_id = 0
     for id_filename in select_ids:
-        dir_name = id_filename[:2]
+        dir_name = "part-000"+id_filename[:2]
         output_dir_path = os.path.join(output_path, dir_name)
         if not os.path.exists(output_dir_path):
             os.makedirs(output_dir_path)
