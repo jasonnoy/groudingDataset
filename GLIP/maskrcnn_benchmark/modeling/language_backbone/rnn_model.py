@@ -1,4 +1,4 @@
-from copy import deepcopy
+from copy_util import deepcopy
 import numpy as np
 import torch
 from torch import nn
