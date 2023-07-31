@@ -199,7 +199,7 @@ class GLIPDemo(object):
         predictions = [prediction.resize((origin_image.shape[1], origin_image.shape[0])) for prediction, origin_image in
                        zip(predictions, origin_images)]
         list_locations = get_entity_list_locs(entity_lists)
-        top_predictions = [self._post_process(prediction, list_loc, thresh, save_img, entity_lists) for
+        top_predictions = [self._post_process(prediction, list_loc, entity_lists, thresh, save_img) for
                            prediction, list_loc in zip(predictions, list_locations)]
         results = None
         if save_img:
