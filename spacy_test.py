@@ -1,7 +1,50 @@
-import json
-import re
-import spacy
+import argparse
 import torch
+import json
+import os
+import re
+import sys
+import spacy
+from tqdm import tqdm
+import webdataset
+import warnings
+import math
+warnings.filterwarnings("ignore")
+from dataset_builder import *
+
+
+def split_list_by_n(origin_list, n):
+    step = math.ceil(len(origin_list) / n)
+    res = []
+    for i in range(0, len(origin_list), step):
+        res.append(origin_list[i:i + step])
+    return res
+
+
+if __name__ == "__main__":
+    torch.multiprocessing.set_start_method('spawn', force=True)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--local_rank', type=int, default=0)
+    parser.add_argument('--world_size', type=int, default=1)
+    parser.add_argument('--rank', type=int, default=0)
+    parser.add_argument('--master_addr', type=str, default='')
+    parser.add_argument('--master_port', type=int, default=7878)
+    args = parser.parse_args()
+
+    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
+    os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+
+    config_file = "GLIP/configs/pretrain/glip_Swin_L.yaml"
+    weight_file = "/nxchinamobile2/shared/official_pretrains/hf_home/GLIP-L/glip_large_model.pth"
+    torch.cuda.set_device(args.local_rank)
+    print("cuda device:", torch.cuda.current_device())
+    rank = args.rank
+    local_rank = args.local_rank
+    world_size = args.world_size
+
+    # spacy.prefer_gpu(args.local_rank)
+    nlp = spacy.load("en_core_web_trf")
 
 
 def get_entity_offset(caption, entities):
