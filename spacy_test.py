@@ -6,11 +6,17 @@ import re
 import sys
 import spacy
 from tqdm import tqdm
-import webdataset
 import warnings
 import math
-warnings.filterwarnings("ignore")
-from dataset_builder import *
+
+
+def remove_punctuation(text: str) -> str:
+    punct = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
+             '\'', '\"', '’', '`', '?', '$', '%', '#', '!', '&', '*', '+', ',', '.'
+             ]
+    for p in punct:
+        text = text.replace(p, '')
+    return text.strip()
 
 
 def split_list_by_n(origin_list, n):
@@ -37,6 +43,7 @@ def get_entity_offset(caption, entities):
 
 
 def get_entities(text):
+    text = remove_punctuation(text)
     doc = nlp(text)
     return [t.text for t in doc.noun_chunks]
 
@@ -91,9 +98,10 @@ if __name__ == "__main__":
                     for j in range(len(entity_lists[i])):
                         old_entity = entity_lists[i][j]
                         offset = entity_offsets[i][j]
-                        new_entity = all_entities[all_idx - offset]
-                        groundings[new_entity] = data['groundings'][old_entity]
-                        original_groundings[new_entity] = data['original_groundings'][old_entity]
+                        if old_entity in data['groundings']:
+                            new_entity = all_entities[all_idx - offset]
+                            groundings[new_entity] = data['groundings'][old_entity]
+                            original_groundings[new_entity] = data['original_groundings'][old_entity]
                         all_idx += 1
                     datas[i]['groundings'] = groundings
                     datas[i]['original_groundings'] = original_groundings
