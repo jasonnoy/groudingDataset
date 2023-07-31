@@ -184,7 +184,6 @@ class GLIPDemo(object):
                               thresh=0.5,
                               save_img=False):
         images = ImageList(images, image_sizes)
-        print("entity_lists:", entity_lists)
         # print("model device:", self.device)
         # print("torch device:", torch.cuda.current_device())
         images = images.to(self.device)
@@ -372,7 +371,6 @@ class GLIPDemo(object):
         if debug:
             print("before post process")
             entity_names = [all_entities[l] for l in labels]
-            print("entity names:", entity_names)
             score_list = scores.tolist()
             print("score_list:", score_list)
             print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
