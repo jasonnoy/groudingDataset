@@ -4,6 +4,8 @@ from maskrcnn_benchmark.structures.image_list import to_image_list
 from GLIP.maskrcnn_benchmark.data.datasets.laion import *
 
 import pdb
+
+
 class BatchCollator(object):
     """
     From a list of samples from the dataset,
@@ -16,7 +18,7 @@ class BatchCollator(object):
 
     def __call__(self, batch):
         transposed_batch = list(zip(*batch))
-        
+
         images = to_image_list(transposed_batch[0], self.size_divisible)
         targets = transposed_batch[1]
         img_ids = transposed_batch[2]
@@ -28,7 +30,7 @@ class BatchCollator(object):
             return images, targets, img_ids, positive_map, positive_map_eval
 
         if "greenlight_map" in transposed_batch[1][0].fields():
-            greenlight_map = torch.stack([i.get_field("greenlight_map") for i in transposed_batch[1]], dim = 0)
+            greenlight_map = torch.stack([i.get_field("greenlight_map") for i in transposed_batch[1]], dim=0)
 
         if "positive_map" in transposed_batch[1][0].fields():
             # we batch the positive maps here
@@ -45,7 +47,6 @@ class BatchCollator(object):
 
             assert cur_count == len(batched_pos_map)
             positive_map = batched_pos_map.float()
-        
 
         if "positive_map_eval" in transposed_batch[1][0].fields():
             # we batch the positive maps here
@@ -63,7 +64,6 @@ class BatchCollator(object):
             assert cur_count == len(batched_pos_map)
             # assert batched_pos_map.sum().item() == sum([v["positive_map"].sum().item() for v in batch[1]])
             positive_map_eval = batched_pos_map.float()
-
 
         return images, targets, img_ids, positive_map, positive_map_eval, greenlight_map
 
@@ -165,15 +165,13 @@ class BatchGroundingCollator(object):
         entities = []
         new_to_old_entity_list = []
         new_entity_to_id_list = []
-        offset_maps = []
 
         for cap in captions:
-            positive_map, new_entities, new_to_old_entity, new_entity_to_id, offset_map = self.process_caption(cap)
+            positive_map, new_entities, new_to_old_entity, new_entity_to_id = self.process_caption(cap)
             positive_maps.append(positive_map)
             entities.append(new_entities)
             new_to_old_entity_list.append(new_to_old_entity)
             new_entity_to_id_list.append(new_entity_to_id)
-            offset_maps.append(offset_map)
 
         # compute batched positive map
         max_len = max([v.shape[1] for v in positive_maps])
@@ -204,7 +202,7 @@ class BatchGroundingCollator(object):
         assert cur_count == len(batched_pos_map)
         positive_map = batched_pos_map.bool()
 
-        return batched_imgs, image_sizes, captions, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list, offset_maps, origin_images, ids
+        return batched_imgs, image_sizes, captions, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list, origin_images, ids
 
 
 class BBoxAugCollator(object):
