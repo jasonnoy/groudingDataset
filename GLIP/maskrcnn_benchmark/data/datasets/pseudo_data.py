@@ -10,7 +10,7 @@ from maskrcnn_benchmark.structures.bounding_box import BoxList
 from .modulated_coco import ConvertCocoPolysToMask
 from .tsv import ODTSVDataset, TSVYamlDataset
 from .od_to_grounding import sanity_check_target_after_processing
-from copy import deepcopy
+from copy_util import deepcopy
 
 class PseudoData(TSVYamlDataset):
     def __init__(self,

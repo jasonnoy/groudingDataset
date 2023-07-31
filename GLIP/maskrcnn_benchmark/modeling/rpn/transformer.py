@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn, Tensor
 
-import copy
+import copy_util
 from typing import Optional, List
 
 
