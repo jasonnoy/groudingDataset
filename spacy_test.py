@@ -70,6 +70,7 @@ def analysis_data_file(in_path, out_path, err_path):
             if count == 20:
                 print("enter 20")
                 entity_lists = [get_entities(caption) for caption in captions]
+                print("entity_lists:", entity_lists)
                 entity_offsets = [get_entity_offset(cap, entities) for cap, entities in zip(captions, entity_lists)]
                 print("74")
                 entity_offset_cont = []
