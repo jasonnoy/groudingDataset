@@ -184,6 +184,7 @@ class GLIPDemo(object):
                               thresh=0.5,
                               save_img=False):
         images = ImageList(images, image_sizes)
+        print("entity_lists:", entity_lists)
         # print("model device:", self.device)
         # print("torch device:", torch.cuda.current_device())
         images = images.to(self.device)

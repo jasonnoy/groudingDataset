@@ -111,12 +111,12 @@ def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, 
         #     for i in range(len(batch[8])):
         #         total_groundings.append(output_decorator(None, batch[8][i]))
         #     continue
-        captions = batch[2]
         new_entities = batch[4]
+        entire_entities = reduce(add, new_entities)
+        captions = batch[2]
         new_to_old_entities = batch[5]
         new_entity_to_ids = batch[6]
         image_ids = batch[8]
-        entire_entities = reduce(add, new_entities)
         if results:
             for result, pred, caption, new_entity_to_id, new_to_old_entity, index in zip(results, preds, captions, new_entity_to_ids, new_to_old_entities, image_ids):
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
