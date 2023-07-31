@@ -97,12 +97,6 @@ def analysis_data_file(in_path, out_path, err_path):
                             groundings[new_entity] = datas[i]['groundings'][old_entity]
                             original_groundings[new_entity] = datas[i]['original_groundings'][old_entity]
                         all_idx += 1
-                    # if idx == 19:
-                    #     # print("entity_lists: ", entity_lists)
-                    #     # print("entity_offsets: ", entity_offsets)
-                    #     # print("all_entities: ", all_entities)
-                    #     print("caption:", captions[i])
-                    #     print("groundings:", groundings)
                     if normal:
                         datas[i]['groundings'] = groundings
                         datas[i]['original_groundings'] = original_groundings
@@ -112,6 +106,7 @@ def analysis_data_file(in_path, out_path, err_path):
                 count = 0
                 captions = []
                 datas = []
+                print("end")
     f2.close()
     f3.close()
     f.close()
