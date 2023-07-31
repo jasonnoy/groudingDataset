@@ -104,15 +104,12 @@ class BatchGroundingCollator(object):
         return image
 
     def process_caption(self, origin_caption):
-        import time
         caption = remove_punctuation(origin_caption)
         # print("process_caption| caption: ", caption)
         offset_map = compute_offset_map(caption, origin_caption)
         doc = self.nlp(caption)
         nouns = [t.text for t in doc.noun_chunks]
         tokens_positive = [(t[0].idx + offset_map[t[0].idx], t[0].idx + offset_map[t[0].idx] + len(t.text)) for t in doc.noun_chunks]
-        print("tokens_positive:", tokens_positive)
-        time.sleep(10)
 
         empty_nouns = False
         if len(nouns) == 0:
