@@ -366,6 +366,7 @@ class GLIPDemo(object):
         all_entities = []
         for entities in entity_lists:
             all_entities.extend(entities)
+        print("all entities:", all_entities)
         scores = prediction.get_field("scores")
         labels = prediction.get_field("labels").tolist()
         if debug:
