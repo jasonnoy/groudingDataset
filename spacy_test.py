@@ -87,13 +87,17 @@ if __name__ == "__main__":
                 all_idx = 0
                 for i in range(len(entity_lists)):
                     groundings = {}
+                    original_groundings = {}
                     for j in range(len(entity_lists[i])):
                         old_entity = entity_lists[i][j]
                         offset = entity_offsets[i][j]
                         new_entity = all_entities[all_idx - offset]
-                        groundings[new_entity] = data[old_entity]
+                        groundings[new_entity] = data['groundings'][old_entity]
+                        original_groundings[new_entity] = data['original_groundings'][old_entity]
                         all_idx += 1
                     datas[i]['groundings'] = groundings
+                    datas[i]['original_groundings'] = original_groundings
+
                     f2.write(json.dumps(datas[i]) + '\n')
                 f2.close()
                 f.close()
