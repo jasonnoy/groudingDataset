@@ -107,8 +107,8 @@ if __name__ == "__main__":
                     datas[i]['original_groundings'] = original_groundings
 
                     f2.write(json.dumps(datas[i]) + '\n')
-                f2.close()
-                f.close()
                 count = 0
                 captions = []
                 datas = []
+        f2.close()
+        f.close()
