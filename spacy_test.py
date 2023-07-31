@@ -120,6 +120,7 @@ if __name__ == "__main__":
                         # print("entity_lists: ", entity_lists)
                         # print("entity_offsets: ", entity_offsets)
                         # print("all_entities: ", all_entities)
+                        print("caption:", captions[i])
                         print("groundings:", groundings)
                     if normal:
                         datas[i]['groundings'] = groundings
