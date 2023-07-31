@@ -108,10 +108,10 @@ if __name__ == "__main__":
                         old_entity = entity_lists[i][j]
                         offset = entity_offset_cont[i][j]
                         if old_entity in datas[i]['groundings']:
-                            if all_idx+offset >= len(all_entities):
-                                normal = False
-                                all_idx += 1
-                                continue
+                            # if all_idx+offset >= len(all_entities):
+                            #     normal = False
+                            #     all_idx += 1
+                            #     continue
                             new_entity = all_entities[all_idx - offset]
                             groundings[new_entity] = datas[i]['groundings'][old_entity]
                             original_groundings[new_entity] = datas[i]['original_groundings'][old_entity]
