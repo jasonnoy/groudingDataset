@@ -9,6 +9,7 @@
 #SBATCH --partition=dev
 #SBATCH --export=ALL
 
-srun experiments/build_from_laion_115m_ningxia.sh
+srun experiments/correct_data.sh
+#srun experiments/build_from_laion_115m_ningxia.sh
 #srun experiments/build_from_laion_aes_jinan.sh
 echo "Done with job $SLURM_JOB_ID"
