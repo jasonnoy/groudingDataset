@@ -68,6 +68,7 @@ def analysis_data_file(in_path, out_path, err_path):
             datas.append(data)
             count += 1
             if count == 20:
+                print("enter 20")
                 entity_lists = [get_entities(caption) for caption in captions]
                 entity_offsets = [get_entity_offset(cap, entities) for cap, entities in zip(captions, entity_lists)]
                 entity_offset_cont = []
@@ -79,6 +80,7 @@ def analysis_data_file(in_path, out_path, err_path):
                         offsets.append(cur_offset)
                     entity_offset_cont.append(offsets)
                 all_entities = get_all_entity_map(entity_lists)
+                print("before assert")
                 assert len(entity_lists) == len(entity_offset_cont)
                 all_idx = 0
                 for i in range(len(entity_lists)):
