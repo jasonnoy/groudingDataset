@@ -41,7 +41,7 @@ def get_entity_offset(caption, entities):
     return offsets
 
 
-def get_entities(text):
+def get_entities(text, nlp):
     doc = nlp(text)
     return [t.text for t in doc.noun_chunks]
 
@@ -55,6 +55,7 @@ def get_all_entity_map(entity_lists):
 
 
 def analysis_data_file(in_path, out_path, err_path):
+    nlp = spacy.load("en_core_web_trf")
     with open(in_path, "r", encoding='utf-8') as f, open(out_path, 'a', encoding='utf-8') as f2, open(err_path, 'a', encoding='utf-8') as f3:
         count = 0
         captions = []
@@ -69,7 +70,7 @@ def analysis_data_file(in_path, out_path, err_path):
             count += 1
             if count == 20:
                 print("enter 20")
-                entity_lists = [get_entities(caption) for caption in captions]
+                entity_lists = [get_entities(caption, nlp) for caption in captions]
                 print("entity_lists:", entity_lists)
                 entity_offsets = [get_entity_offset(cap, entities) for cap, entities in zip(captions, entity_lists)]
                 print("74")
@@ -127,11 +128,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
-    os.environ['TOKENIZERS_PARALLELISM'] = 'false'
     torch.cuda.set_device(args.local_rank)
 
     # spacy.prefer_gpu(args.local_rank)
-    nlp = spacy.load("en_core_web_trf")
     input_path = "/nxchinamobile2/shared/jjh/laion115m_grounding"
     output_path = "/nxchinamobile2/shared/jjh/laion115m-debug"
     process_list = []
