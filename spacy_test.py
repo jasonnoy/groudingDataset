@@ -99,7 +99,7 @@ if __name__ == "__main__":
                     for j in range(len(entity_lists[i])):
                         old_entity = entity_lists[i][j]
                         offset = entity_offsets[i][j]
-                        if old_entity in data['groundings']:
+                        if old_entity in datas[i]['groundings']:
                             if all_idx+offset >= len(all_entities):
                                 normal = False
                                 all_idx += 1
@@ -109,9 +109,9 @@ if __name__ == "__main__":
                             original_groundings[new_entity] = data['original_groundings'][old_entity]
                         all_idx += 1
                     if idx == 19:
-                        print("entity_lists: ", entity_lists)
-                        print("entity_offsets: ", entity_offsets)
-                        print("all_entities: ", all_entities)
+                        # print("entity_lists: ", entity_lists)
+                        # print("entity_offsets: ", entity_offsets)
+                        # print("all_entities: ", all_entities)
                         print("groundings:", groundings)
                     if normal:
                         datas[i]['groundings'] = groundings
