@@ -1,6 +1,6 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import bisect
-import copy_util
+import copy
 import logging
 import os
 

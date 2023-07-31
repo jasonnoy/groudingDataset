@@ -21,7 +21,7 @@ from transformers import AutoTokenizer
 import random
 import timeit
 import pdb
-from copy_util import deepcopy
+from copy import deepcopy
 
 def random_word(input_ids, mask_token_id, vocabs, padding_token_id, greenlight_map):
     """
