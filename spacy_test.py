@@ -38,7 +38,7 @@ def get_entity_offset(caption, entities):
 
 def get_entities(text):
     doc = nlp(text)
-    return (t.text for t in doc.noun_chunks)
+    return [t.text for t in doc.noun_chunks]
 
 
 def get_all_entity_map(entity_lists):
@@ -62,13 +62,7 @@ if __name__ == "__main__":
 
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
-
-    config_file = "GLIP/configs/pretrain/glip_Swin_L.yaml"
-    weight_file = "/nxchinamobile2/shared/official_pretrains/hf_home/GLIP-L/glip_large_model.pth"
     torch.cuda.set_device(args.local_rank)
-    rank = args.rank
-    local_rank = args.local_rank
-    world_size = args.world_size
 
     # spacy.prefer_gpu(args.local_rank)
     nlp = spacy.load("en_core_web_trf")
