@@ -114,6 +114,7 @@ def analysis_data_file(in_path, out_path, err_path):
                 captions = []
                 datas = []
         f2.close()
+        f3.close()
         f.close()
 
 
