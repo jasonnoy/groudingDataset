@@ -66,7 +66,7 @@ if __name__ == "__main__":
     )
 
     input_path = "/nxchinamobile2/shared/img_datasets/laion115m"
-    output_path = "/nxchinamobile2/shared/jjh/laion115m-new"
+    output_path = "/nxchinamobile2/shared/jjh/laion115m-debug"
     map_name = "file_map_laion_synthetic_filtered_large.json"
     map_key = "laion_synthetic_filtered_large.json"
     with open(os.path.join(input_path, map_name), 'r', encoding='utf-8') as f:
@@ -86,6 +86,8 @@ if __name__ == "__main__":
     divided_ids = split_list_by_n(id_list, world_size)
     select_ids = divided_ids[rank]
     for cur_id in select_ids:
+        if cur_id != '3200467':
+            continue
         cur_dir = "part-000{}".format(cur_id[:2])
         output_dir_path = os.path.join(output_path, str(cur_dir))
         input_dir_path = os.path.join(input_path, str(cur_dir))

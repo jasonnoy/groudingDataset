@@ -133,6 +133,7 @@ def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, 
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
                 groundings, origin_groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=True)
                 total_groundings.append(output_decorator(groundings, index, origin_groundings))
+        break
     return total_groundings
 
 
