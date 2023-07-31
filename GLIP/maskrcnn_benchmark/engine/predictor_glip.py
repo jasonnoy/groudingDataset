@@ -363,7 +363,7 @@ class GLIPDemo(object):
         return prediction[ids]
 
     def _post_process(self, prediction, list_loc, entity_lists, threshold=0.5, debug=False):
-        all_entities = ["0"]
+        all_entities = []
         for entities in entity_lists:
             all_entities.extend(entities)
         print("all entities:", all_entities)
@@ -371,7 +371,7 @@ class GLIPDemo(object):
         labels = prediction.get_field("labels").tolist()
         if debug:
             print("before post process")
-            entity_names = [all_entities[l] for l in labels]
+            entity_names = [all_entities[l] for l in labels if l < len(all_entities)]
             score_list = scores.tolist()
             print("score_list:", score_list)
             print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
@@ -390,19 +390,19 @@ class GLIPDemo(object):
         prediction = prediction[idx]
         if debug:
             print("after score filter:")
-            entity_names = [all_entities[l] for l in prediction.get_field("labels").tolist()]
+            entity_names = [all_entities[l] for l in prediction.get_field("labels").tolist() if l < len(all_entities)]
             score_list = prediction.get_field("scores").tolist()
             print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
         prediction = self.filter_object(prediction, list_loc)
         if debug:
             print("after object filter:")
-            entity_names = [all_entities[l] for l in prediction.get_field("labels").tolist()]
+            entity_names = [all_entities[l] for l in prediction.get_field("labels").tolist() if l < len(all_entities)]
             score_list = prediction.get_field("scores").tolist()
             print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
         prediction = self.filter_iou(prediction)
         if debug:
             print("final:")
-            entity_names = [all_entities[l] for l in prediction.get_field("labels").tolist()]
+            entity_names = [all_entities[l] for l in prediction.get_field("labels").tolist() if l < len(all_entities)]
             score_list = prediction.get_field("scores").tolist()
             print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
         return prediction
