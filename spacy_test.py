@@ -105,8 +105,8 @@ if __name__ == "__main__":
                                 all_idx += 1
                                 continue
                             new_entity = all_entities[all_idx + offset]
-                            groundings[new_entity] = data['groundings'][old_entity]
-                            original_groundings[new_entity] = data['original_groundings'][old_entity]
+                            groundings[new_entity] = datas[i]['groundings'][old_entity]
+                            original_groundings[new_entity] = datas[i]['original_groundings'][old_entity]
                         all_idx += 1
                     if idx == 19:
                         # print("entity_lists: ", entity_lists)
