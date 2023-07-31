@@ -135,8 +135,8 @@ if __name__ == "__main__":
     input_path = "/nxchinamobile2/shared/jjh/laion115m_grounding"
     output_path = "/nxchinamobile2/shared/jjh/laion115m-debug/"
     process_list = []
-    for dir_i, dir in enumerate(os.listdir(output_path)):
-        print("processing dir {} {}/{}...".format(os.listdir(output_path), dir_i, len(os.listdir(output_path))))
+    for dir_i, dir in enumerate(os.listdir(input_path)):
+        print("processing dir {} {}/{}...".format(os.listdir(input_path), dir_i, len(os.listdir(input_path))))
         output_dir_path = os.path.join(output_path, dir)
         meta_dir_path = os.path.join(input_path, dir)
         files = os.listdir(meta_dir_path)
