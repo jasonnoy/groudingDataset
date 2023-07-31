@@ -89,12 +89,16 @@ if __name__ == "__main__":
             if count == 20:
                 entity_lists = [get_entities(caption) for caption in captions]
                 entity_offsets = [get_entity_offset(cap, entities) for cap, entities in zip(captions, entity_lists)]
-                for i in range(len(entity_offsets)):
-                    if i == 0:
-                        continue
-                    entity_offsets[i] = [offset+entity_offsets[i-1][-1] for offset in entity_offsets[i]]
+                entity_offset_cont = []
+                cur_offset = 0
+                for offset_list in entity_offsets:
+                    offsets = []
+                    for offset in offset_list:
+                        cur_offset += offset
+                        offsets.append(cur_offset)
+                    entity_offset_cont.append(offsets)
                 all_entities = get_all_entity_map(entity_lists)
-                assert len(entity_lists) == len(entity_offsets)
+                assert len(entity_lists) == len(entity_offset_cont)
                 all_idx = 0
                 for i in range(len(entity_lists)):
                     groundings = {}
@@ -102,7 +106,7 @@ if __name__ == "__main__":
                     original_groundings = {}
                     for j in range(len(entity_lists[i])):
                         old_entity = entity_lists[i][j]
-                        offset = entity_offsets[i][j]
+                        offset = entity_offset_cont[i][j]
                         if old_entity in datas[i]['groundings']:
                             if all_idx+offset >= len(all_entities):
                                 normal = False
