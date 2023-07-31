@@ -133,11 +133,13 @@ if __name__ == "__main__":
     # spacy.prefer_gpu(args.local_rank)
     nlp = spacy.load("en_core_web_trf")
     input_path = "/nxchinamobile2/shared/jjh/laion115m_grounding"
-    output_path = "/nxchinamobile2/shared/jjh/laion115m-debug/"
+    output_path = "/nxchinamobile2/shared/jjh/laion115m-debug"
     process_list = []
     for dir_i, dir in enumerate(os.listdir(input_path)):
         print("processing dir {} {}/{}...".format(os.listdir(input_path), dir_i, len(os.listdir(input_path))))
         output_dir_path = os.path.join(output_path, dir)
+        if not os.path.exists(output_dir_path):
+            os.makedirs(output_dir_path)
         meta_dir_path = os.path.join(input_path, dir)
         files = os.listdir(meta_dir_path)
         for filename in tqdm(files):
