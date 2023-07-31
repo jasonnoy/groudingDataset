@@ -42,6 +42,7 @@ def create_positive_map(tokenized, tokens_positive):
             try:
                 beg_pos = tokenized.char_to_token(beg)
                 end_pos = tokenized.char_to_token(end - 1)
+                print("entity {}, beg: {}, end: {}".format(j, beg_pos, end_pos))
             except Exception as e:
                 print("beg:", beg, "end:", end)
                 print("token_positive:", tokens_positive)

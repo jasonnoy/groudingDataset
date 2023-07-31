@@ -145,8 +145,9 @@ class BatchGroundingCollator(object):
                 raise ValueError("caption:{}, entity:{}".format(caption.lower(), entity))
 
         # process positive map
+        print("caption:", caption)
         positive_map = create_positive_map(tokenized, tokens_positive)
-        return positive_map, new_entities, new_to_old_entity, new_entity_to_id
+        return positive_map, new_entities, new_to_old_entity, new_entity_to_id, caption
 
     def __call__(self, batch):
         images = []
@@ -165,13 +166,15 @@ class BatchGroundingCollator(object):
         entities = []
         new_to_old_entity_list = []
         new_entity_to_id_list = []
+        new_caps = []
 
         for cap in captions:
-            positive_map, new_entities, new_to_old_entity, new_entity_to_id = self.process_caption(cap)
+            positive_map, new_entities, new_to_old_entity, new_entity_to_id, new_caption = self.process_caption(cap)
             positive_maps.append(positive_map)
             entities.append(new_entities)
             new_to_old_entity_list.append(new_to_old_entity)
             new_entity_to_id_list.append(new_entity_to_id)
+            new_caps.append(new_caption)
 
         # compute batched positive map
         max_len = max([v.shape[1] for v in positive_maps])
@@ -202,7 +205,7 @@ class BatchGroundingCollator(object):
         assert cur_count == len(batched_pos_map)
         positive_map = batched_pos_map.bool()
 
-        return batched_imgs, image_sizes, captions, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list, origin_images, ids
+        return batched_imgs, image_sizes, new_caps, positive_map, entities, new_to_old_entity_list, new_entity_to_id_list, origin_images, ids, captions
 
 
 class BBoxAugCollator(object):
