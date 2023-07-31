@@ -21,6 +21,34 @@ def split_list_by_n(origin_list, n):
     return res
 
 
+def get_entity_offset(caption, entities):
+    offsets = []
+    for entity in entities:
+        # want no overlays
+        found = {(0, 0)}
+        try:
+            for m in re.finditer(entity, caption):
+                if (m.start(), m.end()) not in found:
+                    found.add((m.start(), m.end()))
+            offsets.append(len(found) - 2)
+        except Exception as e:
+            raise ValueError("caption:{}, entity:{}".format(caption, entity))
+    return offsets
+
+
+def get_entities(text):
+    doc = nlp(text)
+    return doc.noun_chunks
+
+
+def get_all_entity_map(entity_lists):
+    res = []
+    for entity_list in entity_lists:
+        res.extend(entity_list)
+    # return res, dict(zip(res, range(len(res))))
+    return res
+
+
 if __name__ == "__main__":
     torch.multiprocessing.set_start_method('spawn', force=True)
 
@@ -38,47 +66,12 @@ if __name__ == "__main__":
     config_file = "GLIP/configs/pretrain/glip_Swin_L.yaml"
     weight_file = "/nxchinamobile2/shared/official_pretrains/hf_home/GLIP-L/glip_large_model.pth"
     torch.cuda.set_device(args.local_rank)
-    print("cuda device:", torch.cuda.current_device())
     rank = args.rank
     local_rank = args.local_rank
     world_size = args.world_size
 
     # spacy.prefer_gpu(args.local_rank)
     nlp = spacy.load("en_core_web_trf")
-
-
-def get_entity_offset(caption, entities):
-    offsets = []
-    for entity in entities:
-        # want no overlays
-        found = {(0, 0)}
-        try:
-            for m in re.finditer(entity, caption):
-                if (m.start(), m.end()) not in found:
-                    found.add((m.start(), m.end()))
-            offsets.append(len(found) - 2)
-        except Exception as e:
-            raise ValueError("caption:{}, entity:{}".format(caption, entity))
-    return offsets
-
-
-nlp = spacy.load("en_core_web_trf")
-
-
-def get_entities(text):
-    doc = nlp(text)
-    return doc.noun_chounks
-
-
-def get_all_entity_map(entity_lists):
-    res = []
-    for entity_list in entity_lists:
-        res.extend(entity_list)
-    # return res, dict(zip(res, range(len(res))))
-    return res
-
-
-if __name__ == "__main__":
     path = "/nxchinamobile2/shared/jjh/laion115m_grounding/part-00032/3200467.meta.jsonl"
     out_path = "/nxchinamobile2/shared/jjh/laion115m-debug/part-00032/3200467.meta.jsonl"
     with open(path, "r", encoding='utf-8') as f, open(out_path, 'a', encoding='utf-8') as f2:
