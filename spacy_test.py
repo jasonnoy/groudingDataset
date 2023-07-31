@@ -112,7 +112,7 @@ if __name__ == "__main__":
                                 normal = False
                                 all_idx += 1
                                 continue
-                            new_entity = all_entities[all_idx + offset]
+                            new_entity = all_entities[all_idx - offset]
                             groundings[new_entity] = datas[i]['groundings'][old_entity]
                             original_groundings[new_entity] = datas[i]['original_groundings'][old_entity]
                         all_idx += 1
