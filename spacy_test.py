@@ -60,6 +60,7 @@ def analysis_data_file(in_path, out_path, err_path):
         captions = []
         datas = []
         for idx, line in enumerate(f):
+            print("processing{}...\r".format(idx))
             data = json.loads(line)
             if data['status'] == 'success':
                 caption = data["caption"]
