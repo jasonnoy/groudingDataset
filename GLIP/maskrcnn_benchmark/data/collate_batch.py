@@ -125,7 +125,7 @@ class BatchGroundingCollator(object):
                 new_entities.append("{}-{}".format(chunk, entity_dict[chunk]))
         new_to_old_entity = dict(zip(new_entities, nouns))
         if not empty_nouns:
-            new_entity_to_id = dict(zip(new_entities, [offset_map[noun_chunk[0].idx] for noun_chunk in
+            new_entity_to_id = dict(zip(new_entities, [noun_chunk[0].idx + offset_map[noun_chunk[0].idx] for noun_chunk in
                                                        doc.noun_chunks]))  # starting position of the first token
         else:
             # use caption as only entity
