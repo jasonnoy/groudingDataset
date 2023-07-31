@@ -128,6 +128,8 @@ if __name__ == "__main__":
     parser.add_argument('--master_port', type=int, default=7878)
     args = parser.parse_args()
 
+    torch.multiprocessing.set_start_method('spawn', force=True)
+
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
     torch.cuda.set_device(args.local_rank)
 
