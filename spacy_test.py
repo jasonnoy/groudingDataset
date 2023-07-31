@@ -97,6 +97,7 @@ def analysis_data_file(in_path, out_path, err_path):
                             groundings[new_entity] = datas[i]['groundings'][old_entity]
                             original_groundings[new_entity] = datas[i]['original_groundings'][old_entity]
                         all_idx += 1
+                    print("before write")
                     if normal:
                         datas[i]['groundings'] = groundings
                         datas[i]['original_groundings'] = original_groundings
