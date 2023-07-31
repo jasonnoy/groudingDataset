@@ -198,8 +198,8 @@ class GLIPDemo(object):
         predictions = [prediction.resize((origin_image.shape[1], origin_image.shape[0])) for prediction, origin_image in
                        zip(predictions, origin_images)]
         list_locations = get_entity_list_locs(entity_lists)
-        top_predictions = [self._post_process(prediction, list_loc, thresh, save_img) for
-                           prediction, entity_list, list_loc in zip(predictions, entity_lists, list_locations)]
+        top_predictions = [self._post_process(prediction, list_loc, thresh, save_img, entity_lists) for
+                           prediction, list_loc in zip(predictions, list_locations)]
         results = None
         if save_img:
             results = [image.copy() for image in origin_images]
@@ -362,13 +362,17 @@ class GLIPDemo(object):
                 ids.append(idx)
         return prediction[ids]
 
-    def _post_process(self, prediction, list_loc, threshold=0.5, debug=False):
+    def _post_process(self, prediction, list_loc, entity_lists, threshold=0.5, debug=False):
+        all_entities = []
+        for entities in entity_lists:
+            all_entities.extend(entities)
         scores = prediction.get_field("scores")
         labels = prediction.get_field("labels").tolist()
         if debug:
             print("before post process")
-            print("labels:", labels)
-            print("scores:", scores)
+            entity_names = [all_entities[l] for l in labels]
+            score_list = scores.tolist()
+            print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
         thresh = scores.clone()
         for i, lb in enumerate(labels):
             if isinstance(self.confidence_threshold, float):
@@ -384,18 +388,21 @@ class GLIPDemo(object):
         prediction = prediction[idx]
         if debug:
             print("after score filter:")
-            print("scores:", prediction.get_field("scores"))
-            print("labels:", prediction.get_field("labels"))
+            entity_names = [all_entities[l] for l in prediction.get_field("labels").tolist()]
+            score_list = prediction.get_field("scores").tolist()
+            print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
         prediction = self.filter_object(prediction, list_loc)
         if debug:
             print("after object filter:")
-            print("scores:", prediction.get_field("scores"))
-            print("labels:", prediction.get_field("labels"))
+            entity_names = [all_entities[l] for l in prediction.get_field("labels").tolist()]
+            score_list = prediction.get_field("scores").tolist()
+            print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
         prediction = self.filter_iou(prediction)
         if debug:
             print("final:")
-            print("scores:", prediction.get_field("scores"))
-            print("labels:", prediction.get_field("labels"))
+            entity_names = [all_entities[l] for l in prediction.get_field("labels").tolist()]
+            score_list = prediction.get_field("scores").tolist()
+            print("scores:", [{entity_names[i]: score_list[i] for i in range(len(score_list))}])
         return prediction
 
     def compute_colors_for_labels(self, labels):
