@@ -26,10 +26,12 @@ def write_dataset(meta_path, tar_path, out_path):
             data = json.loads(line)
             ids.append(data['SAMPLE_ID'])
     f1.close()
+    print("ids:", ids)
 
     sink = webdataset.TarWriter(out_path, encoder=False)
     for line in tar_dataset:
         if line['id'] in ids:
+            print("write:", {"id": line['id'], "txt": line['txt'], "jpg": line['jpg']})
             sink.write({"id": line['id'], "txt": line['txt'], "jpg": line['jpg']})
     sink.close()
 
@@ -70,7 +72,7 @@ if __name__ == "__main__":
             p = Process(target=write_dataset, args=(meta_path, input_tar_path, output_tar_path))
             p.start()
             process_list.append(p)
-            if len(process_list) >= 56:
+            if len(process_list) >= 1:
                 for p in process_list:
                     p.join()
                 process_list = []
