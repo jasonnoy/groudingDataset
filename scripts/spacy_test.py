@@ -80,7 +80,7 @@ def compute_offset_map(str1, str0):
 
 
 def analysis_meta_file(in_path, out_path, nlp):
-    with open(in_path, "r", encoding='utf-8') as f, open(out_path, 'a', encoding='utf-8') as f2:
+    with open(in_path, "r", encoding='utf-8') as f, open(out_path, 'a', encoding='utf-8') as f2, open("error_"+out_path, 'a', encoding='utf-8') as f3:
         for line in f:
             data = json.loads(line)
             if data['status'] == 'success':
@@ -94,21 +94,25 @@ def analysis_meta_file(in_path, out_path, nlp):
                     new_pos[entity] = str(t[0].idx + offset_map[t[0].idx])
                 groundings = {}
                 original_groundings = {}
+                error = False
                 for entity in data['groundings']:
-                    if entity not in new_pos:
-                        print("entity:", entity)
-                        print("new_pos:", new_pos)
-                        print("caption:", caption)
-                        print("origin_caption:", origin_caption)
                     for pos in data['groundings'][entity]:
                         groundings[entity] = {}
                         original_groundings[entity] = {}
-                        groundings[entity][new_pos[entity]] = data['groundings'][entity][pos]
-                        original_groundings[entity][new_pos[entity]] = data['original_groundings'][entity][pos]
+                        if entity in new_pos:
+                            groundings[entity][new_pos[entity]] = data['groundings'][entity][pos]
+                            original_groundings[entity][new_pos[entity]] = data['original_groundings'][entity][pos]
+                        else:
+                            error = True
+                            groundings[entity][pos] = data['groundings'][entity][pos]
+                            original_groundings[entity][pos] = data['original_groundings'][entity][pos]
                 data['groundings'] = groundings
                 data['original_groundings'] = original_groundings
                 f2.write(json.dumps(data) + '\n')
+                if error:
+                    f3.write(json.dumps(data) + '\n')
         f2.close()
+        f3.close()
         f.close()
 
 
