@@ -72,10 +72,10 @@ if __name__ == "__main__":
     for dir in dirs:
         id_list.extend([file[:-4] for file in os.listdir(os.path.join(input_path, dir)) if file.endswith(".tar") and os.path.getsize(os.path.join(input_path, dir, file)) > 0])
     id_list.sort()
-    finish_ids = []
-    for dir in os.listdir(output_path):
-        finish_ids.extend([file.split(sep='.')[0] for file in os.listdir(os.path.join(output_path, dir))])
-    id_list = list(set(id_list).difference(set(finish_ids)))
+    # finish_ids = []
+    # for dir in os.listdir(output_path):
+    #     finish_ids.extend([file.split(sep='.')[0] for file in os.listdir(os.path.join(output_path, dir))])
+    # id_list = list(set(id_list).difference(set(finish_ids)))
     id_list.sort()
     divided_ids = split_list_by_n(id_list, world_size)
     select_ids = divided_ids[rank]
@@ -86,12 +86,12 @@ if __name__ == "__main__":
 
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
-
-        skip_ids = os.listdir(output_dir_path)
-        skip_ids = [skip_id.split(sep='.')[0] for skip_id in skip_ids]
-        if cur_id in skip_ids:
-            print("rank {}, skip_id:".format(rank), cur_id)
-            continue
+        #
+        # skip_ids = os.listdir(output_dir_path)
+        # skip_ids = [skip_id.split(sep='.')[0] for skip_id in skip_ids]
+        # if cur_id in skip_ids:
+        #     print("rank {}, skip_id:".format(rank), cur_id)
+        #     continue
 
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
@@ -99,20 +99,17 @@ if __name__ == "__main__":
         tar_file = "{}.tar".format(cur_id)
         res = {}
         batch_size = 20
-        if os.path.getsize(os.path.join(input_dir_path, tar_file)) == 0:
-            print("rank {}, empty file:".format(rank), os.path.join(input_dir_path, tar_file))
-            continue
 
         laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
 
-        meta_filename = "corrected_{}.meta.jsonl".format(cur_id)
+        meta_filename = "error_{}.meta.jsonl".format(cur_id)
         print("rank {}, processing {}".format(rank, cur_id))
         # try:
         groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, output_path=output_dir_path, save_img=True)
         # except Exception as e:
         #     print("failed batch_parse_and_grounding_multi_class for {}, skipping...".format(os.path.join(input_dir_path, tar_file)))
         #     continue
-        output_meta_path = os.path.join(output_dir_path, meta_filename)
+        output_meta_path = os.path.join(output_dir_path, "corrected_{}.meta.jsonl".format(cur_id))
         if os.path.exists(output_meta_path):
             os.remove(output_meta_path)
         with open(os.path.join(input_dir_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'a', encoding='utf-8') as f2:
