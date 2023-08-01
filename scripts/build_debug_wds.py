@@ -24,7 +24,7 @@ def write_dataset(meta_path, tar_path, out_path):
     with open(meta_path, 'r', encoding='utf-8') as f1:
         for line in f1:
             data = json.loads(line)
-            ids.append(data['id'])
+            ids.append(data['SAMPLE_ID'])
     f1.close()
 
     sink = webdataset.TarWriter(out_path, encoder=False)
