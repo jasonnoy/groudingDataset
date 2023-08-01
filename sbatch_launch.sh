@@ -5,7 +5,7 @@
 #SBATCH --nodes=25
 #SBATCH --gres=gpu:0
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=56
+#SBATCH --cpus-per-task=25
 #SBATCH --partition=dev
 #SBATCH --export=ALL
 

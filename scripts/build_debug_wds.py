@@ -70,7 +70,7 @@ if __name__ == "__main__":
         print("total_debug_files:", len(total_debug_files))
     divided_files = split_list_by_n(total_debug_files, world_size)
     selected_files = divided_files[rank]
-    for filename in selected_files:
+    for filename in tqdm(selected_files):
         idx = filename[6:13]
         dir_id = idx[:2]
         dir_name = f"part-000{dir_id}"
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         p = Process(target=write_dataset, args=(meta_path, input_tar_path, output_tar_path))
         p.start()
         process_list.append(p)
-        if len(process_list) >= 56:
+        if len(process_list) >= 25:
             for p in process_list:
                 p.join()
             process_list = []
