@@ -80,8 +80,6 @@ if __name__ == "__main__":
     divided_ids = split_list_by_n(id_list, world_size)
     select_ids = divided_ids[rank]
     for cur_id in select_ids:
-        if cur_id != "3200000":
-            continue
         cur_dir = "part-000{}".format(cur_id[:2])
         output_dir_path = os.path.join(output_path, str(cur_dir))
         input_dir_path = os.path.join(input_path, str(cur_dir))
