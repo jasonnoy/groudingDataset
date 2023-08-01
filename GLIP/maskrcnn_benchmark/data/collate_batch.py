@@ -77,7 +77,7 @@ def compute_offset_map(str1, str0):
     except Exception as e:
         raise AssertionError(f"str1:{str1}, str0:{str0}")
     for i in range(len(str0)):
-        if str0[i] == str1[j]:
+        if j < len(str1) and str0[i] == str1[j]:
             j += 1
         else:
             offset += 1
