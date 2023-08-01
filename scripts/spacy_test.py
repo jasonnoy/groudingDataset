@@ -89,14 +89,17 @@ def analysis_meta_file(in_path, out_path, nlp):
                 offset_map = compute_offset_map(caption, origin_caption)
                 doc = nlp(caption)
                 new_pos = {}
-                old_to_new = {}
                 for t in doc.noun_chunks:
                     entity = t.text
                     new_pos[entity] = str(t[0].idx + offset_map[t[0].idx])
-                    old_to_new[entity] = entity
                 groundings = {}
                 original_groundings = {}
                 for entity in data['groundings']:
+                    if entity not in new_pos:
+                        print("entity:", entity)
+                        print("new_pos:", new_pos)
+                        print("caption:", caption)
+                        print("origin_caption:", origin_caption)
                     for pos in data['groundings'][entity]:
                         groundings[entity] = {}
                         original_groundings[entity] = {}
