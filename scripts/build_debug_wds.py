@@ -58,21 +58,29 @@ if __name__ == "__main__":
 
     input_path = "/nxchinamobile2/shared/img_datasets/laion115m"
     output_path = "/nxchinamobile2/shared/jjh/laion115m-debug"
+    total_debug_files = []
     for dir_i, dir_name in enumerate(os.listdir(output_path)):
-        print("processing dir {} {}/{}...".format(dir_name, dir_i, len(os.listdir(output_path))))
+        if dir_name == "part-00046":
+            continue
         output_dir_path = os.path.join(output_path, dir_name)
-        input_dir_path = os.path.join(input_path, dir_name)
         debug_files = os.listdir(output_dir_path)
         debug_files = [filename for filename in debug_files if "error_" in filename]
-        for filename in tqdm(debug_files):
-            idx = filename[6:13]
-            input_tar_path = os.path.join(input_dir_path, f"{idx}.tar")
-            output_tar_path = os.path.join(output_dir_path, f"{idx}.tar")
-            meta_path = os.path.join(output_dir_path, filename)
-            p = Process(target=write_dataset, args=(meta_path, input_tar_path, output_tar_path))
-            p.start()
-            process_list.append(p)
-            if len(process_list) >= 56:
-                for p in process_list:
-                    p.join()
-                process_list = []
+        total_debug_files.extend(debug_files)
+    divided_files = split_list_by_n(total_debug_files, world_size)
+    selected_files = divided_files[rank]
+    for filename in selected_files:
+        idx = filename[6:13]
+        dir_id = idx[:2]
+        dir_name = f"part-{dir_id}"
+        input_dir_path = os.path.join(input_path, dir_name)
+        output_dir_path = os.path.join(output_path, dir_name)
+        input_tar_path = os.path.join(input_dir_path, f"{idx}.tar")
+        output_tar_path = os.path.join(output_dir_path, f"{idx}.tar")
+        meta_path = os.path.join(output_dir_path, filename)
+        p = Process(target=write_dataset, args=(meta_path, input_tar_path, output_tar_path))
+        p.start()
+        process_list.append(p)
+        if len(process_list) >= 56:
+            for p in process_list:
+                p.join()
+            process_list = []
