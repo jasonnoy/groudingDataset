@@ -18,7 +18,7 @@ from dataset_builder import *
 
 
 def split_list_by_n(origin_list, n):
-    step = math.floor(len(origin_list) / n)
+    step = math.ceil(len(origin_list) / n) - 1
     res = []
     for i in range(0, len(origin_list), step):
         res.append(origin_list[i:i + step])
@@ -111,7 +111,7 @@ if __name__ == "__main__":
             print("failed batch_parse_and_grounding_multi_class for {}, skipping...".format(os.path.join(input_dir_path, tar_file)))
             continue
 
-        with open(os.path.join(input_dir_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'a', encoding='utf-8') as f2:
+        with open(os.path.join(input_dir_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'w', encoding='utf-8') as f2:
             grounding_iter = iter(groundings)
             for i, line in tqdm(enumerate(f1)):
                 meta_data = json.loads(line)
