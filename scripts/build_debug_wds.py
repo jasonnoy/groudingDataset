@@ -11,8 +11,6 @@ warnings.filterwarnings("ignore")
 
 
 def split_list_by_n(origin_list, n):
-    print("n:", n)
-    print("len(origin_list):", len(origin_list))
     step = math.ceil(len(origin_list) / n)
     res = []
     for i in range(0, len(origin_list), step):
@@ -84,7 +82,7 @@ if __name__ == "__main__":
         p = Process(target=write_dataset, args=(meta_path, input_tar_path, output_tar_path))
         p.start()
         process_list.append(p)
-        if len(process_list) >= 2:
+        if len(process_list) >= 56:
             for p in process_list:
                 p.join()
             process_list = []
