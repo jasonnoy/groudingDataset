@@ -103,6 +103,8 @@ def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, 
                                              collate_fn=BatchGroundingCollator(glip_demo.nlp, glip_demo.tokenizer, glip_demo.transforms))
     total_groundings = []
     for i, batch in tqdm(enumerate(dataloader)):
+        if i > 0:
+            break
         origin_images = batch[7]
         # try:
         results, preds = glip_demo.run_on_batched_images(*batch[:5], origin_images=origin_images, thresh=0.55, save_img=save_img)

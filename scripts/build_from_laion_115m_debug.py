@@ -80,6 +80,8 @@ if __name__ == "__main__":
     divided_ids = split_list_by_n(id_list, world_size)
     select_ids = divided_ids[rank]
     for cur_id in select_ids:
+        if cur_id != "3200000":
+            continue
         cur_dir = "part-000{}".format(cur_id[:2])
         output_dir_path = os.path.join(output_path, str(cur_dir))
         input_dir_path = os.path.join(input_path, str(cur_dir))
@@ -105,7 +107,7 @@ if __name__ == "__main__":
         meta_filename = "error_{}.meta.jsonl".format(cur_id)
         print("rank {}, processing {}".format(rank, cur_id))
         # try:
-        groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, output_path=output_dir_path, save_img=False)
+        groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, output_path=output_dir_path, save_img=True)
         # except Exception as e:
         #     print("failed batch_parse_and_grounding_multi_class for {}, skipping...".format(os.path.join(input_dir_path, tar_file)))
         #     continue
