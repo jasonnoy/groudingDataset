@@ -2,10 +2,10 @@
 #SBATCH --job-name=build_bounding_dataset_laion_115m
 #SBATCH --output=./logs/build_bounding_dataset_laion_115m_%j.out
 #SBATCH --error=./logs/build_bounding_dataset_laion_115m_%j.err
-#SBATCH --nodes=25
-#SBATCH --gres=gpu:0
-#SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=25
+#SBATCH --nodes=5
+#SBATCH --gres=gpu:8
+#SBATCH --ntasks-per-node=8
+#SBATCH --cpus-per-task=6
 #SBATCH --partition=dev
 #SBATCH --export=ALL
 

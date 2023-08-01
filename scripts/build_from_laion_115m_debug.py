@@ -65,15 +65,9 @@ if __name__ == "__main__":
         nlp=nlp
     )
 
-    input_path = "/nxchinamobile2/shared/img_datasets/laion115m"
+    input_path = "/nxchinamobile2/shared/jjh/laion115m-debug"
     output_path = "/nxchinamobile2/shared/jjh/laion115m-debug"
-    map_name = "file_map_laion_synthetic_filtered_large.json"
-    map_key = "laion_synthetic_filtered_large.json"
-    with open(os.path.join(input_path, map_name), 'r', encoding='utf-8') as f:
-        data = f.read()
-        data = json.loads(data)
-    f.close()
-    dirs = data[map_key]
+    dirs = os.listdir(input_path)
     id_list = []
     for dir in dirs:
         id_list.extend([file[:-4] for file in os.listdir(os.path.join(input_path, dir)) if file.endswith(".tar") and os.path.getsize(os.path.join(input_path, dir, file)) > 0])
@@ -86,8 +80,6 @@ if __name__ == "__main__":
     divided_ids = split_list_by_n(id_list, world_size)
     select_ids = divided_ids[rank]
     for cur_id in select_ids:
-        if cur_id != '3200467':
-            continue
         cur_dir = "part-000{}".format(cur_id[:2])
         output_dir_path = os.path.join(output_path, str(cur_dir))
         input_dir_path = os.path.join(input_path, str(cur_dir))
@@ -113,7 +105,7 @@ if __name__ == "__main__":
 
         laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
 
-        meta_filename = "{}.meta.jsonl".format(cur_id)
+        meta_filename = "corrected_{}.meta.jsonl".format(cur_id)
         print("rank {}, processing {}".format(rank, cur_id))
         # try:
         groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, output_path=output_dir_path, save_img=True)
