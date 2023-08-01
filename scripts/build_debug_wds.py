@@ -67,6 +67,7 @@ if __name__ == "__main__":
         debug_files = [filename for filename in debug_files if "error_" in filename]
         total_debug_files.extend(debug_files)
     divided_files = split_list_by_n(total_debug_files, world_size)
+    print("divided_files:", divided_files)
     selected_files = divided_files[rank]
     for filename in selected_files:
         idx = filename[6:13]
