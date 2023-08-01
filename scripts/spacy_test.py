@@ -92,7 +92,7 @@ def analysis_meta_file(in_path, out_path, nlp):
                 old_to_new = {}
                 for t in doc.noun_chunks:
                     entity = t.text
-                    new_pos[entity] = t[0].idx + offset_map[t[0].idx]
+                    new_pos[entity] = str(t[0].idx + offset_map[t[0].idx])
                     old_to_new[entity] = entity
                 groundings = {}
                 original_groundings = {}
