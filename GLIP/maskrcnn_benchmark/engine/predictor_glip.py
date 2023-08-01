@@ -371,6 +371,8 @@ class GLIPDemo(object):
         labels = prediction.get_field("labels").tolist()
         if debug:
             print("before post process")
+            print("scores:", scores)
+            print("labels:", labels)
             score_dict = dict(zip(prediction.get_field("labels").tolist(), prediction.get_field("scores").tolist()))
             valid_scores = {}
             for k, v in score_dict.items():
@@ -389,6 +391,8 @@ class GLIPDemo(object):
         prediction = prediction[keep]
         if debug:
             print("before score filter:")
+            print("scores:", scores)
+            print("labels:", labels)
             score_dict = dict(zip(prediction.get_field("labels").tolist(), prediction.get_field("scores").tolist()))
             valid_scores = {}
             for k, v in score_dict.items():
