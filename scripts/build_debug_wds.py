@@ -84,7 +84,7 @@ if __name__ == "__main__":
         p = Process(target=write_dataset, args=(meta_path, input_tar_path, output_tar_path))
         p.start()
         process_list.append(p)
-        if len(process_list) >= 56:
+        if len(process_list) >= 2:
             for p in process_list:
                 p.join()
             process_list = []
