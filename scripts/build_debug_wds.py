@@ -64,11 +64,12 @@ if __name__ == "__main__":
 
     input_path = "/nxchinamobile2/shared/img_datasets/laion115m"
     output_path = "/nxchinamobile2/shared/jjh/laion115m-debug"
-    for dir_name in os.listdir(output_path):
+    for dir_i, dir_name in enumerate(os.listdir(output_path)):
+        print("processing dir {} {}/{}...".format(dir_name, dir_i, len(os.listdir(output_path))))
         output_dir_path = os.path.join(output_path, dir_name)
         input_dir_path = os.path.join(input_path, dir_name)
         debug_files = os.listdir(output_dir_path)
-        for filename in debug_files:
+        for filename in tqdm(debug_files):
             idx = filename.split(".")[0]
             input_tar_path = os.path.join(input_dir_path, f"{idx}.tar")
             output_tar_path = os.path.join(output_dir_path, f"{idx}.tar")
