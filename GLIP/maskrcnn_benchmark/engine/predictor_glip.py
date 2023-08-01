@@ -391,8 +391,8 @@ class GLIPDemo(object):
         prediction = prediction[keep]
         if debug:
             print("before score filter:")
-            print("scores:", scores)
-            print("labels:", labels)
+            print("scores:", prediction.get_field("scores").tolist())
+            print("labels:", prediction.get_field("labels").tolist())
             score_dict = dict(zip(prediction.get_field("labels").tolist(), prediction.get_field("scores").tolist()))
             valid_scores = {}
             for k, v in score_dict.items():
