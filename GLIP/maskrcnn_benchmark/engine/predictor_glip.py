@@ -387,6 +387,14 @@ class GLIPDemo(object):
                 thresh[i] = self.confidence_threshold[lb - 1]
         keep = torch.nonzero(scores > thresh).squeeze(1)
         prediction = prediction[keep]
+        if debug:
+            print("before score filter:")
+            score_dict = dict(zip(prediction.get_field("labels").tolist(), prediction.get_field("scores").tolist()))
+            valid_scores = {}
+            for k, v in score_dict.items():
+                if k < len(all_entities):
+                    valid_scores[all_entities[k]] = v
+            print("scores:", valid_scores)
         scores = prediction.get_field("scores")
         _, idx = scores.sort(0, descending=True)
         if debug:
