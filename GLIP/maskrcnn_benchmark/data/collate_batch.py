@@ -107,6 +107,8 @@ class BatchGroundingCollator(object):
 
     def process_caption(self, origin_caption):
         caption = remove_punctuation(origin_caption)
+        print("origin_caption:", origin_caption)
+        print("caption:", caption)
         offset_map = compute_offset_map(caption, origin_caption)
         doc = self.nlp(caption)
         nouns = [t.text for t in doc.noun_chunks]
