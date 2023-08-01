@@ -88,12 +88,14 @@ if __name__ == "__main__":
 
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
-        #
-        # skip_ids = os.listdir(output_dir_path)
-        # skip_ids = [skip_id.split(sep='.')[0] for skip_id in skip_ids]
-        # if cur_id in skip_ids:
-        #     print("rank {}, skip_id:".format(rank), cur_id)
-        #     continue
+
+        output_meta_path = os.path.join(output_dir_path, "corrected_{}.meta.jsonl".format(cur_id))
+        if os.path.exists(output_meta_path):
+            if os.path.getsize(output_meta_path) > 0:
+                print("skipping", output_meta_path)
+                continue
+            else:
+                os.remove(output_meta_path)
 
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
@@ -107,13 +109,11 @@ if __name__ == "__main__":
         meta_filename = "error_{}.meta.jsonl".format(cur_id)
         print("rank {}, processing {}".format(rank, cur_id))
         # try:
-        groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, output_path=output_dir_path, save_img=True)
+        groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, output_path=output_dir_path, save_img=False)
         # except Exception as e:
         #     print("failed batch_parse_and_grounding_multi_class for {}, skipping...".format(os.path.join(input_dir_path, tar_file)))
         #     continue
-        output_meta_path = os.path.join(output_dir_path, "corrected_{}.meta.jsonl".format(cur_id))
-        if os.path.exists(output_meta_path):
-            os.remove(output_meta_path)
+
         with open(os.path.join(input_dir_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'a', encoding='utf-8') as f2:
             grounding_iter = iter(groundings)
             for i, line in tqdm(enumerate(f1)):
