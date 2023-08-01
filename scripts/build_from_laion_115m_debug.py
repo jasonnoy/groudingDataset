@@ -80,6 +80,7 @@ if __name__ == "__main__":
 
     id_list.sort()
     divided_ids = split_list_by_n(id_list, world_size)
+    print("divided_ids:", len(divided_ids))
     select_ids = divided_ids[rank]
     for cur_id in select_ids:
         cur_dir = "part-000{}".format(cur_id[:2])
