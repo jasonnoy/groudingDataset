@@ -62,6 +62,52 @@ def get_all_entity_map(entity_lists):
     return res
 
 
+def compute_offset_map(str1, str0):
+    res = []
+    j = 0
+    offset = 0
+    try:
+        assert len(str0) >= len(str1)
+    except Exception as e:
+        raise AssertionError(f"str1:{str1}, str0:{str0}")
+    for i in range(len(str0)):
+        if j < len(str1) and str0[i] == str1[j]:
+            j += 1
+        else:
+            offset += 1
+        res.append(offset)
+    return res
+
+
+def analysis_meta_file(in_path, out_path, nlp):
+    with open(in_path, "r", encoding='utf-8') as f, open(out_path, 'a', encoding='utf-8') as f2:
+        for line in f:
+            data = json.loads(line)
+            if data['status'] == 'success':
+                origin_caption = data["caption"]
+                caption = remove_punctuation(origin_caption)
+                offset_map = compute_offset_map(caption, origin_caption)
+                doc = nlp(caption)
+                new_pos = {}
+                old_to_new = {}
+                for t in doc.noun_chunks:
+                    entity = t.text
+                    new_pos[entity] = t[0].idx + offset_map[t[0].idx]
+                    old_to_new[entity] = entity
+                groundings = {}
+                original_groundings = {}
+                for entity in data['groundings']:
+                    for pos in data['groundings'][entity]:
+                        groundings[entity] = {}
+                        groundings[entity][new_pos[pos]] = data['groundings'][entity][pos]
+                        original_groundings[entity][new_pos[pos]] = data['original_groundings'][entity][pos]
+                data['groundings'] = groundings
+                data['original_groundings'] = original_groundings
+                f2.write(json.dumps(data) + '\n')
+        f2.close()
+        f.close()
+
+
 def analysis_data_file(in_path, out_path, err_path, nlp):
     with open(in_path, "r", encoding='utf-8') as f, open(out_path, 'a', encoding='utf-8') as f2, open(err_path, 'a', encoding='utf-8') as f3:
         count = 0
@@ -133,9 +179,9 @@ if __name__ == "__main__":
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
     torch.cuda.set_device(args.local_rank)
 
-    spacy.prefer_gpu(args.local_rank)
+    spacy.require_gpu(args.local_rank)
     input_path = "/nxchinamobile2/shared/jjh/laion115m_grounding"
-    output_path = "/nxchinamobile2/shared/jjh/laion115m-debug"
+    output_path = "/nxchinamobile2/shared/jjh/laion115m_grounding_new"
     ids = []
     for dir in os.listdir(input_path):
         ids.extend(os.listdir(os.path.join(input_path, dir)))
@@ -151,8 +197,7 @@ if __name__ == "__main__":
         meta_dir_path = os.path.join(input_path, dir_name)
         in_file_path = os.path.join(meta_dir_path, id_filename)
         out_file_path = os.path.join(output_dir_path, id_filename)
-        err_file_path = os.path.join(output_dir_path, "error_"+id_filename)
-        p = Process(target=analysis_data_file, args=(in_file_path, out_file_path, err_file_path, nlps[nlp_id]))
+        p = Process(target=analysis_meta_file, args=(in_file_path, out_file_path, nlps[nlp_id]))
         nlp_id += 1
         p.start()
         process_list.append(p)
@@ -161,4 +206,3 @@ if __name__ == "__main__":
                 p.join()
             process_list = []
             nlp_id = 0
-
