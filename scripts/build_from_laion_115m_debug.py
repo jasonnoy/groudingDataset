@@ -18,7 +18,7 @@ from dataset_builder import *
 
 
 def split_list_by_n(origin_list, n):
-    step = math.ceil(len(origin_list) / n) - 1
+    step = math.ceil(len(origin_list) / n)
     res = []
     for i in range(0, len(origin_list), step):
         res.append(origin_list[i:i + step])
