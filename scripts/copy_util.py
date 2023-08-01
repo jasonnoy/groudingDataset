@@ -48,7 +48,8 @@ def combine_files(in_path, meta_path, correct_path, out_path, backup_path, recor
                 f3.write(json.dumps(res_dict[idx]) + '\n')
             else:
                 f3.write(json.dumps(backup_dict[idx]) + '\n')
-                f4.write(idx+'\n')
+                if backup_dict[idx]['status'] == 'success':
+                    f4.write(idx+'\n')
         f3.close()
 
 
