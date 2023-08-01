@@ -15,9 +15,14 @@ def split_list_by_n(origin_list, n):
     return res
 
 
-def combine_files(in_path, meta_path, correct_path, out_path):
+def combine_files(in_path, meta_path, correct_path, out_path, backup_path, record_path):
     data = webdataset.WebDataset(in_path)
-    with open(correct_path, 'r', encoding='utf-8') as f1, open(meta_path, 'r', encoding='utf-8') as f2, open(out_path, 'w', encoding='utf-8') as f3:
+    backup_dict = {}
+    with open(backup_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            back_data = json.loads(line)
+            backup_dict[back_data['SAMPLE_ID']] = back_data
+    with open(correct_path, 'r', encoding='utf-8') as f1, open(meta_path, 'r', encoding='utf-8') as f2, open(out_path, 'w', encoding='utf-8') as f3, open(record_path, 'a', encoding='utf-8') as f4:
         res_dict = {}
         for f1_line in f1:
             correct_data = json.loads(f1_line)
@@ -28,8 +33,12 @@ def combine_files(in_path, meta_path, correct_path, out_path):
             res_dict[correct_data['SAMPLE_ID']] = meta_data
         f2.close()
         for d in data:
-            idx = d['id']
-            f3.write(json.dumps(res_dict[idx]) + '\n')
+            idx = d['id'].decode()
+            if idx in res_dict:
+                f3.write(json.dumps(res_dict[idx]) + '\n')
+            else:
+                f3.write(json.dumps(backup_dict[idx]) + '\n')
+                f4.write(idx+'\n')
         f3.close()
 
 
@@ -42,11 +51,11 @@ if __name__ == "__main__":
     parser.add_argument('--master_port', type=int, default=7878)
     args = parser.parse_args()
 
-    input_path = "/nxchinamobile2/shared/jjh/laion115m"
+    input_path = "/nxchinamobile2/shared/img_datasets/laion115m"
     debug_path = "/nxchinamobile2/shared/jjh/laion115m-debug"
     output_path = "/nxchinamobile2/shared/jjh/laion115m_grounding"
     ids = []
-    for dir in os.listdir(input_path):
+    for dir in os.listdir(debug_path):
         ids.extend(os.listdir(os.path.join(input_path, dir)))
     ids = [name.split(".")[0] for name in ids if name.endswith(".tar")]
     ids.sort()
@@ -64,9 +73,11 @@ if __name__ == "__main__":
         tar_file_path = os.path.join(tar_dir_path, tar_filename)
         meta_filename = idx+".meta.jsonl"
         meta_file_path = os.path.join(meta_dir_path, meta_filename)
+        backup_file_path = os.path.join(tar_dir_path, meta_filename)
         out_file_path = os.path.join(output_dir_path, meta_filename)
         correct_file_path = os.path.join(output_dir_path, "corrected_"+meta_filename)
-        p = Process(target=combine_files, args=(tar_file_path, meta_file_path, correct_file_path, out_file_path))
+        record_path = os.path.join(output_path, "record.txt")
+        p = Process(target=combine_files, args=(tar_file_path, meta_file_path, correct_file_path, out_file_path, backup_file_path, record_path))
         p.start()
         process_list.append(p)
         if len(process_list) >= 36:
