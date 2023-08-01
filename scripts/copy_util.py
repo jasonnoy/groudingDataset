@@ -37,14 +37,14 @@ def combine_files(in_path, meta_path, correct_path, out_path, backup_path, recor
             backup_dict[back_data['SAMPLE_ID']] = back_data
     with open(correct_path, 'r', encoding='utf-8') as f1, open(meta_path, 'r', encoding='utf-8') as f2, open(out_path, 'w', encoding='utf-8') as f3, open(record_path, 'a', encoding='utf-8') as f4:
         res_dict = {}
+        for f2_line in f2:
+            meta_data = json.loads(f2_line)
+            res_dict[meta_data['SAMPLE_ID']] = meta_data
+        f2.close()
         for f1_line in f1:
             correct_data = json.loads(f1_line)
             res_dict[correct_data['SAMPLE_ID']] = correct_data
         f1.close()
-        for f2_line in f2:
-            meta_data = json.loads(f2_line)
-            res_dict[correct_data['SAMPLE_ID']] = meta_data
-        f2.close()
         for d in data:
             idx = d['id'].decode()
             # if idx in offset_map:
