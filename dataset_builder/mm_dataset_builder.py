@@ -104,13 +104,7 @@ def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, 
     total_groundings = []
     for i, batch in tqdm(enumerate(dataloader)):
         origin_images = batch[7]
-        # try:
         results, preds = glip_demo.run_on_batched_images(*batch[:5], origin_images=origin_images, thresh=0.55, save_img=save_img)
-        # except Exception as e:
-        #     print(e)
-        #     for i in range(len(batch[8])):
-        #         total_groundings.append(output_decorator(None, batch[8][i]))
-        #     continue
         new_entities = batch[4]
         entire_entities = reduce(add, new_entities)
         new_to_old_entities = batch[5]
