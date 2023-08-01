@@ -105,11 +105,12 @@ class BatchGroundingCollator(object):
 
     def process_caption(self, origin_caption):
         caption = remove_punctuation(origin_caption)
-        # print("process_caption| caption: ", caption)
         try:
             offset_map = compute_offset_map(caption, origin_caption)
         except Exception as e:
-            raise ValueError("process_caption| caption: ".format(caption))
+            print("process_caption| caption: ", caption)
+            print("process_caption| origin_caption: ", origin_caption)
+            raise ValueError("process_caption")
         doc = self.nlp(caption)
         nouns = [t.text for t in doc.noun_chunks]
         tokens_positive = [[(int(t[0].idx) + offset_map[t[0].idx], int(t[0].idx) + offset_map[int(t[0].idx)] + len(t.text))] for t in doc.noun_chunks]
