@@ -85,7 +85,7 @@ if __name__ == "__main__":
         meta_file_path = os.path.join(meta_dir_path, meta_filename)
         backup_file_path = os.path.join(tar_dir_path, meta_filename)
         out_file_path = os.path.join(output_dir_path, meta_filename)
-        correct_file_path = os.path.join(output_dir_path, "corrected_"+meta_filename)
+        correct_file_path = os.path.join(meta_dir_path, "corrected_"+meta_filename)
         record_path = os.path.join(output_path, "record.txt")
         p = Process(target=combine_files, args=(tar_file_path, meta_file_path, correct_file_path, out_file_path, backup_file_path, record_path))
         p.start()
