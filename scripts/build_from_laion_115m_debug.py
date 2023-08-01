@@ -105,7 +105,7 @@ if __name__ == "__main__":
         meta_filename = "error_{}.meta.jsonl".format(cur_id)
         print("rank {}, processing {}".format(rank, cur_id))
         # try:
-        groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, output_path=output_dir_path, save_img=True)
+        groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, output_path=output_dir_path, save_img=False)
         # except Exception as e:
         #     print("failed batch_parse_and_grounding_multi_class for {}, skipping...".format(os.path.join(input_dir_path, tar_file)))
         #     continue

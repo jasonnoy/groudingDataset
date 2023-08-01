@@ -115,7 +115,6 @@ def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, 
         #     continue
         new_entities = batch[4]
         entire_entities = reduce(add, new_entities)
-        print("entire entities len:", len(entire_entities))
         new_to_old_entities = batch[5]
         new_entity_to_ids = batch[6]
         image_ids = batch[8]
