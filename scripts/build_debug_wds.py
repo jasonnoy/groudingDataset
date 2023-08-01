@@ -11,6 +11,8 @@ warnings.filterwarnings("ignore")
 
 
 def split_list_by_n(origin_list, n):
+    print("n:", n)
+    print("len(origin_list):", len(origin_list))
     step = math.ceil(len(origin_list) / n)
     res = []
     for i in range(0, len(origin_list), step):
