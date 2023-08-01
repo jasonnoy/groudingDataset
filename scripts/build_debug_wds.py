@@ -32,7 +32,7 @@ def write_dataset(meta_path, tar_path, out_path):
     for line in tar_dataset:
         if line['id'].decode() in ids:
             # print("write:", {"id": line['id']})
-            sink.write({"id": line['id'], "txt": line['txt'], "jpg": line['jpg']})
+            sink.write({"__key__": line['id'], "id": line['id'], "txt": line['txt'], "jpg": line['jpg']})
     sink.close()
 
 
