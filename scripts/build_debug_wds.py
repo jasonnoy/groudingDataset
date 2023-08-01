@@ -30,7 +30,7 @@ def write_dataset(meta_path, tar_path, out_path):
 
     sink = webdataset.TarWriter(out_path, encoder=False)
     for line in tar_dataset:
-        if line['id'] in ids:
+        if line['id'].decode() in ids:
             print("write:", {"id": line['id'], "txt": line['txt'], "jpg": line['jpg']})
             sink.write({"id": line['id'], "txt": line['txt'], "jpg": line['jpg']})
     sink.close()
