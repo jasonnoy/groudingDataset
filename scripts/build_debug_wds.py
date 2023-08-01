@@ -65,7 +65,7 @@ if __name__ == "__main__":
             idx = filename.split(".")[0]
             input_tar_path = os.path.join(input_dir_path, f"{idx}.tar")
             output_tar_path = os.path.join(output_dir_path, f"{idx}.tar")
-            meta_path = os.path.join(output_path, filename)
+            meta_path = os.path.join(output_dir_path, filename)
             p = Process(target=write_dataset, args=(meta_path, input_tar_path, output_tar_path))
             p.start()
             process_list.append(p)
