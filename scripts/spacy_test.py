@@ -80,7 +80,7 @@ def compute_offset_map(str1, str0):
 
 
 def analysis_meta_file(in_path, out_path, nlp):
-    with open(in_path, "r", encoding='utf-8') as f, open(out_path, 'a', encoding='utf-8') as f2, open("error_"+out_path, 'a', encoding='utf-8') as f3:
+    with open(in_path, "r", encoding='utf-8') as f, open(out_path, 'a', encoding='utf-8') as f2, open(out_path+".error", 'a', encoding='utf-8') as f3:
         for line in f:
             data = json.loads(line)
             if data['status'] == 'success':
