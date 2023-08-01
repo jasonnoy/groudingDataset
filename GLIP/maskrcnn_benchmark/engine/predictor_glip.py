@@ -389,6 +389,8 @@ class GLIPDemo(object):
         prediction = prediction[keep]
         scores = prediction.get_field("scores")
         _, idx = scores.sort(0, descending=True)
+        if debug:
+            print("idx:", idx)
         prediction = prediction[idx]
         if debug:
             print("after score filter:")
