@@ -111,12 +111,15 @@ if __name__ == "__main__":
             print("failed batch_parse_and_grounding_multi_class for {}, skipping...".format(os.path.join(input_dir_path, tar_file)))
             continue
 
-        with open(os.path.join(input_dir_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'w', encoding='utf-8') as f2:
+        with open(os.path.join(input_dir_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'a', encoding='utf-8') as f2:
             grounding_iter = iter(groundings)
             for i, line in tqdm(enumerate(f1)):
                 meta_data = json.loads(line)
                 if meta_data['status'] == "success":
-                    grounding = next(grounding_iter)
+                    try:
+                        grounding = next(grounding_iter)
+                    except Exception as e:
+                        break
                     image_id = grounding['SAMPLE_ID']
                     sample_id = meta_data['SAMPLE_ID']
                     assert str(image_id) == str(sample_id)
