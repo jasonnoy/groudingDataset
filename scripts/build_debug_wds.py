@@ -1,21 +1,13 @@
 from multiprocessing import Process
 import argparse
-import torch
 import json
 import os
 import sys
-import spacy
 from tqdm import tqdm
 import webdataset
 import warnings
 import math
 warnings.filterwarnings("ignore")
-
-sys.path.append(os.getcwd())
-sys.path.append(os.path.join(os.getcwd(), "GLIP"))
-
-from GLIP import *
-from dataset_builder import *
 
 
 def split_list_by_n(origin_list, n):
