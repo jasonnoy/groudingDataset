@@ -72,10 +72,13 @@ if __name__ == "__main__":
     for dir in dirs:
         id_list.extend([file[:-4] for file in os.listdir(os.path.join(input_path, dir)) if file.endswith(".tar") and os.path.getsize(os.path.join(input_path, dir, file)) > 0])
     id_list.sort()
-    # finish_ids = []
-    # for dir in os.listdir(output_path):
-    #     finish_ids.extend([file.split(sep='.')[0] for file in os.listdir(os.path.join(output_path, dir))])
-    # id_list = list(set(id_list).difference(set(finish_ids)))
+    finish_ids = []
+    for dir in os.listdir(output_path):
+        finish_ids.extend([file.split(sep='.')[0] for file in os.listdir(os.path.join(output_path, dir)) if file.startswith("corrected_") and os.path.getsize(os.path.join(output_path, dir, file)) > 0])
+    if rank == 0:
+        print("finished:", len(finish_ids))
+    id_list = list(set(id_list).difference(set(finish_ids)))
+
     id_list.sort()
     divided_ids = split_list_by_n(id_list, world_size)
     select_ids = divided_ids[rank]
@@ -88,12 +91,12 @@ if __name__ == "__main__":
             os.mkdir(output_dir_path)
 
         output_meta_path = os.path.join(output_dir_path, "corrected_{}.meta.jsonl".format(cur_id))
-        if os.path.exists(output_meta_path):
-            if os.path.getsize(output_meta_path) > 0:
-                print("skipping", output_meta_path)
-                continue
-            else:
-                os.remove(output_meta_path)
+        # if os.path.exists(output_meta_path):
+        #     if os.path.getsize(output_meta_path) > 0:
+        #         print("skipping", output_meta_path)
+        #         continue
+        #     else:
+        #         os.remove(output_meta_path)
 
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
