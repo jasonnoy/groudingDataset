@@ -74,7 +74,7 @@ if __name__ == "__main__":
     id_list.sort()
     finish_ids = []
     for dir in os.listdir(output_path):
-        finish_ids.extend([file.split(sep='.')[0] for file in os.listdir(os.path.join(output_path, dir)) if file.startswith("corrected_") and os.path.getsize(os.path.join(output_path, dir, file)) > 0])
+        finish_ids.extend([file[10:17] for file in os.listdir(os.path.join(output_path, dir)) if file.startswith("corrected_") and os.path.getsize(os.path.join(output_path, dir, file)) > 0])
     # print("finished:", len(finish_ids))
     id_list = list(set(id_list).difference(set(finish_ids)))
 
