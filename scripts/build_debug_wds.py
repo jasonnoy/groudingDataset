@@ -26,12 +26,12 @@ def write_dataset(meta_path, tar_path, out_path):
             data = json.loads(line)
             ids.append(data['SAMPLE_ID'])
     f1.close()
-    print("ids:", ids)
+    # print("ids:", ids)
 
     sink = webdataset.TarWriter(out_path, encoder=False)
     for line in tar_dataset:
         if line['id'].decode() in ids:
-            print("write:", {"id": line['id']})
+            # print("write:", {"id": line['id']})
             sink.write({"id": line['id'], "txt": line['txt'], "jpg": line['jpg']})
     sink.close()
 
