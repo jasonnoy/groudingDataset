@@ -72,9 +72,11 @@ def compute_offset_map(str1, str0):
     res = []
     j = 0
     offset = 0
+    try:
+        assert len(str0) >= len(str1)
+    except Exception as e:
+        raise AssertionError(f"str1:{str1}, str0:{str0}")
     for i in range(len(str0)):
-        if j >= len(str1):
-            print(str0, str1)
         if str0[i] == str1[j]:
             j += 1
         else:
@@ -107,8 +109,8 @@ class BatchGroundingCollator(object):
 
     def process_caption(self, origin_caption):
         caption = remove_punctuation(origin_caption)
-        print("origin_caption:", origin_caption)
-        print("caption:", caption)
+        # print("origin_caption:", origin_caption)
+        # print("caption:", caption)
         offset_map = compute_offset_map(caption, origin_caption)
         doc = self.nlp(caption)
         nouns = [t.text for t in doc.noun_chunks]
