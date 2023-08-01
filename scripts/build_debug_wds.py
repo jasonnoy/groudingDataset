@@ -61,8 +61,9 @@ if __name__ == "__main__":
         output_dir_path = os.path.join(output_path, dir_name)
         input_dir_path = os.path.join(input_path, dir_name)
         debug_files = os.listdir(output_dir_path)
+        debug_files = [filename for filename in debug_files if "error_" in filename]
         for filename in tqdm(debug_files):
-            idx = filename.split(".")[0]
+            idx = filename[6:13]
             input_tar_path = os.path.join(input_dir_path, f"{idx}.tar")
             output_tar_path = os.path.join(output_dir_path, f"{idx}.tar")
             meta_path = os.path.join(output_dir_path, filename)
