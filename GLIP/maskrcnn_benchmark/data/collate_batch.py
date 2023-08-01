@@ -100,7 +100,8 @@ class BatchGroundingCollator(object):
 
     def process_iamge(self, image):
         image_shape = image.size
-        image_resize_shape = compute_image_shape(image_shape)
+        # image_resize_shape = compute_image_shape(image_shape)
+        image_resize_shape = (522, 522)
         image = image.resize(image_resize_shape)
         image = np.array(image)[:, :, [2, 1, 0]]
         if self.transform is not None:
