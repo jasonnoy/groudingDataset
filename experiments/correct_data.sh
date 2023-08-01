@@ -23,4 +23,4 @@ echo "RUN on `hostname`, CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES, RANK=$RANK,
 # shellcheck disable=SC2046
 python scripts/build_from_laion_115m_debug.py --world_size $WORLD_SIZE --rank $RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT --local_rank $LOCAL_RANK
 
-echo "DONE on `hostname`"
+echo "DONE on `hostname`, RANK=$RANK"
