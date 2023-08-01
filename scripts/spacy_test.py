@@ -99,6 +99,7 @@ def analysis_meta_file(in_path, out_path, nlp):
                 for entity in data['groundings']:
                     for pos in data['groundings'][entity]:
                         groundings[entity] = {}
+                        original_groundings[entity] = {}
                         groundings[entity][new_pos[pos]] = data['groundings'][entity][pos]
                         original_groundings[entity][new_pos[pos]] = data['original_groundings'][entity][pos]
                 data['groundings'] = groundings
