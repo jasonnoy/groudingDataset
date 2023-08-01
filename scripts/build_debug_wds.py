@@ -66,13 +66,14 @@ if __name__ == "__main__":
         debug_files = os.listdir(output_dir_path)
         debug_files = [filename for filename in debug_files if "error_" in filename]
         total_debug_files.extend(debug_files)
+    if rank == 0:
+        print("total_debug_files:", len(total_debug_files))
     divided_files = split_list_by_n(total_debug_files, world_size)
-    print("divided_files:", divided_files)
     selected_files = divided_files[rank]
     for filename in selected_files:
         idx = filename[6:13]
         dir_id = idx[:2]
-        dir_name = f"part-{dir_id}"
+        dir_name = f"part-000{dir_id}"
         input_dir_path = os.path.join(input_path, dir_name)
         output_dir_path = os.path.join(output_path, dir_name)
         input_tar_path = os.path.join(input_dir_path, f"{idx}.tar")
