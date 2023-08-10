@@ -35,6 +35,7 @@ nlp = spacy.load("en_core_web_trf")
 def build_temp_dataset(data_path, img_dir_path):
     img_filenames = os.listdir(img_dir_path)
     img_ids = [f.split(sep='.')[0] for f in img_filenames]
+    dataset = []
     with open(data_path, "r", encoding='utf-8') as f:
         for line in f:
             data = json.loads(line)
@@ -46,7 +47,8 @@ def build_temp_dataset(data_path, img_dir_path):
                 b_img = f2.read()
             b_key = key.encode()
             b_caption = data['caption'].encode()
-            yield {'id': b_key, 'jpg': b_img, 'txt': b_caption}
+            dataset.append({'id': b_key, 'jpg': b_img, 'txt': b_caption})
+    return dataset
 
 
 if __name__ == "__main__":
