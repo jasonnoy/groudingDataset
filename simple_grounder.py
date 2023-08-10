@@ -43,7 +43,7 @@ def build_temp_dataset(data_path, img_dir_path):
             if key not in img_ids:
                 continue
             filename = img_filenames[img_ids.index(key)]
-            with open(filename, 'rb') as f2:
+            with open(os.path.join(img_dir_path, filename), 'rb') as f2:
                 b_img = f2.read()
             b_key = key.encode()
             b_caption = data['caption'].encode()
