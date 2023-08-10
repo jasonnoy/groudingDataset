@@ -1,7 +1,5 @@
 import os
 import torch
-from PIL import Image
-import numpy as np
 import spacy
 import json
 import warnings
