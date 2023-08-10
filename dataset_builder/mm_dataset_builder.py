@@ -90,10 +90,12 @@ def load(path):
     return image, img_size
 
 
-def imsave(img, caption, save_dir):
+def imsave(img, caption, save_dir, index=None):
     plt.imshow(img[:, :, [2, 1, 0]])
     plt.axis("off")
     plt.figtext(0.5, 0.09, caption, wrap=True, horizontalalignment='center', fontsize=20)
+    if index is not None:
+        caption=index
     plt.savefig(os.path.join(save_dir, "{}.png".format(caption)))
     plt.close()
 
@@ -119,7 +121,7 @@ def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, 
                     result = glip_demo.overlay_entity_names(result, pred, entire_entities, custom_labels=old_labels, text_size=0.8,
                                                             text_offset=-25,
                                                             text_offset_original=-40, text_pixel=2)
-                    imsave(result, caption, output_path)
+                    imsave(result, caption, output_path, index)
                 groundings, origin_groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=True)
                 total_groundings.append(output_decorator(groundings, index, origin_groundings))
         else:
