@@ -22,14 +22,15 @@ cfg.merge_from_list(["MODEL.DEVICE", "cuda:0"])
 torch.cuda.set_device(0)
 cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH = "/nxchinamobile2/shared/official_pretrains/hf_home/bert-base-uncased"
 
+nlp = spacy.load("en_core_web_trf")
+
 glip_demo = GLIPDemo(
     cfg,
     confidence_threshold=0.7,
     show_mask_heatmaps=False,
-    min_image_size=255
+    min_image_size=255,
+    nlp=nlp
 )
-
-nlp = spacy.load("en_core_web_trf")
 
 
 def build_temp_dataset(data_path, img_dir_path):
