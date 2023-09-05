@@ -172,8 +172,8 @@ def pick_small_items(tar_id, part_id, thresh=0.1):
 
 
 if __name__ == '__main__':
-    tar_id = "3200262"
-    part_id = "32"
+    tar_id = 3200262
+    part_id = 32
     pick_small_items(tar_id, part_id, thresh=0.1)
 # if __name__ == '__main__':
 #     grounding_path = '/nxchinamobile2/shared/jjh/laion115m'
