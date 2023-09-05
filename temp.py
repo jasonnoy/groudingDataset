@@ -137,6 +137,16 @@ def compare_and_update(tar_id, tar_path, ouput_path):
         f1.close()
 
 
+def is_small_object(json_object, thresh=0.1):
+    for item, groundings in dict(json_object['task_data']['groundings']).items():
+        for pos, boxes in groundings.items():
+            for box in boxes:
+                x_1, y_1, x_2, y_2 = box
+                if (x_2 - x_1) * (y_2 - y_1) < thresh:
+                    return True
+    return False
+
+
 def get_area_ratio(ref_coords):
     x_1, y_1, x_2, y_2 = ref_coords
     return (x_2 - x_1) * (y_2 - y_1)

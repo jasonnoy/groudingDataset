@@ -665,6 +665,8 @@ class ATSSPostProcessor(torch.nn.Module):
                                                         positive_map=positive_map,
                                                         score_agg=self.score_agg)
             box_cls = scores
+        print("box cls:", box_cls)
+        print("box cls shape:", box_cls.shape)
 
         box_regression = permute_and_flatten(box_regression, N, A, 4, H, W)
         box_regression = box_regression.reshape(N, -1, 4)
