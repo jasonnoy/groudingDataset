@@ -423,7 +423,7 @@ _C.MODEL.ATSS.POST_NMS_TOP_N_TRAIN = 1000
 # DYHEAD Options
 # ---------------------------------------------------------------------------- #
 _C.MODEL.DYHEAD = CN()
-_C.MODEL.DYHEAD.NUM_CLASSES = 81  # the number of classes including background
+_C.MODEL.DYHEAD.NUM_CLASSES = 257  # the number of classes including background
 _C.MODEL.DYHEAD.PRIOR_PROB = 0.01
 
 # the number of convolutions used in the cls and bbox tower

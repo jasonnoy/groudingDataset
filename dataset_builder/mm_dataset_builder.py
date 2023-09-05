@@ -90,10 +90,12 @@ def load(path):
     return image, img_size
 
 
-def imsave(img, caption, save_dir):
+def imsave(img, caption, save_dir, index=None):
     plt.imshow(img[:, :, [2, 1, 0]])
     plt.axis("off")
     plt.figtext(0.5, 0.09, caption, wrap=True, horizontalalignment='center', fontsize=20)
+    if index is not None:
+        caption=index
     plt.savefig(os.path.join(save_dir, "{}.png".format(caption)))
     plt.close()
 
@@ -104,19 +106,13 @@ def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, 
     total_groundings = []
     for i, batch in tqdm(enumerate(dataloader)):
         origin_images = batch[7]
-        try:
-            results, preds = glip_demo.run_on_batched_images(*batch[:5], origin_images=origin_images, thresh=0.55, save_img=save_img)
-        except Exception as e:
-            print(e)
-            for i in range(len(batch[8])):
-                total_groundings.append(output_decorator(None, batch[8][i]))
-            continue
-        captions = batch[2]
+        results, preds = glip_demo.run_on_batched_images(*batch[:5], origin_images=origin_images, thresh=0.55, save_img=save_img)
         new_entities = batch[4]
+        entire_entities = reduce(add, new_entities)
         new_to_old_entities = batch[5]
         new_entity_to_ids = batch[6]
         image_ids = batch[8]
-        entire_entities = reduce(add, new_entities)
+        captions = batch[9]
         if results:
             for result, pred, caption, new_entity_to_id, new_to_old_entity, index in zip(results, preds, captions, new_entity_to_ids, new_to_old_entities, image_ids):
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
@@ -125,7 +121,7 @@ def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, 
                     result = glip_demo.overlay_entity_names(result, pred, entire_entities, custom_labels=old_labels, text_size=0.8,
                                                             text_offset=-25,
                                                             text_offset_original=-40, text_pixel=2)
-                    imsave(result, caption, output_path)
+                    imsave(result, caption, output_path, index)
                 groundings, origin_groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=True)
                 total_groundings.append(output_decorator(groundings, index, origin_groundings))
         else:
