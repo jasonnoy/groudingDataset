@@ -1253,7 +1253,7 @@ class EfficientDetBackbone(nn.Module):
         7: [72, 200],
     }
     fpn_cell_repeats = [3, 4, 5, 6, 7, 7, 8, 8]
-    def __init__(self, num_classes=80, compound_coef=0, load_weights=False,
+    def __init__(self, num_classes=256, compound_coef=0, load_weights=False,
                  prior_prob=0.01, **kwargs):
         super(EfficientDetBackbone, self).__init__()
         self.compound_coef = compound_coef
