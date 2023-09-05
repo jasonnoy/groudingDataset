@@ -74,58 +74,59 @@ def vis_image(pil_img, json_obj, output_folder):
     # for (phrase_s, phrase_e, x1_norm, y1_norm, x2_norm, y2_norm, score) in grounding_list:
     for phrase, grounding_boxes in grounding_list.items():
         for start_pos, boxes in grounding_boxes.items():
-            x1, y1, x2, y2 = int(boxes[0] * image_w), int(boxes[1] * image_h), int(boxes[2] * image_w), int(boxes[3] * image_h)
-            # print(f"Decode results: {phrase} - {[x1, y1, x2, y2]}")
-            # draw bbox
-            # random color
-            color = tuple(np.random.randint(0, 255, size=3).tolist())
-            new_image = cv2.rectangle(new_image, (x1, y1), (x2, y2), color, box_line)
+            for box in boxes:
+                x1, y1, x2, y2 = int(box[0] * image_w), int(box[1] * image_h), int(box[2] * image_w), int(box[3] * image_h)
+                # print(f"Decode results: {phrase} - {[x1, y1, x2, y2]}")
+                # draw bbox
+                # random color
+                color = tuple(np.random.randint(0, 255, size=3).tolist())
+                new_image = cv2.rectangle(new_image, (x1, y1), (x2, y2), color, box_line)
 
-            # add phrase name
-            # decide the text location first
-            for x_prev, y_prev in previous_locations:
-                if abs(x1 - x_prev) < abs(text_offset) and abs(y1 - y_prev) < abs(text_offset):
-                    y1 += text_height
+                # add phrase name
+                # decide the text location first
+                for x_prev, y_prev in previous_locations:
+                    if abs(x1 - x_prev) < abs(text_offset) and abs(y1 - y_prev) < abs(text_offset):
+                        y1 += text_height
 
-            if y1 < 2 * text_offset:
-                y1 += text_offset + text_offset_original
+                if y1 < 2 * text_offset:
+                    y1 += text_offset + text_offset_original
 
-            # add text background
-            (text_width, text_height), _ = cv2.getTextSize(phrase, cv2.FONT_HERSHEY_SIMPLEX, text_size, text_line)
-            text_bg_x1, text_bg_y1, text_bg_x2, text_bg_y2 = x1, y1 - text_height - text_offset_original, x1 + text_width, y1
+                # add text background
+                (text_width, text_height), _ = cv2.getTextSize(phrase, cv2.FONT_HERSHEY_SIMPLEX, text_size, text_line)
+                text_bg_x1, text_bg_y1, text_bg_x2, text_bg_y2 = x1, y1 - text_height - text_offset_original, x1 + text_width, y1
 
-            for prev_bbox in previous_bboxes:
-                while is_overlapping((text_bg_x1, text_bg_y1, text_bg_x2, text_bg_y2), prev_bbox):
-                    text_bg_y1 += text_offset
-                    text_bg_y2 += text_offset
-                    y1 += text_offset
+                for prev_bbox in previous_bboxes:
+                    while is_overlapping((text_bg_x1, text_bg_y1, text_bg_x2, text_bg_y2), prev_bbox):
+                        text_bg_y1 += text_offset
+                        text_bg_y2 += text_offset
+                        y1 += text_offset
 
-                    if text_bg_y2 >= image_h:
-                        text_bg_y1 = max(0, image_h - text_height - text_offset_original)
-                        text_bg_y2 = image_h
-                        y1 = max(0, image_h - text_height - text_offset_original + text_offset)
-                        break
+                        if text_bg_y2 >= image_h:
+                            text_bg_y1 = max(0, image_h - text_height - text_offset_original)
+                            text_bg_y2 = image_h
+                            y1 = max(0, image_h - text_height - text_offset_original + text_offset)
+                            break
 
-            alpha = 0.5
-            for i in range(text_bg_y1, text_bg_y2):
-                for j in range(text_bg_x1, text_bg_x2):
-                    if i < image_h and j < image_w:
-                        new_image[i, j] = (alpha * new_image[i, j] + (1 - alpha) * np.array(color)).astype(np.uint8)
+                alpha = 0.5
+                for i in range(text_bg_y1, text_bg_y2):
+                    for j in range(text_bg_x1, text_bg_x2):
+                        if i < image_h and j < image_w:
+                            new_image[i, j] = (alpha * new_image[i, j] + (1 - alpha) * np.array(color)).astype(np.uint8)
 
-            cv2.putText(
-                new_image, phrase, (x1, y1 - text_offset_original), cv2.FONT_HERSHEY_SIMPLEX, text_size, (0, 0, 0), text_line, cv2.LINE_AA
-            )
-            previous_locations.append((x1, y1))
-            previous_bboxes.append((text_bg_x1, text_bg_y1, text_bg_x2, text_bg_y2))
+                cv2.putText(
+                    new_image, phrase, (x1, y1 - text_offset_original), cv2.FONT_HERSHEY_SIMPLEX, text_size, (0, 0, 0), text_line, cv2.LINE_AA
+                )
+                previous_locations.append((x1, y1))
+                previous_bboxes.append((text_bg_x1, text_bg_y1, text_bg_x2, text_bg_y2))
 
-        try:
-            file_key_name = task_obj['SAMPLE_ID'] + '_exp.jpg'
-            output_path = os.path.join(output_folder, file_key_name)
+            try:
+                file_key_name = task_obj['SAMPLE_ID'] + '_exp.jpg'
+                output_path = os.path.join(output_folder, file_key_name)
 
-            imshow(new_image, file_name= output_path, caption=caption)
-        except:
-            # Out of (supported formats: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff, webp)
-            return
+                imshow(new_image, file_name= output_path, caption=caption)
+            except:
+                # Out of (supported formats: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff, webp)
+                return
 
     
 if __name__ == '__main__':  
