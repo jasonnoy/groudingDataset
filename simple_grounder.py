@@ -54,7 +54,7 @@ def build_temp_dataset(data_path, img_dir_path):
 
 if __name__ == "__main__":
     batch_size = 1
-    output_dir_path = "/nxchinamobile2/shared/jjh/grit-dataset-20M/demo_100/vis_grit_exp"
+    output_dir_path = "/nxchinamobile2/shared/jjh/grit-dataset-20M/demo_100/grit_grounding_100"
     meta_path = "/nxchinamobile2/shared/jjh/grit-dataset-20M/demo_100/grit_coyo_100.jsonl"
     img_dir_path = "/nxchinamobile2/shared/jjh/grit-dataset-20M/demo_100/imgs"
     grit_dataset = build_temp_dataset(meta_path, img_dir_path)

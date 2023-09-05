@@ -8,6 +8,7 @@ from PIL import Image
 import io
 import math
 import re
+from visualize_grounding import vis_image
 
 puncts = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
           '\'', '\"', '’', '`', '?', '$', '%', '#', '!', '&', '*', '+', ',', '.'
@@ -136,6 +137,44 @@ def compare_and_update(tar_id, tar_path, ouput_path):
         f1.close()
 
 
+def get_area_ratio(ref_coords):
+    x_1, y_1, x_2, y_2 = ref_coords
+    return (x_2 - x_1) * (y_2 - y_1)
+
+
+def process_json(data, wds_data, thresh):
+    for item, groundings in dict(data['task_data']['groundings']).items():
+        for pos, boxes in groundings.items():
+            for box in boxes:
+                if get_area_ratio(box) < thresh:
+                    img = wds_data['jpg']
+                    pil_image = Image.open(io.BytesIO(img)).convert('RGB')
+                    vis_image(pil_image, data, "./visual_output")
+                    return
+
+
+def pick_small_items(tar_id, part_id, thresh=0.1):
+    dataset_path = "/nxchinamobile2/shared/img_datasets/filted_laion115m_grounding"
+    part_path = os.path.join(dataset_path, "part-%05d" % part_id)
+    tar_path = os.path.join(part_path, f"{tar_id}.tar")
+    meta_path = os.path.join(part_path, f"{tar_id}.meta.jsonl")
+    web = wds.WebDataset(tar_path)
+    web_iter = iter(web)
+    with open(meta_path, 'r') as f1:
+        lines = f1.readlines()
+        for line in tqdm(lines):
+            data = json.loads(line)
+            if data['task_data']['status'] != "success":
+                continue
+            wds_data = next(web_iter)
+            assert wds_data['id'].decode() == data['task_data']['SAMPLE_ID']
+            process_json(data, wds_data, thresh)
+
+
+if __name__ == '__main__':
+    tar_id = "3200262"
+    part_id = "32"
+    pick_small_items(tar_id, part_id, thresh=0.1)
 # if __name__ == '__main__':
 #     grounding_path = '/nxchinamobile2/shared/jjh/laion115m'
 #     process_list = []
@@ -149,24 +188,24 @@ def compare_and_update(tar_id, tar_path, ouput_path):
 #         p.join()
 
 
-if __name__ == "__main__":
-    output_path = "/nxchinamobile2/shared/jjh/laion115m"
-    input_path = "/nxchinamobile2/shared/img_datasets/laion115m"
-    process_list = []
-    for dir_i, dir in enumerate(os.listdir(output_path)):
-        print("processing dir {} {}/{}...".format(os.listdir(output_path), dir_i, len(os.listdir(output_path))))
-        output_dir_path = os.path.join(output_path, dir)
-        files = os.listdir(output_dir_path)
-        tar_path = os.path.join(input_path, dir)
-        for file in tqdm(files):
-            tar_id = file.split('.')[0]
-            p = Process(target=compare_and_update, args=(tar_id, tar_path, output_dir_path))
-            p.start()
-            process_list.append(p)
-            if len(process_list) >= 400:
-                for p in process_list:
-                    p.join()
-                process_list = []
+# if __name__ == "__main__":
+#     output_path = "/nxchinamobile2/shared/jjh/laion115m"
+#     input_path = "/nxchinamobile2/shared/img_datasets/laion115m"
+#     process_list = []
+#     for dir_i, dir in enumerate(os.listdir(output_path)):
+#         print("processing dir {} {}/{}...".format(os.listdir(output_path), dir_i, len(os.listdir(output_path))))
+#         output_dir_path = os.path.join(output_path, dir)
+#         files = os.listdir(output_dir_path)
+#         tar_path = os.path.join(input_path, dir)
+#         for file in tqdm(files):
+#             tar_id = file.split('.')[0]
+#             p = Process(target=compare_and_update, args=(tar_id, tar_path, output_dir_path))
+#             p.start()
+#             process_list.append(p)
+#             if len(process_list) >= 400:
+#                 for p in process_list:
+#                     p.join()
+#                 process_list = []
 
 # def read_tar(tar_path):
 #     return wds.WebDataset(tar_path)
