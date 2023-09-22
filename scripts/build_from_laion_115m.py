@@ -17,6 +17,16 @@ from GLIP import *
 from dataset_builder import *
 
 
+def is_small_object(json_object, thresh=0.1):
+    for item, groundings in dict(json_object['task_data']['groundings']).items():
+        for pos, boxes in groundings.items():
+            for box in boxes:
+                x_1, y_1, x_2, y_2 = box
+                if (x_2 - x_1) * (y_2 - y_1) < thresh:
+                    return True
+    return False
+
+
 def split_list_by_n(origin_list, n):
     step = math.ceil(len(origin_list) / n)
     res = []
@@ -65,80 +75,95 @@ if __name__ == "__main__":
         nlp=nlp
     )
 
-    input_path = "/nxchinamobile2/shared/img_datasets/laion115m"
-    output_path = "/nxchinamobile2/shared/jjh/laion115m-new"
-    map_name = "file_map_laion_synthetic_filtered_large.json"
-    map_key = "laion_synthetic_filtered_large.json"
-    with open(os.path.join(input_path, map_name), 'r', encoding='utf-8') as f:
-        data = f.read()
-        data = json.loads(data)
-    f.close()
-    dirs = data[map_key]
+    input_path = "/nxchinamobile2/shared/img_datasets/filted_laion115m_grounding"
+    output_path = "/nxchinamobile2/shared/jjh/laion115m-small"
+    # map_name = "file_map_laion_synthetic_filtered_large.json"
+    # map_key = "laion_synthetic_filtered_large.json"
+    # with open(os.path.join(input_path, map_name), 'r', encoding='utf-8') as f:
+    #     data = f.read()
+    #     data = json.loads(data)
+    # f.close()
+    dirs = range(32, 47)
     id_list = []
     for dir in dirs:
-        id_list.extend([file[:-4] for file in os.listdir(os.path.join(input_path, dir)) if file.endswith(".tar") and os.path.getsize(os.path.join(input_path, dir, file)) > 0])
+        id_list.extend([file[:-4] for file in os.listdir(os.path.join(input_path, "part-%05d" % dir)) if file.endswith(".tar") and os.path.getsize(os.path.join(input_path, "part-%05d" % dir, file)) > 0])
     id_list.sort()
     finish_ids = []
     for dir in os.listdir(output_path):
-        finish_ids.extend([file.split(sep='.')[0] for file in os.listdir(os.path.join(output_path, dir))])
+        finish_ids.extend([file.split(sep='.')[0] for file in os.listdir(os.path.join(output_path, dir)) if os.path.getsize(os.path.join(output_path, dir, file)) > 1000 * 1000])
     id_list = list(set(id_list).difference(set(finish_ids)))
     id_list.sort()
     divided_ids = split_list_by_n(id_list, world_size)
     select_ids = divided_ids[rank]
     for cur_id in select_ids:
-        cur_dir = "part-000{}".format(cur_id[:2])
+        cur_dir = "part-000%s" % cur_id[:2]
         output_dir_path = os.path.join(output_path, str(cur_dir))
         input_dir_path = os.path.join(input_path, str(cur_dir))
+        meta_filename = "{}.meta.jsonl".format(cur_id)
+        print("rank {}, processing {}".format(rank, cur_id))
+
+        output_meta_path = os.path.join(output_dir_path, meta_filename)
+        # if os.path.exists(output_meta_path):
+        #     if os.path.getsize(output_meta_path) > 1000*1000:
+        #         print(f"rank {rank}, skip {cur_id}")
+        #         continue
+        #     print("rank {}, removed {}".format(rank, cur_id))
+        #     os.remove(output_meta_path)
 
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
-
-        skip_ids = os.listdir(output_dir_path)
-        skip_ids = [skip_id.split(sep='.')[0] for skip_id in skip_ids]
-        if cur_id in skip_ids:
-            print("rank {}, skip_id:".format(rank), cur_id)
-            continue
 
         if not os.path.exists(output_dir_path):
             os.mkdir(output_dir_path)
 
         tar_file = "{}.tar".format(cur_id)
         res = {}
-        batch_size = 1
+        batch_size = 10
         if os.path.getsize(os.path.join(input_dir_path, tar_file)) == 0:
             print("rank {}, empty file:".format(rank), os.path.join(input_dir_path, tar_file))
             continue
 
         laion_dataset = webdataset.WebDataset(os.path.join(input_dir_path, tar_file))
 
-        meta_filename = "{}.meta.jsonl".format(cur_id)
-        print("rank {}, processing {}".format(rank, cur_id))
+
+        wds_iter = iter(laion_dataset)
+        cur_dataset = []
+        with open(os.path.join(input_dir_path, meta_filename), 'r', encoding='utf-8') as f:
+            for line in f:
+                data = json.loads(line)
+                if data['task_data']['status'] != "success":
+                    continue
+                try:
+                    cur_wds = next(wds_iter)
+                except StopIteration:
+                    print("rank {}, StopIteration:".format(rank), cur_id)
+                    break
+                wds_id = cur_wds['id'].decode()
+                assert wds_id == data['task_data']['SAMPLE_ID']
+                if is_small_object(data, 0.1):
+                    cur_dataset.append(cur_wds)
         # try:
-        groundings = batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size=batch_size, output_path=output_dir_path, save_img=False)
+        groundings = batch_parse_and_grounding_multi_class(glip_demo, cur_dataset, batch_size=batch_size, output_path=output_dir_path, save_img=False)
         # except Exception as e:
         #     print("failed batch_parse_and_grounding_multi_class for {}, skipping...".format(os.path.join(input_dir_path, tar_file)))
         #     continue
-        output_meta_path = os.path.join(output_dir_path, meta_filename)
-        if os.path.exists(output_meta_path):
-            os.remove(output_meta_path)
-        with open(os.path.join(input_dir_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'a', encoding='utf-8') as f2:
+
+        with open(os.path.join(input_dir_path, meta_filename), 'r', encoding='utf-8') as f1, open(output_meta_path, 'w', encoding='utf-8') as f2:
             grounding_iter = iter(groundings)
             for i, line in tqdm(enumerate(f1)):
                 meta_data = json.loads(line)
-                if meta_data['status'] == "success":
+                if meta_data['task_data']['status'] == "success" and is_small_object(meta_data, 0.1):
                     grounding = next(grounding_iter)
-                    image_id = grounding['SAMPLE_ID']
-                    sample_id = meta_data['SAMPLE_ID']
-                    assert str(image_id) == str(sample_id)
-                    if str(image_id) != str(sample_id):
-                        print("index:{}\n sample_id:{}".format(str(image_id), str(sample_id)))
-                    meta_data.update(grounding)
-                    # meta_data['annot_caption'] = build_training_text(record=meta_data)
+                    # image_id = grounding['SAMPLE_ID']
+                    # sample_id = meta_data['SAMPLE_ID']
+                    # assert str(image_id) == str(sample_id)
+                    # if str(image_id) != str(sample_id):
+                    #     print("index:{}\n sample_id:{}".format(str(image_id), str(sample_id)))
+                    assert grounding['SAMPLE_ID'] == meta_data['task_data']['SAMPLE_ID']
+                    meta_data['task_data'].update(grounding)
+                    meta_data['task_data']['small'] = True
                 else:
-                    meta_data['groundings'] = None
-                    meta_data['original_groundings'] = None
-                    # meta_data['annot_caption'] = None
-                    loc_pos_list = None
+                    meta_data['task_data']['small'] = False
                 f2.write(json.dumps(meta_data, ensure_ascii=False) + '\n')
         f1.close()
         f2.close()

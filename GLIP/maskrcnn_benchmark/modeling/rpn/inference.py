@@ -770,7 +770,7 @@ class ATSSPostProcessor(torch.nn.Module):
 def convert_grounding_to_od_logits(logits, box_cls, positive_map, score_agg=None):
     scores = torch.zeros(logits.shape[0], logits.shape[1], box_cls.shape[2]).to(logits.device)
     # 256 -> 80, average for each class
-    hurdle = 80
+    hurdle = 256
     if positive_map is not None:
         # score aggregation method
         if score_agg == "MEAN":

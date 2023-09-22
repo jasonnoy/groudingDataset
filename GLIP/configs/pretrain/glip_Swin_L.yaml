@@ -36,7 +36,7 @@ MODEL:
     USE_DYRELU: True
     USE_DFCONV: True
     USE_DYFUSE: True
-    TOPK: 20 # topk for selecting candidate positive samples from each level
+    TOPK: 9 # topk for selecting candidate positive samples from each level
     SCORE_AGG: "MEAN"
     LOG_SCALE: 0.0
 

@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 from tqdm import tqdm
@@ -181,10 +182,91 @@ def pick_small_items(tar_id, part_id, thresh=0.1):
             process_json(data, wds_data, thresh)
 
 
+# if __name__ == '__main__':
+#     grounding_path = '/nxchinamobile2/shared/img_datasets/clay1b/meta_jsonl_cleaned_data/meta_jsonl_all_laion2ben_merged2_translate'
+#     for part in tqdm(os.listdir(grounding_path)):
+#         part_path = os.path.join(grounding_path, part)
+#         for file in os.listdir(part_path):
+#             if file.endswith(".meta.jsonl"):
+#                 file_path = os.path.join(part_path, file)
+#                 try:
+#                     with open(file_path, 'r', errors='ignore') as f1:
+#                         for line in f1:
+#                             try:
+#                                 data = json.loads(line)
+#                             except Exception:
+#                                 print(file_path)
+#                                 print(line)
+#                 except Exception:
+#                     print(file_path)
 if __name__ == '__main__':
-    tar_id = 3200262
-    part_id = 32
-    pick_small_items(tar_id, part_id, thresh=0.05)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--local_rank', type=int, default=0)
+    parser.add_argument('--world_size', type=int, default=1)
+    parser.add_argument('--rank', type=int, default=0)
+    parser.add_argument('--master_addr', type=str, default='')
+    parser.add_argument('--master_port', type=int, default=7878)
+    args = parser.parse_args()
+
+    grounding_path = '/nxchinamobile2/shared/img_datasets/laion115m_grounding_small_objects_optimized'
+    tar_path = "/nxchinamobile2/shared/img_datasets/laion115m_grounding_small_objects_optimized"
+    small_count = 0
+    count = 0
+    for part in tqdm(range(32, 47)):
+        part_name = "part-%05d" % part
+        part_path = os.path.join(grounding_path, part_name)
+        for file in os.listdir(part_path):
+            if not file.endswith('.meta.jsonl'):
+                continue
+            file_path = os.path.join(part_path, file)
+            # print(file_path)
+            tar_id = file.split('.')[0]
+            tar_file = os.path.join(tar_path, f"part-000{part}", f"{tar_id}.tar")
+            # wds_data = wds.WebDataset(tar_file)
+            # wds_iter = iter(wds_data)
+            contains_small = False
+            with open(file_path, 'r', errors='ignore') as f1:
+                for line in f1:
+                    data = json.loads(line)
+                    # if data['task_data']['status'] == 'success':
+                    #     cur_wds = next(wds_iter)
+                    if data['task_data']['small'] and not data['task_data']['bad']:
+                        contains_small = True
+                        break
+                        # img = cur_wds['jpg']
+                        # pil_image = Image.open(io.BytesIO(img)).convert('RGB')
+                        # vis_image(pil_image, data, "./good_and_small")
+                        small_count += 1
+                    # if small_count == 50:
+                    #     raise Exception("STOP")
+                    count += 1
+            if not contains_small:
+                print(tar_file)
+                print(file_path)
+                # os.system(f"rm {tar_file}")
+                # os.system(f"rm {file_path}")
+        # print(small_count, count)
+    # tar_path = "/nxchinamobile2/shared/img_datasets/filted_laion115m_grounding"
+    #
+    # tar_id = 3200005
+    # part_id = 32
+    #
+    # tar_file = os.path.join(tar_path, f"part-000{part_id}", f"{tar_id}.tar")
+    # meta_file = os.path.join(grounding_path, f"part-000{part_id}", f"{tar_id}.meta.jsonl")
+    # wds_dataset = wds.WebDataset(tar_file)
+    # wds_iter = iter(wds_dataset)
+    # with open(meta_file, 'r', errors='ignore') as f1:
+    #     for line in tqdm(f1):
+    #         data = json.loads(line)
+    #         if data['task_data']['status'] == 'success':
+    #             wds_data = next(wds_iter)
+    #             if data['task_data']['small']:
+    #                 img = wds_data['jpg']
+    #                 pil_image = Image.open(io.BytesIO(img)).convert('RGB')
+    #                 vis_image(pil_image, data, "./3200005")
+
+
+    # pick_small_items(tar_id, part_id, thresh=0.05)
 # if __name__ == '__main__':
 #     grounding_path = '/nxchinamobile2/shared/jjh/laion115m'
 #     process_list = []

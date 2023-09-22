@@ -120,43 +120,14 @@ def analysis_data_file(in_path, out_path, err_path, nlp):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--local_rank', type=int, default=0)
-    parser.add_argument('--world_size', type=int, default=1)
-    parser.add_argument('--rank', type=int, default=0)
-    parser.add_argument('--master_addr', type=str, default='')
-    parser.add_argument('--master_port', type=int, default=7878)
-    args = parser.parse_args()
+    # from spacy_cleaner.processing.replacers import replace_punctuation_token
 
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
-    torch.cuda.set_device(args.local_rank)
-
-    spacy.prefer_gpu(args.local_rank)
-    input_path = "/nxchinamobile2/shared/jjh/laion115m_grounding"
-    output_path = "/nxchinamobile2/shared/jjh/laion115m-debug"
-    ids = []
-    for dir in os.listdir(input_path):
-        ids.extend(os.listdir(os.path.join(input_path, dir)))
-    select_ids = split_list_by_n(ids, args.world_size)[args.rank]
-    process_list = []
-    nlps = [spacy.load("en_core_web_trf") for _ in range(8)]
-    nlp_id = 0
-    for id_filename in select_ids:
-        dir_name = "part-000"+id_filename[:2]
-        output_dir_path = os.path.join(output_path, dir_name)
-        if not os.path.exists(output_dir_path):
-            os.makedirs(output_dir_path)
-        meta_dir_path = os.path.join(input_path, dir_name)
-        in_file_path = os.path.join(meta_dir_path, id_filename)
-        out_file_path = os.path.join(output_dir_path, id_filename)
-        err_file_path = os.path.join(output_dir_path, "error_"+id_filename)
-        p = Process(target=analysis_data_file, args=(in_file_path, out_file_path, err_file_path, nlps[nlp_id]))
-        nlp_id += 1
-        p.start()
-        process_list.append(p)
-        if len(process_list) >= 8:
-            for p in process_list:
-                p.join()
-            process_list = []
-            nlp_id = 0
-
+    nlp = spacy.load("en_core_web_trf")
+    nlp.add_pipe("merge_noun_chunks")
+    nlp.add_pipe("merge_entities")
+    for t in nlp("A group of people. Tim Cook would like a cup of coffee. But there's no one in the room."):
+        print("text:", t.text, "pos:", t.pos_)
+        print("head:", t.head)
+        for an in t.ancestors:
+            print("ancestor:", an.text)
