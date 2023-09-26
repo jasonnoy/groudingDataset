@@ -32,16 +32,19 @@ def get_label_names(predictions, model, new_entities):
 
 
 def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=False):
-    res = {}
-    origin = {}
+    per = []
+    origin = []
     for idx, box in enumerate(pred.bbox):
         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
         if new_labels[idx] in new_to_old_entity:
             entity = new_to_old_entity[new_labels[idx]]
-            pos = new_entity_to_id[new_labels[idx]]
+            pos = new_entity_to_id[new_labels[idx]][0]
+            end = new_entity_to_id[new_labels[idx]][1]
         else:
             entity = new_labels[idx]
-            pos = -1
+            pos = 0
+            end = 0
+            print("invalid entity:", entity)
 
         origin_loc = top_left+bottom_right
         loc = origin_loc
@@ -50,16 +53,40 @@ def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entit
             width, height = pred.size
             loc = [l/width if i % 2 == 0 else l/height for i, l in enumerate(loc)]
 
-        if entity not in res:
-            res[entity] = {pos: [loc]}
-            origin[entity] = {pos: [origin_loc]}
-        elif pos in res[entity]:
-            res[entity][pos].append(loc)
-            origin[entity][pos].append(origin_loc)
-        else:
-            res[entity][pos] = [loc]
-            origin[entity][pos] = [origin_loc]
-    return res, origin
+        per.append([entity, pos, end] + loc)
+        origin.append([entity, pos, end] + origin_loc)
+    return per, origin
+
+
+# def get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=False):
+#     res = {}
+#     origin = {}
+#     for idx, box in enumerate(pred.bbox):
+#         top_left, bottom_right = box[:2].tolist(), box[2:].tolist()
+#         if new_labels[idx] in new_to_old_entity:
+#             entity = new_to_old_entity[new_labels[idx]]
+#             pos = new_entity_to_id[new_labels[idx]][0]
+#         else:
+#             entity = new_labels[idx]
+#             pos = -1
+#
+#         origin_loc = top_left+bottom_right
+#         loc = origin_loc
+#
+#         if percent:
+#             width, height = pred.size
+#             loc = [l/width if i % 2 == 0 else l/height for i, l in enumerate(loc)]
+#
+#         if entity not in res:
+#             res[entity] = {pos: [loc]}
+#             origin[entity] = {pos: [origin_loc]}
+#         elif pos in res[entity]:
+#             res[entity][pos].append(loc)
+#             origin[entity][pos].append(origin_loc)
+#         else:
+#             res[entity][pos] = [loc]
+#             origin[entity][pos] = [origin_loc]
+#     return res, origin
 
 
 # def output_decorator(id, caption, groundings, image_size):
@@ -100,7 +127,7 @@ def imsave(img, caption, save_dir, index=None):
     plt.close()
 
 
-def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, output_path, save_img=False):
+def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, output_path, save_img=False, use_decor=True):
     dataloader = torch.utils.data.DataLoader(laion_dataset, shuffle=False, num_workers=4, batch_size=batch_size,
                                              collate_fn=BatchGroundingCollator(glip_demo.nlp, glip_demo.tokenizer, glip_demo.transforms))
     total_groundings = []
@@ -123,12 +150,18 @@ def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, 
                                                             text_offset_original=-40, text_pixel=2)
                     imsave(result, caption, output_path, index)
                 groundings, origin_groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=True)
-                total_groundings.append(output_decorator(groundings, index, origin_groundings))
+                if use_decor:
+                    total_groundings.append(output_decorator(groundings, index, origin_groundings))
+                else:
+                    total_groundings.append((groundings, index, origin_groundings))
         else:
             for pred, new_entity_to_id, new_to_old_entity, index in zip(preds, new_entity_to_ids, new_to_old_entities, image_ids):
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
                 groundings, origin_groundings = get_grounding_and_label(pred, new_labels, new_entity_to_id, new_to_old_entity, percent=True)
-                total_groundings.append(output_decorator(groundings, index, origin_groundings))
+                if use_decor:
+                    total_groundings.append(output_decorator(groundings, index, origin_groundings))
+                else:
+                    total_groundings.append((groundings, index, origin_groundings))
     return total_groundings
 
 
