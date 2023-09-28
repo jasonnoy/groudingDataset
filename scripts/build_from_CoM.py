@@ -89,7 +89,7 @@ if __name__ == "__main__":
     )
 
     input_path = "/share/img_datasets/instruction_data/CoM"
-    output_path = "/share/img_datasets/instruction_data/CoM_Grounding"
+    output_path = "/share/img_datasets/instruction_data/CoM_Grounding_test"
 
     all_paths = []
     for dir in os.listdir(input_path):
@@ -131,7 +131,10 @@ if __name__ == "__main__":
         res = {}
 
         # try:
-        groundings = batch_parse_and_grounding_multi_class(glip_demo, com_dataset, batch_size=batch_size, output_path=output_img_path, save_img=args.save_img, use_decor=False, thresh=args.thresh)
+        data_collator = BatchGroundingCollator(nlp, glip_demo.tokenizer, glip_demo.transforms, use_json=True)
+        grounder = BaseGrounder(data_collator, glip_demo, batch_size)
+        groundings = grounder(com_dataset, batch_size, output_path, save_img=False, num_workers=4)
+        # groundings = batch_parse_and_grounding_multi_class(glip_demo, com_dataset, batch_size=batch_size, output_path=output_img_path, save_img=args.save_img, use_decor=False, thresh=args.thresh)
         # except Exception as e:
         #     print("failed batch_parse_and_grounding_multi_class for {}, skipping...".format(os.path.join(input_dir_path, tar_file)))
         #     continue

@@ -71,6 +71,9 @@ class GLIPDemo(object):
 
         self.tokenizer = self.build_tokenizer()
 
+    def __call__(self, *args, **kwargs):
+        return self.run_on_batched_images(*args, **kwargs)
+
     def build_transform(self):
         """
         Creates a basic transformation that was used to train the models
@@ -183,6 +186,11 @@ class GLIPDemo(object):
                               origin_images=None,
                               thresh=0.5,
                               save_img=False):
+        # print("images:", images)
+        # print("image_sizes:", image_sizes)
+        # print("captions:", captions)
+        # print("positive_map_label_to_tokens:", positive_map_label_to_tokens)
+        # print("entity_lists:", entity_lists)
         images = ImageList(images, image_sizes)
         # print("model device:", self.device)
         # print("torch device:", torch.cuda.current_device())
