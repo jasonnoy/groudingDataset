@@ -9,6 +9,8 @@ module unload cuda
 module unload cuda/11.8
 module load cuda/11.7
 
+export CUDA_HOME=/share/apps/cuda-11.7
+
 WORLD_SIZE=${SLURM_NTASKS:-1}
 RANK=${SLURM_PROCID:-0}
 # MASTER_ADDR is the first in SLURM_NODELIST
@@ -32,6 +34,6 @@ export SAT_HOME=/shared/official_pretrains/sat_home
 export TRANSFORMERS_CACHE=/share/home/jijunhui/transformers_cache
 export HF_MODULES_CACHE=/share/home/jijunhui/hf_modules_cache
 # shellcheck disable=SC2046
-python scripts/build_from_CoM.py --world_size $WORLD_SIZE --rank $RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT --local_rank $LOCAL_RANK --batch_size 10 --save_img
-
+python scripts/build_from_CoM.py --world_size $WORLD_SIZE --rank $RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT --local_rank $LOCAL_RANK --batch_size 10 --thresh 0.4
+# --save_img
 echo "DONE for RANK=$RANK on `hostname`"

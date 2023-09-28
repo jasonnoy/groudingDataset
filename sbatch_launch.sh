@@ -3,9 +3,9 @@
 #SBATCH --output=./logs/CoM_grounding_%j.out
 #SBATCH --error=./logs/CoM_grounding_%j.err
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:1
-#SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=4
+#SBATCH --gres=gpu:8
+#SBATCH --ntasks-per-node=8
+#SBATCH --cpus-per-task=8
 #SBATCH --partition=gpu
 #SBATCH --export=ALL
 

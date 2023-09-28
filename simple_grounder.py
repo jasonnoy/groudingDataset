@@ -20,7 +20,7 @@ cfg.merge_from_list(["MODEL.WEIGHT", weight_file])
 cfg.merge_from_list(["MODEL.DEVICE", "cuda:0"])
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 torch.cuda.set_device(0)
-cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH = "/nxchinamobile2/shared/official_pretrains/hf_home/bert-base-uncased"
+cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH = "/share/official_pretrains/hf_home/bert-base-uncased"
 
 nlp = spacy.load("en_core_web_trf")
 

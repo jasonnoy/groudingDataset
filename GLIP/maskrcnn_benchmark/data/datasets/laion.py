@@ -93,12 +93,11 @@ def compute_image_shape(original_shape):
 
 
 def remove_punctuation(text: str) -> str:
-    punct = ['|', ':', ';', '@', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
-             '\'', '\"', '’', '`', '?', '$', '%', '#', '!', '&', '*', '+', ',', '.'
-             ]
+    punct = ['|', '@', '-', '=', '(', ')', '[', ']', '{', '}', '^', '\\', '/',
+             '\'', '\"', '’', '`', '$', '%', '#', '&', '*', '+']
     for p in punct:
-        text = text.replace(p, '')
-    return text.strip()
+        text = text.replace(p, ' ')
+    return text
 
 
 class Laion(data.Dataset):

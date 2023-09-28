@@ -14,9 +14,6 @@ sys.path.append(os.getcwd())
 sys.path.append(os.path.join(os.getcwd(), "GLIP"))
 
 from GLIP import *
-from GLIP.maskrcnn_benchmark.config import cfg
-from GLIP.maskrcnn_benchmark.engine.predictor_glip import GLIPDemo
-from GLIP.maskrcnn_benchmark.data.datasets.laion import Laion
 from dataset_builder import *
 
 def is_small_object(json_object, thresh=0.1):
@@ -37,9 +34,11 @@ def split_list_by_n(origin_list, n):
     return res
 
 
-def get_durations(breaker_positions, end, start=0):
+def get_durations(j_caption, start=0):
     durations = []
-    for breaker in breaker_positions:
+    end = len(j_caption)
+    for it in re.finditer(r'\|\|', j_caption):
+        breaker = it.start()
         durations.append((start, breaker))
         start = breaker
     durations.append((start, end))
@@ -56,6 +55,7 @@ if __name__ == "__main__":
     parser.add_argument('--master_addr', type=str, default='')
     parser.add_argument('--master_port', type=int, default=7878)
     parser.add_argument('--batch_size', type=int, default=10)
+    parser.add_argument('--thresh', type=float, default=0.55)
     parser.add_argument('--save_img', action='store_true')
     args = parser.parse_args()
 
@@ -63,14 +63,14 @@ if __name__ == "__main__":
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
     config_file = "GLIP/configs/pretrain/glip_Swin_L.yaml"
-    weight_file = "share/official_pretrains/hf_home/GLIP-L/glip_large_model.pth"
+    weight_file = "/share/official_pretrains/hf_home/GLIP-L/glip_large_model.pth"
     cfg.local_rank = args.local_rank
     cfg.num_gpus = 1
     cfg.merge_from_file(config_file)
     cfg.merge_from_list(["MODEL.WEIGHT", weight_file])
     cfg.merge_from_list(["MODEL.DEVICE", "cuda:{}".format(args.local_rank)])
     torch.cuda.set_device(args.local_rank)
-    cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH = "share/official_pretrains/hf_home/bert-base-uncased"
+    cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH = "/share/official_pretrains/hf_home/bert-base-uncased"
     print("model device:",  cfg.MODEL.DEVICE)
     print("cuda device:", torch.cuda.current_device())
     rank = args.rank
@@ -114,7 +114,12 @@ if __name__ == "__main__":
                 img_path = data['image_path']
                 questions = []
                 for qa in data['metadata']:
-                    questions.append(qa['prompt'])
+                    if "question" in qa:
+                        questions.append(qa['question'])
+                    elif "prompt" in qa:
+                        questions.append(qa['prompt'])
+                    else:
+                        raise Exception(f"No question in metadata: {data}")
                 caption = "||".join(questions)
                 joint_captions.append(caption)
                 com_dataset.append({"image_path": img_path, "caption": caption, "id": "%05d" % i})
@@ -126,25 +131,36 @@ if __name__ == "__main__":
         res = {}
 
         # try:
-        groundings = batch_parse_and_grounding_multi_class(glip_demo, com_dataset, batch_size=batch_size, output_path=output_img_path, save_img=False)
+        groundings = batch_parse_and_grounding_multi_class(glip_demo, com_dataset, batch_size=batch_size, output_path=output_img_path, save_img=args.save_img, use_decor=False, thresh=args.thresh)
         # except Exception as e:
         #     print("failed batch_parse_and_grounding_multi_class for {}, skipping...".format(os.path.join(input_dir_path, tar_file)))
         #     continue
 
         with open(meta_path, 'r', encoding='utf-8') as f1, open(output_meta_path, 'w', encoding='utf-8') as f2:
-            for line, grounding in zip(f1, groundings):
+            for d_i, (line, grounding) in enumerate(zip(f1, groundings)):
                 percent_grounding, index, origin_grounding = grounding
                 data = json.loads(line)
-                joint_caption = joint_captions[i]
-                breaker_poses = re.findall(r'\|\|', joint_caption)
-                durations = get_durations(breaker_poses, len(joint_caption))
+                for d in data['metadata']:
+                    d['question_grounding'] = []
+                    d['question_grounding_percent'] = []
+                joint_caption = joint_captions[d_i]
+                durations = get_durations(joint_caption)
                 for gr_i, gr in enumerate(percent_grounding):
-                    start = gr[1]
-                    end = gr[2]
+                    start = int(gr[1])
+                    end = int(gr[2])
                     for i, dura in enumerate(durations):
-                        if start in dura:
-                            assert end in dura
-                            data['matadata'][i].update({"question_grounding": origin_grounding[gr_i], "question_grounding_percent": gr})
+                        if dura[0] <= start <= dura[1]:
+                            try:
+                                assert dura[0] <= end <= dura[1]
+                            except Exception:
+                                print(dura, gr)
+                                print(joint_caption)
+                                continue
+                            gr[1] -= dura[0]
+                            gr[2] -= dura[0]
+                            origin_grounding[gr_i][1] -= dura[0]
+                            origin_grounding[gr_i][2] -= dura[0]
+                            data['metadata'][i].update({"question_grounding": origin_grounding[gr_i], "question_grounding_percent": gr})
                 f2.write(json.dumps(data, ensure_ascii=False) + '\n')
         f1.close()
         f2.close()

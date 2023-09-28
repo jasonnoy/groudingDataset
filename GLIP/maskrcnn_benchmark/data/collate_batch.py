@@ -92,11 +92,12 @@ class BatchGroundingCollator(object):
     This should be passed to the DataLoader
     """
 
-    def __init__(self, nlp, tokenizer, transforms=None, size_divisible=0):
+    def __init__(self, nlp, tokenizer, transforms=None, size_divisible=0, use_json=False):
         self.tokenizer = tokenizer
         self.transform = transforms
         self.nlp = nlp
         self.size_divisible = size_divisible
+        self.use_json = use_json
 
     def process_iamge(self, image):
         image_shape = image.size
@@ -109,11 +110,21 @@ class BatchGroundingCollator(object):
         return image
 
     def process_caption(self, origin_caption):
+
+        def is_valid_chunk(chunk: str):
+            exclude = ['what', 'where', 'it', 'there', 'these', 'those', 'who', "it's", "its",
+                       'whose', 'they', 'their', 'them', 'when', 'how']
+            for ex in exclude:
+                for word in chunk.lower().split():
+                    if ex == word:
+                        return False
+            return True
+
         caption = remove_punctuation(origin_caption)
-        offset_map = compute_offset_map(caption, origin_caption)
         doc = self.nlp(caption)
-        nouns = [t.text for t in doc.noun_chunks]
-        tokens_positive = [[(int(t[0].idx) + offset_map[t[0].idx], int(t[0].idx) + offset_map[int(t[0].idx)] + len(t.text))] for t in doc.noun_chunks]
+        nouns = [t.text for t in doc.noun_chunks if is_valid_chunk(t.text)]
+        tokens_positive = [[(int(t[0].idx), int(t[0].idx) + len(t.text))] for t in doc.noun_chunks if
+                           is_valid_chunk(t.text)]
         empty_nouns = False
         if len(nouns) == 0:
             print("No entities found, using caption as entity, caption: {}".format(caption))
@@ -131,23 +142,73 @@ class BatchGroundingCollator(object):
                 new_entities.append("{}-{}".format(chunk, entity_dict[chunk]))
         new_to_old_entity = dict(zip(new_entities, nouns))
         if not empty_nouns:
-            new_entity_to_id = dict(zip(new_entities, [(noun_chunk[0].idx + offset_map[noun_chunk[0].idx],
-                                                        noun_chunk[-1].idx + offset_map[noun_chunk[-1].idx] - (noun_chunk[0].idx + offset_map[noun_chunk[0].idx])) for noun_chunk in doc.noun_chunks]))  # starting position of the first token and the noun chunk length
+            # match new entity to its position in the original joint caption
+            new_entity_to_id = dict(zip(new_entities,
+                                        [(noun_chunk[0].idx, noun_chunk[-1].idx + len(noun_chunk[-1].text)) for
+                                         noun_chunk in doc.noun_chunks if is_valid_chunk(
+                                            noun_chunk.text)]))  # starting and ending position of the noun chunk
         else:
             # use caption as only entity
-            new_entity_to_id = {new_entities[0]: (offset_map[0], len(caption) - offset_map[0])}
+            new_entity_to_id = {new_entities[0]: (0, len(caption))}
 
+        # print("new_entity_to_id:", new_entity_to_id)
         tokenized = self.tokenizer([caption], return_tensors="pt")
 
         # process positive map
         positive_map = create_positive_map(tokenized, tokens_positive)
         return positive_map, new_entities, new_to_old_entity, new_entity_to_id, caption
 
-    def __call__(self, batch, use_json=False):
+    def process_caption_with_offset(self, origin_caption):
+        caption = remove_punctuation(origin_caption)
+        offset_map = compute_offset_map(caption, origin_caption)
+        # print("caption:", caption)
+        # print("offset_map:", offset_map)
+        doc = self.nlp(caption)
+        nouns = [t.text for t in doc.noun_chunks]
+        # print("nouns: {}".format(nouns))
+        # tokens_positive = [[(int(t[0].idx) + offset_map[t[0].idx], int(t[0].idx) + offset_map[int(t[0].idx)] + len(t.text))] for t in doc.noun_chunks]
+        # for t in doc.noun_chunks:
+        #     print("noun chunk s, e:", t[0].idx, int(t[0].idx) + len(t.text))
+        tokens_positive = [[(int(t[0].idx), int(t[0].idx) + len(t.text))] for t in doc.noun_chunks]
+        # print("tokens_positive:", tokens_positive)
+        empty_nouns = False
+        if len(nouns) == 0:
+            print("No entities found, using caption as entity, caption: {}".format(caption))
+            nouns = [caption]
+            empty_nouns = True
+        entity_dict = {}
+        new_entities = []
+        # to handle duplicates in entities
+        for chunk in nouns:
+            if chunk not in entity_dict:
+                new_entities.append(chunk)
+                entity_dict[chunk] = 0
+            else:
+                entity_dict[chunk] += 1
+                new_entities.append("{}-{}".format(chunk, entity_dict[chunk]))
+        new_to_old_entity = dict(zip(new_entities, nouns))
+        if not empty_nouns:
+            # match new entity to its position in the original joint caption
+            new_entity_to_id = dict(zip(new_entities, [(noun_chunk[0].idx + offset_map[noun_chunk[0].idx],
+                                                        noun_chunk[-1].idx + len(noun_chunk[-1].text) + offset_map[
+                                                            noun_chunk[-1].idx]) for noun_chunk in
+                                                       doc.noun_chunks]))  # starting and ending position of the noun chunk
+        else:
+            # use caption as only entity
+            new_entity_to_id = {new_entities[0]: (offset_map[0], len(caption))}
+
+        # print("new_entity_to_id:", new_entity_to_id)
+        tokenized = self.tokenizer([caption], return_tensors="pt")
+
+        # process positive map
+        positive_map = create_positive_map(tokenized, tokens_positive)
+        return positive_map, new_entities, new_to_old_entity, new_entity_to_id, caption
+
+    def __call__(self, batch):
         images = []
         captions = []
         ids = []
-        if use_json:
+        if self.use_json:
             for d in batch:
                 images.append(Image.open(d['image_path']).convert('RGB'))
                 captions.append(d['caption'])
@@ -230,6 +291,3 @@ class BBoxAugCollator(object):
             return images, targets, img_ids, positive_map, positive_map_eval
 
         return images, targets, img_ids, positive_map, positive_map_eval
-
-
-

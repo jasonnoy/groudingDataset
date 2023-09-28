@@ -47,7 +47,7 @@ if __name__ == "__main__":
     cfg.merge_from_list(["MODEL.WEIGHT", weight_file])
     cfg.merge_from_list(["MODEL.DEVICE", "cuda:{}".format(args.local_rank)])
     torch.cuda.set_device(args.local_rank)
-    cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH = "/nxchinamobile2/shared/official_pretrains/hf_home/bert-base-uncased"
+    cfg.MODEL.LANGUAGE_BACKBONE.LOCAL_PATH = "/share/official_pretrains/hf_home/bert-base-uncased"
     print("model device:",  cfg.MODEL.DEVICE)
     print("cuda device:", torch.cuda.current_device())
     rank = args.rank

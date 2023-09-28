@@ -127,13 +127,15 @@ def imsave(img, caption, save_dir, index=None):
     plt.close()
 
 
-def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, output_path, save_img=False, use_decor=True):
+def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, output_path, save_img=False, use_decor=True, thresh=0.55):
     dataloader = torch.utils.data.DataLoader(laion_dataset, shuffle=False, num_workers=4, batch_size=batch_size,
-                                             collate_fn=BatchGroundingCollator(glip_demo.nlp, glip_demo.tokenizer, glip_demo.transforms))
+                                             collate_fn=BatchGroundingCollator(glip_demo.nlp, glip_demo.tokenizer, glip_demo.transforms, use_json=True))
     total_groundings = []
+    if save_img:
+        print("Saving images to {}".format(output_path))
     for i, batch in tqdm(enumerate(dataloader)):
         origin_images = batch[7]
-        results, preds = glip_demo.run_on_batched_images(*batch[:5], origin_images=origin_images, thresh=0.55, save_img=save_img)
+        results, preds = glip_demo.run_on_batched_images(*batch[:5], origin_images=origin_images, thresh=thresh, save_img=save_img)
         new_entities = batch[4]
         entire_entities = reduce(add, new_entities)
         new_to_old_entities = batch[5]
@@ -142,6 +144,7 @@ def batch_parse_and_grounding_multi_class(glip_demo, laion_dataset, batch_size, 
         captions = batch[9]
         if results:
             for result, pred, caption, new_entity_to_id, new_to_old_entity, index in zip(results, preds, captions, new_entity_to_ids, new_to_old_entities, image_ids):
+                print("new_entity_to_id:", new_entity_to_id)
                 new_labels = get_label_names(pred, glip_demo, entire_entities)
                 old_labels = [new_to_old_entity[label] for label in new_labels]
                 if save_img:
